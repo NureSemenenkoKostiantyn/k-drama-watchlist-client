@@ -8,6 +8,7 @@
   "scripts": {
     "ng": "ng",
     "dev": "ng serve --proxy-config proxy.conf.json",
+    "dev:compose": "ng serve --host 0.0.0.0 --poll 1000 --proxy-config proxy.compose.conf.json",
     "start": "npm run dev",
     "build": "ng build",
     "lint": "ng lint",

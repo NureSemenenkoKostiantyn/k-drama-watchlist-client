@@ -13,8 +13,22 @@ global state store.
 - Node.js 22.12 or newer within the Node 22 release line
 - npm 10 or newer
 - The API running on `http://localhost:8080` for features that make backend requests
+- Docker Compose 2.22 or newer when running the complete containerized stack
 
 ## Local development
+
+To run MongoDB, the API, and this client together, use the Compose file in the sibling server
+repository:
+
+```bash
+docker compose --file ../k-drama-watchlist-server/compose.yaml up --build --watch
+```
+
+The client is then available at `http://localhost:4200`. Compose Watch synchronizes changes under
+`src` and `public`, while `proxy.compose.conf.json` sends `/api` requests to the internal `api`
+service. Stop the stack with `docker compose down`.
+
+To run only the client directly on the host, follow the steps below.
 
 Install dependencies and start the development server:
 
