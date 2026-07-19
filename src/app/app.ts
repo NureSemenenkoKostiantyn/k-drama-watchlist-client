@@ -1,15 +1,24 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 
 import { environment } from '../environments/environment';
+import { AuthenticationService } from './core/auth/authentication.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterLink, RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
   protected readonly appName = environment.appName;
+  protected readonly authentication = inject(AuthenticationService);
+  private readonly router = inject(Router);
+
+  protected async signOut(): Promise<void> {
+    if (await this.authentication.signOut()) {
+      await this.router.navigate(['/login']);
+    }
+  }
 }

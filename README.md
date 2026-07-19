@@ -8,6 +8,10 @@ routes, Angular `HttpClient` for API access, RxJS for asynchronous streams, and 
 local UI state as features are introduced. Remote data is owned by feature services rather than a
 global state store.
 
+The first authentication slice is implemented with Better Auth's framework-agnostic client. An
+injectable Angular service exposes session state through read-only Signals, route guards protect the
+application by default, and standalone pages provide registration, login, and username onboarding.
+
 ## Requirements
 
 - Node.js 22.12 or newer within the Node 22 release line
@@ -70,6 +74,17 @@ The initial route is implemented at:
 ```text
 src/app/features/home/pages/home-page/
 ```
+
+Authentication code is organized under:
+
+```text
+src/app/core/auth/
+src/app/features/auth/
+```
+
+Anonymous users are redirected to `/login`. New accounts continue to `/onboarding` until they have
+a unique username. Browser requests use same-origin `/api/auth/*` routes through the Angular proxy;
+the client never receives the Better Auth secret or MongoDB credentials.
 
 Runtime-independent client configuration lives in `src/environments/environment.ts`. Browser code
 must never contain MongoDB credentials, Better Auth secrets, or the TMDB access token.

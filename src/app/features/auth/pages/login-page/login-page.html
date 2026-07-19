@@ -1,0 +1,56 @@
+<section class="auth-page" aria-labelledby="login-title">
+  <div class="auth-page__intro">
+    <p class="auth-page__eyebrow">Welcome back</p>
+    <h1 id="login-title">Pick up where the story left off.</h1>
+    <p class="auth-page__summary">
+      Sign in to reach your watchlist, current episodes, priorities, and wheels.
+    </p>
+  </div>
+
+  <div class="auth-card">
+    <h2>Log in</h2>
+    <p class="auth-card__lead">Use the email address connected to your account.</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="field">
+        <label for="login-email">Email</label>
+        <input
+          id="login-email"
+          type="email"
+          autocomplete="email"
+          formControlName="email"
+          [attr.aria-invalid]="form.controls.email.invalid && form.controls.email.touched"
+        />
+        @if (form.controls.email.invalid && form.controls.email.touched) {
+          <p class="field__error">Enter a valid email address.</p>
+        }
+      </div>
+
+      <div class="field">
+        <label for="login-password">Password</label>
+        <input
+          id="login-password"
+          type="password"
+          autocomplete="current-password"
+          formControlName="password"
+          [attr.aria-invalid]="form.controls.password.invalid && form.controls.password.touched"
+        />
+        @if (form.controls.password.invalid && form.controls.password.touched) {
+          <p class="field__error">Enter your password.</p>
+        }
+      </div>
+
+      @if (authentication.error(); as error) {
+        <p class="auth-card__error" role="alert">{{ error }}</p>
+      }
+
+      <button type="submit" [disabled]="authentication.isPending()">
+        {{ authentication.isPending() ? 'Logging in…' : 'Log in' }}
+      </button>
+    </form>
+
+    <p class="auth-card__footer">
+      New to Drama Watch? <a routerLink="/register">Create an account</a>
+    </p>
+  </div>
+</section>

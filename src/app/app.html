@@ -2,11 +2,28 @@
 
 <header class="app-shell__header">
   <div class="app-shell__header-content">
-    <div class="app-shell__brand">
+    <a class="app-shell__brand" routerLink="/">
       <span class="app-shell__brand-mark" aria-hidden="true">DW</span>
       <span>{{ appName }}</span>
-    </div>
-    <p>Personal watchlist</p>
+    </a>
+
+    @if (authentication.isAuthenticated()) {
+      <div class="app-shell__account">
+        <span>
+          {{
+            authentication.session()?.user?.displayUsername ?? authentication.session()?.user?.name
+          }}
+        </span>
+        <button type="button" (click)="signOut()" [disabled]="authentication.isPending()">
+          Sign out
+        </button>
+      </div>
+    } @else {
+      <nav class="app-shell__auth-links" aria-label="Account">
+        <a routerLink="/login">Log in</a>
+        <a class="app-shell__register-link" routerLink="/register">Create account</a>
+      </nav>
+    }
   </div>
 </header>
 
