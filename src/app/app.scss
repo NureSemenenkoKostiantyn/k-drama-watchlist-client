@@ -41,6 +41,7 @@
   align-items: center;
   font-weight: 750;
   letter-spacing: -0.02em;
+  text-decoration: none;
 }
 
 .app-shell__brand-mark {
@@ -55,14 +56,44 @@
   letter-spacing: 0;
 }
 
-.app-shell__header p {
-  margin: 0;
+.app-shell__account,
+.app-shell__auth-links {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.app-shell__account span {
   color: var(--color-text-muted);
   font-size: 0.8125rem;
 }
 
+.app-shell__account button,
+.app-shell__auth-links a {
+  border: 0;
+  color: var(--color-text);
+  background: transparent;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.app-shell__account button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.app-shell__register-link {
+  padding: 0.625rem 0.875rem;
+  border-radius: 999rem;
+  color: #100d18 !important;
+  background: var(--color-accent);
+}
+
 @media (max-width: 30rem) {
-  .app-shell__header p {
+  .app-shell__account span,
+  .app-shell__auth-links > :first-child {
     display: none;
   }
 }

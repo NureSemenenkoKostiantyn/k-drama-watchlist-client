@@ -8,6 +8,10 @@ routes, Angular `HttpClient` for API access, RxJS for asynchronous streams, and 
 local UI state as features are introduced. Remote data is owned by feature services rather than a
 global state store.
 
+The first authentication slice is implemented with Better Auth's framework-agnostic client. An
+injectable Angular service exposes session state through read-only Signals, route guards protect the
+application by default, and standalone pages provide registration, login, and username onboarding.
+
 ## Requirements
 
 - Node.js 22.12 or newer within the Node 22 release line
@@ -71,14 +75,49 @@ The initial route is implemented at:
 src/app/features/home/pages/home-page/
 ```
 
+Authentication code is organized under:
+
+```text
+src/app/core/auth/
+src/app/features/auth/
+```
+
+Anonymous users are redirected to `/login`. New accounts continue to `/onboarding` until they have
+a unique username. Browser requests use same-origin `/api/auth/*` routes through the Angular proxy;
+the client never receives the Better Auth secret or MongoDB credentials.
+
 Runtime-independent client configuration lives in `src/environments/environment.ts`. Browser code
 must never contain MongoDB credentials, Better Auth secrets, or the TMDB access token.
 
 ## Deployment
 
 Production builds are written to `dist/drama-watch-web/browser`. `firebase.json` serves that folder,
-rewrites `/api/**` to the `drama-watch-api` Cloud Run service in `europe-west1`, and sends all other
+rewrites `/api/**` to the `k-drama-watchlist` Cloud Run service in `europe-west1`, and sends all other
 unknown routes to Angular's `index.html`.
 
 Select the Firebase project outside source control before deploying; this repository intentionally
 does not contain a `.firebaserc` project identifier.
+
+### GitHub Actions deployment
+
+`.github/workflows/deploy-frontend.yml` runs linting, type-checking, unit tests, and the production
+build for pull requests targeting `main` and pushes to `main`. Pull requests from branches in this
+repository deploy to a seven-day Firebase Hosting preview channel. Pull requests from forks run
+verification but skip deployment. Successful pushes to `main` deploy the same verified build
+artifact to the live channel. The live job uses the `firebase-hosting-production` GitHub environment
+so deployment protection rules can be enabled in the repository settings.
+
+Configure these GitHub Actions values before enabling deployment:
+
+| Type                | Name                             | Value                                              |
+| ------------------- | -------------------------------- | -------------------------------------------------- |
+| Repository variable | `FIREBASE_PROJECT_ID`            | The Firebase project containing the Hosting site.  |
+| Repository variable | `GCP_WORKLOAD_IDENTITY_PROVIDER` | The full Workload Identity Provider resource name. |
+| Repository variable | `GCP_FIREBASE_SERVICE_ACCOUNT`   | The dedicated deployment service-account email.    |
+
+Deployment uses GitHub OIDC and Google Cloud Workload Identity Federation. It does not require or
+permit a long-lived service-account key. Follow [the Workload Identity setup guide](docs/firebase-github-actions.md)
+to create the provider, grant the deployment roles, and configure the repository variables.
+
+Preview channels use the real Firebase project and the configured Cloud Run backend. Treat preview
+URLs as public, temporary application deployments rather than isolated test environments.
