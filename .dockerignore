@@ -4,6 +4,7 @@
 coverage
 dist
 Dockerfile*
+gha-creds-*.json
 node_modules
 npm-debug.log*
 playwright-report
