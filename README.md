@@ -92,7 +92,7 @@ must never contain MongoDB credentials, Better Auth secrets, or the TMDB access 
 ## Deployment
 
 Production builds are written to `dist/drama-watch-web/browser`. `firebase.json` serves that folder,
-rewrites `/api/**` to the `drama-watch-api` Cloud Run service in `europe-west1`, and sends all other
+rewrites `/api/**` to the `k-drama-watchlist` Cloud Run service in `europe-west1`, and sends all other
 unknown routes to Angular's `index.html`.
 
 Select the Firebase project outside source control before deploying; this repository intentionally
