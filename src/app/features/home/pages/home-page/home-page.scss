@@ -56,6 +56,17 @@ h1 {
   box-shadow: 0 0 0.75rem var(--color-accent);
 }
 
+.hero__action {
+  margin-top: 1rem;
+  padding: 0.875rem 1.125rem;
+  border-radius: 999rem;
+  color: #100d18;
+  background: var(--color-accent);
+  font-size: 0.875rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
 .capabilities {
   padding: 0 0 clamp(4rem, 8vw, 7rem);
 }

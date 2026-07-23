@@ -8,15 +8,22 @@
     </a>
 
     @if (authentication.isAuthenticated()) {
-      <div class="app-shell__account">
-        <span>
-          {{
-            authentication.session()?.user?.displayUsername ?? authentication.session()?.user?.name
-          }}
-        </span>
-        <button type="button" (click)="signOut()" [disabled]="authentication.isPending()">
-          Sign out
-        </button>
+      <div class="app-shell__authenticated">
+        <nav class="app-shell__primary-links" aria-label="Primary">
+          <a routerLink="/">Home</a>
+          <a routerLink="/search">Search</a>
+        </nav>
+        <div class="app-shell__account">
+          <span>
+            {{
+              authentication.session()?.user?.displayUsername ??
+                authentication.session()?.user?.name
+            }}
+          </span>
+          <button type="button" (click)="signOut()" [disabled]="authentication.isPending()">
+            Sign out
+          </button>
+        </div>
       </div>
     } @else {
       <nav class="app-shell__auth-links" aria-label="Account">

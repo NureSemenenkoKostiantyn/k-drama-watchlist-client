@@ -1,0 +1,101 @@
+<section class="media-details">
+  <a class="media-details__back" routerLink="/search">← Back to search</a>
+
+  @if (isLoading()) {
+    <div class="media-details__state" role="status">Loading media details…</div>
+  } @else if (error()) {
+    <div class="media-details__state media-details__state--error" role="alert">
+      {{ error() }}
+    </div>
+  } @else if (media(); as item) {
+    <article>
+      @if (item.backdropUrl) {
+        <div class="media-details__backdrop" aria-hidden="true">
+          <img [src]="item.backdropUrl" alt="" />
+        </div>
+      }
+
+      <div class="media-details__content">
+        <div class="media-details__poster">
+          @if (item.posterUrl) {
+            <img [src]="item.posterUrl" [alt]="item.title + ' poster'" />
+          } @else {
+            <span>No poster</span>
+          }
+        </div>
+
+        <div class="media-details__summary">
+          <div class="media-details__metadata">
+            <span>{{ item.mediaType === 'tv' ? 'TV series' : 'Movie' }}</span>
+            @if (displayYear(); as year) {
+              <span>{{ year }}</span>
+            }
+            @if (item.runtimeMinutes) {
+              <span>{{ item.runtimeMinutes }} minutes</span>
+            }
+            @if (displayScore(); as score) {
+              <span>TMDB {{ score }}</span>
+            }
+          </div>
+
+          <h1>{{ item.title }}</h1>
+          @if (item.originalTitle !== item.title) {
+            <p class="media-details__original-title">{{ item.originalTitle }}</p>
+          }
+
+          @if (item.overview) {
+            <p class="media-details__overview">{{ item.overview }}</p>
+          } @else {
+            <p class="media-details__overview">No overview is available yet.</p>
+          }
+
+          @if (item.mediaType === 'tv') {
+            <dl class="media-details__facts">
+              @if (item.totalSeasons !== undefined) {
+                <div>
+                  <dt>Seasons</dt>
+                  <dd>{{ item.totalSeasons }}</dd>
+                </div>
+              }
+              @if (item.totalEpisodes !== undefined) {
+                <div>
+                  <dt>Episodes</dt>
+                  <dd>{{ item.totalEpisodes }}</dd>
+                </div>
+              }
+              @if (item.originCountry.length > 0) {
+                <div>
+                  <dt>Origin</dt>
+                  <dd>{{ item.originCountry.join(', ') }}</dd>
+                </div>
+              }
+            </dl>
+          }
+        </div>
+      </div>
+
+      @if (regularSeasons().length > 0) {
+        <section class="season-list" aria-labelledby="seasons-title">
+          <div class="season-list__heading">
+            <p>Episode structure</p>
+            <h2 id="seasons-title">Seasons</h2>
+          </div>
+          <div class="season-list__grid">
+            @for (season of regularSeasons(); track season.seasonNumber) {
+              <article>
+                <span>Season {{ season.seasonNumber }}</span>
+                <h3>{{ season.name }}</h3>
+                <p>{{ season.episodeCount }} episodes</p>
+              </article>
+            }
+          </div>
+          @if (specials().length > 0) {
+            <p class="season-list__specials">
+              Specials are available but will be excluded from progress by default.
+            </p>
+          }
+        </section>
+      }
+    </article>
+  }
+</section>
