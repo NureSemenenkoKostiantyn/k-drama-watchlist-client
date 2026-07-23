@@ -1,0 +1,131 @@
+<section class="search-page" aria-labelledby="search-title">
+  <header class="search-page__header">
+    <p class="search-page__eyebrow">TMDB search</p>
+    <h1 id="search-title">Find your next story.</h1>
+    <p>Search TV series and movies without exposing the TMDB token to your browser.</p>
+  </header>
+
+  <form class="search-form" [formGroup]="searchForm" (ngSubmit)="submitSearch()">
+    <label class="search-form__query" for="media-query">
+      <span>Title</span>
+      <input
+        id="media-query"
+        type="search"
+        formControlName="query"
+        maxlength="100"
+        autocomplete="off"
+        placeholder="Goblin, Parasite, Crash Landing on You..."
+      />
+    </label>
+
+    <label for="media-type">
+      <span>Type</span>
+      <select id="media-type" formControlName="type">
+        <option value="all">TV and movies</option>
+        <option value="tv">TV series</option>
+        <option value="movie">Movies</option>
+      </select>
+    </label>
+
+    <label class="search-form__korean">
+      <input type="checkbox" formControlName="koreanOnly" />
+      <span>Korean dramas only</span>
+    </label>
+
+    <button type="submit" [disabled]="isLoading()">
+      {{ isLoading() ? 'Searching…' : 'Search' }}
+    </button>
+
+    @if (searchForm.controls.query.touched && searchForm.controls.query.invalid) {
+      <p class="search-form__error">Enter a title between 1 and 100 characters.</p>
+    }
+  </form>
+
+  @if (error()) {
+    <div class="search-state search-state--error" role="alert">{{ error() }}</div>
+  } @else if (hasSearched() && !isLoading()) {
+    <div class="search-results__summary" aria-live="polite">
+      <p>
+        {{ results().length }} shown
+        @if (totalResults() > 0) {
+          <span>from {{ totalResults() }} TMDB matches</span>
+        }
+      </p>
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <button
+            type="button"
+            (click)="changePage(currentPage() - 1)"
+            [disabled]="currentPage() === 1"
+          >
+            Previous
+          </button>
+          <span>Page {{ currentPage() }} of {{ totalPages() }}</span>
+          <button
+            type="button"
+            (click)="changePage(currentPage() + 1)"
+            [disabled]="currentPage() === totalPages()"
+          >
+            Next
+          </button>
+        </div>
+      }
+    </div>
+
+    @if (results().length === 0) {
+      <div class="search-state">
+        <h2>No matching titles</h2>
+        <p>Try another spelling or broaden the media type.</p>
+      </div>
+    } @else {
+      <div class="search-results">
+        @for (media of results(); track media.id) {
+          <article class="media-card">
+            <a
+              class="media-card__poster"
+              [routerLink]="['/media', media.mediaType, media.tmdbId]"
+              [attr.aria-label]="'View ' + media.title"
+            >
+              @if (media.posterUrl) {
+                <img [src]="media.posterUrl" [alt]="media.title + ' poster'" />
+              } @else {
+                <span aria-hidden="true">No poster</span>
+              }
+            </a>
+
+            <div class="media-card__body">
+              <div class="media-card__metadata">
+                <span>{{ media.mediaType === 'tv' ? 'TV series' : 'Movie' }}</span>
+                <span>{{ displayYear(media) }}</span>
+                @if (displayScore(media); as score) {
+                  <span>TMDB {{ score }}</span>
+                }
+              </div>
+              <h2>
+                <a [routerLink]="['/media', media.mediaType, media.tmdbId]">
+                  {{ media.title }}
+                </a>
+              </h2>
+              @if (media.originalTitle !== media.title) {
+                <p class="media-card__original-title">{{ media.originalTitle }}</p>
+              }
+              @if (media.overview) {
+                <p class="media-card__overview">{{ media.overview }}</p>
+              } @else {
+                <p class="media-card__overview">No overview is available yet.</p>
+              }
+              <a
+                class="media-card__details-link"
+                [routerLink]="['/media', media.mediaType, media.tmdbId]"
+              >
+                View details
+              </a>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  } @else if (isLoading()) {
+    <div class="search-state" role="status">Searching TMDB…</div>
+  }
+</section>

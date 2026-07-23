@@ -12,6 +12,11 @@ The first authentication slice is implemented with Better Auth's framework-agnos
 injectable Angular service exposes session state through read-only Signals, route guards protect the
 application by default, and standalone pages provide registration, login, and username onboarding.
 
+The TMDB search slice adds protected `/search` and `/media/:mediaType/:tmdbId` routes. A feature data
+service calls the same-origin NestJS API with Angular `HttpClient`, while Signals own loading, error,
+pagination, and result state. The K-drama shortcut searches TV titles with the `KR` origin-country
+filter. The browser receives normalized media data and image URLs, never the TMDB access token.
+
 ## Requirements
 
 - Node.js 22.12 or newer within the Node 22 release line
@@ -80,6 +85,14 @@ Authentication code is organized under:
 ```text
 src/app/core/auth/
 src/app/features/auth/
+```
+
+TMDB search code is organized under:
+
+```text
+src/app/features/search/data-access/
+src/app/features/search/models/
+src/app/features/search/pages/
 ```
 
 Anonymous users are redirected to `/login`. New accounts continue to `/onboarding` until they have
