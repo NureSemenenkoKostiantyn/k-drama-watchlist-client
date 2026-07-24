@@ -11,6 +11,8 @@ import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { readApiErrorMessage } from '../../../../core/api/api-error';
+import { LibraryService } from '../../../library/data-access/library.service';
+import { WatchStatus } from '../../../library/models/library';
 import { MediaService } from '../../data-access/media.service';
 import { MediaDetails, MediaType } from '../../models/media';
 
@@ -24,10 +26,12 @@ import { MediaDetails, MediaType } from '../../models/media';
 export class MediaDetailsPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly mediaService = inject(MediaService);
+  protected readonly library = inject(LibraryService);
 
   protected readonly media = signal<MediaDetails | null>(null);
   protected readonly isLoading = signal(true);
   protected readonly error = signal<string | null>(null);
+  protected readonly isUpdatingLibrary = signal(false);
   protected readonly regularSeasons = computed(
     () => this.media()?.seasons?.filter((season) => season.seasonNumber > 0) ?? [],
   );
@@ -37,6 +41,7 @@ export class MediaDetailsPage implements OnInit {
 
   ngOnInit(): void {
     void this.loadDetails();
+    void this.library.load();
   }
 
   protected displayYear(): string | null {
@@ -47,6 +52,26 @@ export class MediaDetailsPage implements OnInit {
   protected displayScore(): string | null {
     const score = this.media()?.tmdbVoteAverage;
     return score === undefined ? null : score.toFixed(1);
+  }
+
+  protected async setLibraryStatus(status: WatchStatus): Promise<void> {
+    const media = this.media();
+
+    if (!media || this.isUpdatingLibrary()) {
+      return;
+    }
+
+    this.isUpdatingLibrary.set(true);
+    await this.library.setStatus(media.mediaType, media.tmdbId, status);
+    this.isUpdatingLibrary.set(false);
+  }
+
+  protected statusLabel(status: WatchStatus): string {
+    return status === 'to_watch'
+      ? 'To watch'
+      : status === 'watching'
+        ? 'Watching'
+        : 'Watched';
   }
 
   private async loadDetails(): Promise<void> {

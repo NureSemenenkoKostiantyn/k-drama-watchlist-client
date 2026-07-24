@@ -1,10 +1,19 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { readApiErrorMessage } from '../../../../core/api/api-error';
+import { LibraryService } from '../../../library/data-access/library.service';
+import { WatchStatus } from '../../../library/models/library';
 import { MediaService } from '../../data-access/media.service';
 import { MediaSearchRequest, MediaSummary, SearchMediaType } from '../../models/media';
 
@@ -15,9 +24,10 @@ import { MediaSearchRequest, MediaSummary, SearchMediaType } from '../../models/
   styleUrl: './search-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SearchPage {
+export class SearchPage implements OnInit {
   private readonly mediaService = inject(MediaService);
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly library = inject(LibraryService);
 
   protected readonly searchForm = new FormGroup({
     query: new FormControl('', {
@@ -34,6 +44,7 @@ export class SearchPage {
   protected readonly currentPage = signal(1);
   protected readonly totalPages = signal(0);
   protected readonly totalResults = signal(0);
+  protected readonly pendingMediaId = signal<string | null>(null);
 
   constructor() {
     this.searchForm.controls.koreanOnly.valueChanges
@@ -43,6 +54,10 @@ export class SearchPage {
           this.searchForm.controls.type.setValue('tv');
         }
       });
+  }
+
+  ngOnInit(): void {
+    void this.library.load();
   }
 
   protected submitSearch(): void {
@@ -69,6 +84,24 @@ export class SearchPage {
 
   protected displayScore(media: MediaSummary): string | null {
     return media.tmdbVoteAverage === undefined ? null : media.tmdbVoteAverage.toFixed(1);
+  }
+
+  protected async setLibraryStatus(media: MediaSummary, status: WatchStatus): Promise<void> {
+    if (this.pendingMediaId() !== null) {
+      return;
+    }
+
+    this.pendingMediaId.set(media.id);
+    await this.library.setStatus(media.mediaType, media.tmdbId, status);
+    this.pendingMediaId.set(null);
+  }
+
+  protected statusLabel(status: WatchStatus): string {
+    return status === 'to_watch'
+      ? 'To watch'
+      : status === 'watching'
+        ? 'Watching'
+        : 'Watched';
   }
 
   private async loadPage(page: number): Promise<void> {

@@ -49,6 +49,49 @@
             <p class="media-details__overview">No overview is available yet.</p>
           }
 
+          <section class="media-details__library" aria-label="Personal library">
+            @if (library.entryFor(item.mediaType, item.tmdbId); as entry) {
+              <p>In your library · {{ statusLabel(entry.status) }}</p>
+            } @else {
+              <p>Choose where this title belongs in your library.</p>
+            }
+            <div>
+              <button
+                type="button"
+                [class.is-active]="
+                  library.entryFor(item.mediaType, item.tmdbId)?.status === 'to_watch'
+                "
+                [disabled]="isUpdatingLibrary()"
+                (click)="setLibraryStatus('to_watch')"
+              >
+                To watch
+              </button>
+              <button
+                type="button"
+                [class.is-active]="
+                  library.entryFor(item.mediaType, item.tmdbId)?.status === 'watching'
+                "
+                [disabled]="isUpdatingLibrary()"
+                (click)="setLibraryStatus('watching')"
+              >
+                Watching
+              </button>
+              <button
+                type="button"
+                [class.is-active]="
+                  library.entryFor(item.mediaType, item.tmdbId)?.status === 'watched'
+                "
+                [disabled]="isUpdatingLibrary()"
+                (click)="setLibraryStatus('watched')"
+              >
+                Watched
+              </button>
+            </div>
+            @if (library.error()) {
+              <span role="alert">{{ library.error() }}</span>
+            }
+          </section>
+
           @if (item.mediaType === 'tv') {
             <dl class="media-details__facts">
               @if (item.totalSeasons !== undefined) {

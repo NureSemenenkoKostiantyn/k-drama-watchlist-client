@@ -1,7 +1,10 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
+import { vi } from 'vitest';
 
+import { LibraryService } from '../../../library/data-access/library.service';
 import { MediaService } from '../../data-access/media.service';
 import { MediaDetailsPage } from './media-details-page';
 
@@ -53,6 +56,16 @@ describe('MediaDetailsPage', () => {
                   },
                 ],
               }),
+          },
+        },
+        {
+          provide: LibraryService,
+          useValue: {
+            entries: signal([]).asReadonly(),
+            error: signal<string | null>(null).asReadonly(),
+            load: vi.fn().mockResolvedValue(true),
+            entryFor: vi.fn().mockReturnValue(undefined),
+            setStatus: vi.fn().mockResolvedValue(null),
           },
         },
       ],

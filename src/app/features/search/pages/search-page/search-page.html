@@ -43,6 +43,8 @@
 
   @if (error()) {
     <div class="search-state search-state--error" role="alert">{{ error() }}</div>
+  } @else if (library.error()) {
+    <div class="search-state search-state--error" role="alert">{{ library.error() }}</div>
   } @else if (hasSearched() && !isLoading()) {
     <div class="search-results__summary" aria-live="polite">
       <p>
@@ -120,6 +122,43 @@
               >
                 View details
               </a>
+              @if (library.entryFor(media.mediaType, media.tmdbId); as entry) {
+                <p class="media-card__library-status">
+                  In your library · {{ statusLabel(entry.status) }}
+                </p>
+              }
+              <div class="media-card__actions" aria-label="Library status">
+                <button
+                  type="button"
+                  [class.is-active]="
+                    library.entryFor(media.mediaType, media.tmdbId)?.status === 'to_watch'
+                  "
+                  [disabled]="pendingMediaId() !== null"
+                  (click)="setLibraryStatus(media, 'to_watch')"
+                >
+                  To watch
+                </button>
+                <button
+                  type="button"
+                  [class.is-active]="
+                    library.entryFor(media.mediaType, media.tmdbId)?.status === 'watching'
+                  "
+                  [disabled]="pendingMediaId() !== null"
+                  (click)="setLibraryStatus(media, 'watching')"
+                >
+                  Watching
+                </button>
+                <button
+                  type="button"
+                  [class.is-active]="
+                    library.entryFor(media.mediaType, media.tmdbId)?.status === 'watched'
+                  "
+                  [disabled]="pendingMediaId() !== null"
+                  (click)="setLibraryStatus(media, 'watched')"
+                >
+                  Watched
+                </button>
+              </div>
             </div>
           </article>
         }
