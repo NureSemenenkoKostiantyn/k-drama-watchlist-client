@@ -4,6 +4,7 @@ import { ActivatedRoute, provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 
 import { CategoriesService } from '../../../categories/data-access/categories.service';
+import { PriorityService } from '../../../priority/data-access/priority.service';
 import { LibraryService } from '../../data-access/library.service';
 import { LibraryEntry } from '../../models/library';
 import { LibraryPage } from './library-page';
@@ -45,6 +46,13 @@ describe('LibraryPage', () => {
             snapshot: {
               data: { status: 'to_watch' },
             },
+          },
+        },
+        {
+          provide: PriorityService,
+          useValue: {
+            lanes: signal([]).asReadonly(),
+            load: vi.fn().mockResolvedValue(true),
           },
         },
         {

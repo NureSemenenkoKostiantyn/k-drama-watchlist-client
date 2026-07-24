@@ -30,6 +30,8 @@ export interface LibraryEntry {
   status: WatchStatus;
   media: MediaDetails;
   categoryIds: string[];
+  priorityLaneId?: string;
+  priorityPosition?: number;
   progress?: LibraryProgress;
   rating?: number;
   description?: string;

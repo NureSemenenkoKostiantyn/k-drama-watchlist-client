@@ -29,6 +29,11 @@ can belong to multiple categories from either the library or media-details view,
 pages can be filtered by one category. Category assignment always sends category IDs; ownership is
 verified by the API.
 
+The protected `/priority` route provides an Angular CDK drag-and-drop board. Users can create,
+rename, delete, collapse, and reorder lanes; reorder titles within a lane; move titles between
+lanes or back to unassigned; and randomly pick from one lane. Only `to_watch` entries appear on the
+board, and each affected lane sends its complete ordered item ID array to the API.
+
 ## Requirements
 
 - Node.js 22.12 or newer within the Node 22 release line
@@ -124,6 +129,17 @@ src/app/features/categories/components/
 src/app/features/categories/data-access/
 src/app/features/categories/models/
 ```
+
+Priority-board code is organized under:
+
+```text
+src/app/features/priority/data-access/
+src/app/features/priority/models/
+src/app/features/priority/pages/
+```
+
+The priority board supports whole-card and whole-lane drag interactions. Random lane picks use a
+preselected-winner case-opening reel that can be skipped and respects reduced-motion preferences.
 
 Anonymous users are redirected to `/login`. New accounts continue to `/onboarding` until they have
 a unique username. Browser requests use same-origin `/api/auth/*` routes through the Angular proxy;

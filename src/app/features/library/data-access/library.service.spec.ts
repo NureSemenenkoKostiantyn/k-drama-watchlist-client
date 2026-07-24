@@ -209,4 +209,33 @@ describe('LibraryService', () => {
     service.removeCategoryReference('category-1');
     expect(service.entries()[0]?.categoryIds).toEqual([]);
   });
+
+  it('applies complete priority orders and clears omitted entries', async () => {
+    const secondEntry: LibraryEntry = {
+      ...entry,
+      id: 'entry-2',
+      mediaId: 'media-2',
+    };
+    const loadResult = service.load();
+    http.expectOne('/api/library').flush([
+      {
+        ...entry,
+        priorityLaneId: 'lane-1',
+        priorityPosition: 0,
+      },
+      secondEntry,
+    ]);
+    await loadResult;
+
+    service.applyPriorityOrder('lane-1', ['entry-2']);
+
+    expect(service.entries()).toEqual([
+      entry,
+      {
+        ...secondEntry,
+        priorityLaneId: 'lane-1',
+        priorityPosition: 0,
+      },
+    ]);
+  });
 });

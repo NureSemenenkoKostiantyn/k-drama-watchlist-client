@@ -164,6 +164,38 @@ export class LibraryService {
     );
   }
 
+  applyPriorityOrder(laneId: string, itemIds: string[]): void {
+    const positionById = new Map(
+      itemIds.map((itemId, position) => [itemId, position]),
+    );
+    this.entriesState.update((entries) =>
+      entries.map((entry) => {
+        const position = positionById.get(entry.id);
+
+        if (position !== undefined) {
+          return {
+            ...entry,
+            priorityLaneId: laneId,
+            priorityPosition: position,
+          };
+        }
+
+        if (entry.priorityLaneId === laneId) {
+          const withoutPriority = { ...entry };
+          delete withoutPriority.priorityLaneId;
+          delete withoutPriority.priorityPosition;
+          return withoutPriority;
+        }
+
+        return entry;
+      }),
+    );
+  }
+
+  clearPriorityLane(laneId: string): void {
+    this.applyPriorityOrder(laneId, []);
+  }
+
   updatePlaybackPreference(
     entryId: string,
     preference: UpdatePlaybackPreferenceRequest,

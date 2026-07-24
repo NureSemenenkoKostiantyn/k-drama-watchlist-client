@@ -19,6 +19,18 @@
         }
       </select>
     </label>
+    @if (status === 'to_watch') {
+      <label>
+        <span>Filter by priority</span>
+        <select [value]="selectedPriorityLaneId()" (change)="changePriorityFilter($event)">
+          <option value="all">All priority lanes</option>
+          <option value="unassigned">Unassigned</option>
+          @for (lane of priority.lanes(); track lane.id) {
+            <option [value]="lane.id">{{ lane.name }}</option>
+          }
+        </select>
+      </label>
+    }
     <details>
       <summary>Manage categories</summary>
       <app-category-manager />
