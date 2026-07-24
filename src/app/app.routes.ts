@@ -47,6 +47,41 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'library',
+    pathMatch: 'full',
+    redirectTo: 'library/to-watch',
+  },
+  {
+    path: 'library/to-watch',
+    title: 'To watch · Drama Watch',
+    canActivate: [profileCompleteGuard],
+    data: { status: 'to_watch' },
+    loadComponent: () =>
+      import('./features/library/pages/library-page/library-page').then(
+        ({ LibraryPage }) => LibraryPage,
+      ),
+  },
+  {
+    path: 'library/watching',
+    title: 'Watching · Drama Watch',
+    canActivate: [profileCompleteGuard],
+    data: { status: 'watching' },
+    loadComponent: () =>
+      import('./features/library/pages/library-page/library-page').then(
+        ({ LibraryPage }) => LibraryPage,
+      ),
+  },
+  {
+    path: 'library/watched',
+    title: 'Watched · Drama Watch',
+    canActivate: [profileCompleteGuard],
+    data: { status: 'watched' },
+    loadComponent: () =>
+      import('./features/library/pages/library-page/library-page').then(
+        ({ LibraryPage }) => LibraryPage,
+      ),
+  },
+  {
     path: '',
     title: 'Drama Watch',
     canActivate: [profileCompleteGuard],

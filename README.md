@@ -17,6 +17,11 @@ service calls the same-origin NestJS API with Angular `HttpClient`, while Signal
 pagination, and result state. The K-drama shortcut searches TV titles with the `KR` origin-country
 filter. The browser receives normalized media data and image URLs, never the TMDB access token.
 
+The personal library slice adds protected status views at `/library/to-watch`, `/library/watching`,
+and `/library/watched`. Search results and media details provide quick status actions backed by the
+owner-scoped library API. The client receives one shared media snapshot inside each personal entry;
+it does not store or submit user IDs.
+
 ## Requirements
 
 - Node.js 22.12 or newer within the Node 22 release line
@@ -93,6 +98,14 @@ TMDB search code is organized under:
 src/app/features/search/data-access/
 src/app/features/search/models/
 src/app/features/search/pages/
+```
+
+Personal library code is organized under:
+
+```text
+src/app/features/library/data-access/
+src/app/features/library/models/
+src/app/features/library/pages/
 ```
 
 Anonymous users are redirected to `/login`. New accounts continue to `/onboarding` until they have

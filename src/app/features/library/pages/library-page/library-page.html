@@ -1,0 +1,76 @@
+<section class="library-page" aria-labelledby="library-title">
+  <header class="library-page__header">
+    <p>Your personal collection</p>
+    <h1 id="library-title">{{ heading }}</h1>
+    <nav aria-label="Library status">
+      <a routerLink="/library/to-watch" routerLinkActive="is-active">To watch</a>
+      <a routerLink="/library/watching" routerLinkActive="is-active">Watching</a>
+      <a routerLink="/library/watched" routerLinkActive="is-active">Watched</a>
+    </nav>
+  </header>
+
+  @if (library.error()) {
+    <div class="library-state library-state--error" role="alert">{{ library.error() }}</div>
+  } @else if (library.isLoading()) {
+    <div class="library-state" role="status">Loading your library…</div>
+  } @else if (entries().length === 0) {
+    <div class="library-state">
+      <h2>Nothing here yet</h2>
+      <p>Find a title and add it to {{ heading.toLowerCase() }}.</p>
+      <a routerLink="/search">Search TMDB</a>
+    </div>
+  } @else {
+    <div class="library-grid">
+      @for (entry of entries(); track entry.id) {
+        <article class="library-card">
+          <a
+            class="library-card__poster"
+            [routerLink]="['/media', entry.media.mediaType, entry.media.tmdbId]"
+          >
+            @if (entry.media.posterUrl) {
+              <img [src]="entry.media.posterUrl" [alt]="entry.media.title + ' poster'" />
+            } @else {
+              <span>No poster</span>
+            }
+          </a>
+          <div class="library-card__body">
+            <p>
+              {{ entry.media.mediaType === 'tv' ? 'TV series' : 'Movie' }}
+              <span>·</span>
+              {{ displayYear(entry) }}
+            </p>
+            <h2>
+              <a [routerLink]="['/media', entry.media.mediaType, entry.media.tmdbId]">
+                {{ entry.media.title }}
+              </a>
+            </h2>
+            @if (entry.media.originalTitle !== entry.media.title) {
+              <span class="library-card__original-title">{{ entry.media.originalTitle }}</span>
+            }
+            <div class="library-card__controls">
+              <label>
+                <span>Status</span>
+                <select
+                  [value]="entry.status"
+                  [disabled]="pendingEntryId() === entry.id"
+                  (change)="changeStatus(entry, $event)"
+                >
+                  <option value="to_watch">To watch</option>
+                  <option value="watching">Watching</option>
+                  <option value="watched">Watched</option>
+                </select>
+              </label>
+              <button
+                type="button"
+                [disabled]="pendingEntryId() === entry.id"
+                (click)="remove(entry)"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>
