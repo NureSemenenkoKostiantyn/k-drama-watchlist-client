@@ -117,6 +117,87 @@
         </div>
       </div>
 
+      @if (currentEntry(); as entry) {
+        <section class="tracking" aria-labelledby="tracking-title">
+          <div class="tracking__heading">
+            <p>Private to you</p>
+            <h2 id="tracking-title">Personal tracking</h2>
+          </div>
+
+          @if (item.mediaType === 'tv') {
+            <app-progress-controls [entry]="entry" />
+          }
+
+          <div class="tracking__forms">
+            <form [formGroup]="personalForm" (ngSubmit)="savePersonalDetails()">
+              <h3>Rating and description</h3>
+              <label>
+                <span>Rating out of 10</span>
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  step="0.5"
+                  placeholder="Not rated"
+                  formControlName="rating"
+                />
+              </label>
+              <label>
+                <span>Private description</span>
+                <textarea
+                  rows="5"
+                  maxlength="5000"
+                  placeholder="Add notes only you can see"
+                  formControlName="description"
+                ></textarea>
+              </label>
+              <button type="submit" [disabled]="isSavingTracking()">
+                Save personal details
+              </button>
+            </form>
+
+            <form [formGroup]="playbackForm" (ngSubmit)="savePlaybackPreference()">
+              <h3>Playback preference</h3>
+              <label>
+                <span>Audio</span>
+                <select formControlName="audioType">
+                  <option value="">No preference</option>
+                  <option value="original">Original</option>
+                  <option value="dubbed">Dubbed</option>
+                  <option value="mixed">Mixed</option>
+                  <option value="unknown">Unknown</option>
+                </select>
+              </label>
+              <div class="tracking__row">
+                <label>
+                  <span>Audio language code</span>
+                  <input maxlength="16" placeholder="e.g. ko, en, uk" formControlName="languageCode" />
+                </label>
+                <label>
+                  <span>Custom audio label</span>
+                  <input maxlength="100" placeholder="e.g. Ukrainian dub" formControlName="customLabel" />
+                </label>
+              </div>
+              <label>
+                <span>Subtitle language code</span>
+                <input
+                  maxlength="16"
+                  placeholder="e.g. en, uk, none"
+                  formControlName="subtitleLanguageCode"
+                />
+              </label>
+              <button type="submit" [disabled]="isSavingTracking()">
+                Save playback preference
+              </button>
+            </form>
+          </div>
+
+          @if (savedMessage()) {
+            <p class="tracking__saved" role="status">{{ savedMessage() }}</p>
+          }
+        </section>
+      }
+
       @if (regularSeasons().length > 0) {
         <section class="season-list" aria-labelledby="seasons-title">
           <div class="season-list__heading">

@@ -93,4 +93,95 @@ describe('LibraryService', () => {
     await expect(removeResult).resolves.toBe(true);
     expect(service.entries()).toEqual([]);
   });
+
+  it('updates progress and replaces the entry in local state', async () => {
+    const loadResult = service.load();
+    http.expectOne('/api/library').flush([entry]);
+    await loadResult;
+
+    const updatedEntry: LibraryEntry = {
+      ...entry,
+      status: 'watching',
+      progress: {
+        currentSeason: 1,
+        currentEpisode: 2,
+        completedEpisodes: 2,
+        totalEpisodesSnapshot: 16,
+        completedSeasonNumbers: [],
+        includeSpecials: false,
+        updatedAt: '2026-07-24T10:00:00.000Z',
+      },
+    };
+    const result = service.updateProgress(entry.id, {
+      currentSeason: 1,
+      currentEpisode: 2,
+      includeSpecials: false,
+    });
+    const request = http.expectOne('/api/library/entry-1/progress');
+
+    expect(request.request.method).toBe('PATCH');
+    expect(request.request.body).toEqual({
+      currentSeason: 1,
+      currentEpisode: 2,
+      includeSpecials: false,
+    });
+    request.flush(updatedEntry);
+
+    await expect(result).resolves.toEqual(updatedEntry);
+    expect(service.entries()[0]?.progress?.currentEpisode).toBe(2);
+  });
+
+  it('updates personal metadata through the dedicated endpoints', async () => {
+    const ratingResult = service.updateRating(entry.id, 8.5);
+    const ratingRequest = http.expectOne('/api/library/entry-1/rating');
+    expect(ratingRequest.request.body).toEqual({ rating: 8.5 });
+    ratingRequest.flush({ ...entry, rating: 8.5 });
+    await expect(ratingResult).resolves.toMatchObject({ rating: 8.5 });
+
+    const descriptionResult = service.updateDescription(entry.id, 'A private note');
+    const descriptionRequest = http.expectOne('/api/library/entry-1');
+    expect(descriptionRequest.request.body).toEqual({ description: 'A private note' });
+    descriptionRequest.flush({ ...entry, rating: 8.5, description: 'A private note' });
+    await expect(descriptionResult).resolves.toMatchObject({
+      description: 'A private note',
+    });
+
+    const playbackResult = service.updatePlaybackPreference(entry.id, {
+      audio: {
+        type: 'dubbed',
+        languageCode: 'uk',
+      },
+      subtitleLanguageCode: 'en',
+    });
+    const playbackRequest = http.expectOne('/api/library/entry-1/playback-preference');
+    expect(playbackRequest.request.body).toEqual({
+      audio: {
+        type: 'dubbed',
+        languageCode: 'uk',
+      },
+      subtitleLanguageCode: 'en',
+    });
+    playbackRequest.flush({
+      ...entry,
+      rating: 8.5,
+      description: 'A private note',
+      playbackPreference: {
+        audio: {
+          type: 'dubbed',
+          languageCode: 'uk',
+        },
+        subtitleLanguageCode: 'en',
+      },
+    });
+
+    await expect(playbackResult).resolves.toMatchObject({
+      playbackPreference: {
+        audio: {
+          type: 'dubbed',
+          languageCode: 'uk',
+        },
+        subtitleLanguageCode: 'en',
+      },
+    });
+  });
 });

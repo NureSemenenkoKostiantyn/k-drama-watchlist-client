@@ -1,0 +1,80 @@
+<section class="progress" aria-labelledby="progress-title">
+  <div class="progress__heading">
+    <div>
+      <p>Episode progress</p>
+      <h2 id="progress-title">
+        Season {{ entry().progress?.currentSeason ?? 1 }},
+        episode {{ entry().progress?.currentEpisode ?? 0 }}
+      </h2>
+    </div>
+    <strong>{{ progressPercent() }}%</strong>
+  </div>
+
+  <div
+    class="progress__bar"
+    role="progressbar"
+    aria-label="Completed episodes"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    [attr.aria-valuenow]="progressPercent()"
+  >
+    <span [style.width.%]="progressPercent()"></span>
+  </div>
+  <p class="progress__count">
+    {{ entry().progress?.completedEpisodes ?? 0 }}
+    /
+    {{ entry().progress?.totalEpisodesSnapshot ?? entry().media.totalEpisodes ?? '?' }}
+    episodes
+  </p>
+
+  <div class="progress__actions" aria-label="Quick progress actions">
+    <button
+      type="button"
+      data-action="decrement"
+      [disabled]="isSaving()"
+      (click)="decrement()"
+    >
+      − Episode
+    </button>
+    <button
+      type="button"
+      data-action="increment"
+      [disabled]="isSaving()"
+      (click)="increment()"
+    >
+      + Episode
+    </button>
+    <button type="button" [disabled]="isSaving()" (click)="finishSeason()">
+      Finish season
+    </button>
+    @if (undoRequest()) {
+      <button
+        class="progress__undo"
+        type="button"
+        [disabled]="isSaving()"
+        (click)="undo()"
+      >
+        Undo
+      </button>
+    }
+  </div>
+
+  <details>
+    <summary>Correct progress manually</summary>
+    <form [formGroup]="progressForm" (ngSubmit)="saveManualProgress()">
+      <label>
+        <span>Season</span>
+        <input type="number" min="0" step="1" formControlName="currentSeason" />
+      </label>
+      <label>
+        <span>Episode</span>
+        <input type="number" min="0" step="1" formControlName="currentEpisode" />
+      </label>
+      <label class="progress__checkbox">
+        <input type="checkbox" formControlName="includeSpecials" />
+        <span>Include specials</span>
+      </label>
+      <button type="submit" [disabled]="isSaving()">Save correction</button>
+    </form>
+  </details>
+</section>
