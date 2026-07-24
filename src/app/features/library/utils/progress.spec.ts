@@ -12,6 +12,7 @@ describe('library progress actions', () => {
     id: 'entry-1',
     mediaId: 'media-1',
     status: 'watching',
+    categoryIds: [],
     media: {
       id: 'tv:1',
       tmdbId: 1,

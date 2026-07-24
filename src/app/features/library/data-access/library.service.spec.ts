@@ -13,6 +13,7 @@ describe('LibraryService', () => {
     id: 'entry-1',
     mediaId: 'media-1',
     status: 'to_watch',
+    categoryIds: [],
     media: {
       id: 'tv:1',
       tmdbId: 1,
@@ -183,5 +184,29 @@ describe('LibraryService', () => {
         subtitleLanguageCode: 'en',
       },
     });
+  });
+
+  it('assigns categories and removes deleted references from local state', async () => {
+    const loadResult = service.load();
+    http.expectOne('/api/library').flush([entry]);
+    await loadResult;
+
+    const updateResult = service.updateCategories(entry.id, ['category-1']);
+    const request = http.expectOne('/api/library/entry-1');
+
+    expect(request.request.method).toBe('PATCH');
+    expect(request.request.body).toEqual({
+      categoryIds: ['category-1'],
+    });
+    request.flush({
+      ...entry,
+      categoryIds: ['category-1'],
+    });
+    await expect(updateResult).resolves.toMatchObject({
+      categoryIds: ['category-1'],
+    });
+
+    service.removeCategoryReference('category-1');
+    expect(service.entries()[0]?.categoryIds).toEqual([]);
   });
 });

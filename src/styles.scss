@@ -163,6 +163,11 @@ a {
   gap: 1rem;
 }
 
+.tracking__categories {
+  display: grid;
+  gap: 0.625rem;
+}
+
 .tracking form {
   display: grid;
   gap: 0.875rem;

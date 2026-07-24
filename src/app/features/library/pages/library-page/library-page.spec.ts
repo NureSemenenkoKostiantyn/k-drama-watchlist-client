@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 
+import { CategoriesService } from '../../../categories/data-access/categories.service';
 import { LibraryService } from '../../data-access/library.service';
 import { LibraryEntry } from '../../models/library';
 import { LibraryPage } from './library-page';
@@ -12,6 +13,7 @@ describe('LibraryPage', () => {
     id: 'entry-1',
     mediaId: 'media-1',
     status: 'to_watch',
+    categoryIds: [],
     media: {
       id: 'tv:1',
       tmdbId: 1,
@@ -29,6 +31,7 @@ describe('LibraryPage', () => {
 
   beforeEach(async () => {
     const entries = signal([entry]);
+    const categories = signal([]);
     const isLoading = signal(false);
     const error = signal<string | null>(null);
 
@@ -45,6 +48,15 @@ describe('LibraryPage', () => {
           },
         },
         {
+          provide: CategoriesService,
+          useValue: {
+            categories: categories.asReadonly(),
+            error: signal<string | null>(null).asReadonly(),
+            load: vi.fn().mockResolvedValue(true),
+            clearError: vi.fn(),
+          },
+        },
+        {
           provide: LibraryService,
           useValue: {
             entries: entries.asReadonly(),
@@ -52,6 +64,8 @@ describe('LibraryPage', () => {
             error: error.asReadonly(),
             load: vi.fn().mockResolvedValue(true),
             setStatus: vi.fn().mockResolvedValue(entry),
+            updateCategories: vi.fn().mockResolvedValue(entry),
+            removeCategoryReference: vi.fn(),
             remove: vi.fn().mockResolvedValue(true),
           },
         },

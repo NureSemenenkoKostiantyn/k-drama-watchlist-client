@@ -24,6 +24,11 @@ it does not store or submit user IDs. TV entries provide episode increment/decre
 completion, manual correction, and one-step client undo. Media details also support half-point
 ratings, private descriptions, and optional audio and subtitle preferences.
 
+Custom categories can be created, renamed, and deleted from the library screen. Each personal entry
+can belong to multiple categories from either the library or media-details view, and status library
+pages can be filtered by one category. Category assignment always sends category IDs; ownership is
+verified by the API.
+
 ## Requirements
 
 - Node.js 22.12 or newer within the Node 22 release line
@@ -110,6 +115,14 @@ src/app/features/library/components/
 src/app/features/library/models/
 src/app/features/library/pages/
 src/app/features/library/utils/
+```
+
+Custom category code is organized under:
+
+```text
+src/app/features/categories/components/
+src/app/features/categories/data-access/
+src/app/features/categories/models/
 ```
 
 Anonymous users are redirected to `/login`. New accounts continue to `/onboarding` until they have

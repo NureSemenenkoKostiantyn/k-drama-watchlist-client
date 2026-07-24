@@ -9,6 +9,22 @@
     </nav>
   </header>
 
+  <div class="library-tools">
+    <label>
+      <span>Filter by category</span>
+      <select [value]="selectedCategoryId()" (change)="changeCategoryFilter($event)">
+        <option value="all">All categories</option>
+        @for (category of categories.categories(); track category.id) {
+          <option [value]="category.id">{{ category.name }}</option>
+        }
+      </select>
+    </label>
+    <details>
+      <summary>Manage categories</summary>
+      <app-category-manager />
+    </details>
+  </div>
+
   @if (library.error()) {
     <div class="library-state library-state--error" role="alert">{{ library.error() }}</div>
   } @else if (library.isLoading()) {
@@ -47,6 +63,10 @@
             @if (entry.media.originalTitle !== entry.media.title) {
               <span class="library-card__original-title">{{ entry.media.originalTitle }}</span>
             }
+            <app-entry-category-picker
+              [entry]="entry"
+              [categories]="categories.categories()"
+            />
             @if (entry.media.mediaType === 'tv' && entry.status === 'watching') {
               <app-progress-controls [entry]="entry" />
             }

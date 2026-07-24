@@ -4,6 +4,7 @@ import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/route
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 
+import { CategoriesService } from '../../../categories/data-access/categories.service';
 import { LibraryService } from '../../../library/data-access/library.service';
 import { MediaService } from '../../data-access/media.service';
 import { MediaDetailsPage } from './media-details-page';
@@ -56,6 +57,13 @@ describe('MediaDetailsPage', () => {
                   },
                 ],
               }),
+          },
+        },
+        {
+          provide: CategoriesService,
+          useValue: {
+            categories: signal([]).asReadonly(),
+            load: vi.fn().mockResolvedValue(true),
           },
         },
         {
