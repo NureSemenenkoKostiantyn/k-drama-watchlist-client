@@ -1,0 +1,71 @@
+<section class="category-manager" aria-labelledby="category-manager-title">
+  <div>
+    <p>Organize your library</p>
+    <h2 id="category-manager-title">
+      {{ editingCategory() ? 'Edit category' : 'Create category' }}
+    </h2>
+  </div>
+
+  <form [formGroup]="categoryForm" (ngSubmit)="submit()">
+    <label>
+      <span>Name</span>
+      <input
+        maxlength="100"
+        placeholder="e.g. Comfort drama"
+        formControlName="name"
+      />
+    </label>
+    <label>
+      <span>Icon or emoji (optional)</span>
+      <input maxlength="100" placeholder="e.g. 💗" formControlName="icon" />
+    </label>
+    <div>
+      <button type="submit" [disabled]="pendingCategoryId() !== null">
+        {{ editingCategory() ? 'Save category' : 'Add category' }}
+      </button>
+      @if (editingCategory()) {
+        <button type="button" (click)="cancelEdit()">Cancel</button>
+      }
+    </div>
+  </form>
+
+  @if (categoriesService.error()) {
+    <p class="category-manager__error" role="alert">
+      {{ categoriesService.error() }}
+    </p>
+  }
+
+  @if (categoriesService.categories().length > 0) {
+    <ul>
+      @for (category of categoriesService.categories(); track category.id) {
+        <li>
+          <span>
+            @if (category.icon) {
+              <span aria-hidden="true">{{ category.icon }}</span>
+            }
+            {{ category.name }}
+          </span>
+          <div>
+            <button
+              type="button"
+              [disabled]="pendingCategoryId() !== null"
+              (click)="startEdit(category)"
+            >
+              Edit
+            </button>
+            <button
+              class="category-manager__delete"
+              type="button"
+              [disabled]="pendingCategoryId() !== null"
+              (click)="delete(category)"
+            >
+              Delete
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="category-manager__empty">No custom categories yet.</p>
+  }
+</section>

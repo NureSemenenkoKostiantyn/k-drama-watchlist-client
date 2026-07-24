@@ -1,0 +1,32 @@
+<section class="category-picker" aria-label="Categories">
+  @if (categories().length > 0) {
+    <div class="category-picker__options">
+      @for (category of categories(); track category.id) {
+        <label>
+          <input
+            type="checkbox"
+            [checked]="selectedIds().has(category.id)"
+            [disabled]="isSaving()"
+            (change)="toggle(category.id, $event)"
+          />
+          <span>
+            @if (category.icon) {
+              <span aria-hidden="true">{{ category.icon }}</span>
+            }
+            {{ category.name }}
+          </span>
+        </label>
+      }
+    </div>
+    <div class="category-picker__footer">
+      <button type="button" [disabled]="isSaving()" (click)="save()">
+        Save categories
+      </button>
+      @if (saved()) {
+        <span role="status">Saved</span>
+      }
+    </div>
+  } @else {
+    <p>Create a category to organize this title.</p>
+  }
+</section>

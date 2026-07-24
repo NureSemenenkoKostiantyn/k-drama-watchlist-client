@@ -13,6 +13,8 @@ import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { readApiErrorMessage } from '../../../../core/api/api-error';
+import { EntryCategoryPicker } from '../../../categories/components/entry-category-picker/entry-category-picker';
+import { CategoriesService } from '../../../categories/data-access/categories.service';
 import { ProgressControls } from '../../../library/components/progress-controls/progress-controls';
 import { LibraryService } from '../../../library/data-access/library.service';
 import {
@@ -25,7 +27,12 @@ import { MediaDetails, MediaType } from '../../models/media';
 
 @Component({
   selector: 'app-media-details-page',
-  imports: [ReactiveFormsModule, RouterLink, ProgressControls],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    EntryCategoryPicker,
+    ProgressControls,
+  ],
   templateUrl: './media-details-page.html',
   styleUrl: './media-details-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,6 +43,7 @@ export class MediaDetailsPage implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private syncedEntryId: string | null = null;
   protected readonly library = inject(LibraryService);
+  protected readonly categories = inject(CategoriesService);
 
   protected readonly media = signal<MediaDetails | null>(null);
   protected readonly isLoading = signal(true);
@@ -80,6 +88,7 @@ export class MediaDetailsPage implements OnInit {
   ngOnInit(): void {
     void this.loadDetails();
     void this.library.load();
+    void this.categories.load();
   }
 
   protected displayYear(): string | null {

@@ -128,6 +128,14 @@
             <app-progress-controls [entry]="entry" />
           }
 
+          <div class="tracking__categories">
+            <h3>Categories</h3>
+            <app-entry-category-picker
+              [entry]="entry"
+              [categories]="categories.categories()"
+            />
+          </div>
+
           <div class="tracking__forms">
             <form [formGroup]="personalForm" (ngSubmit)="savePersonalDetails()">
               <h3>Rating and description</h3>

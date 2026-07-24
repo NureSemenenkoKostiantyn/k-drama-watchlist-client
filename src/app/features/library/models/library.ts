@@ -29,6 +29,7 @@ export interface LibraryEntry {
   mediaId: string;
   status: WatchStatus;
   media: MediaDetails;
+  categoryIds: string[];
   progress?: LibraryProgress;
   rating?: number;
   description?: string;

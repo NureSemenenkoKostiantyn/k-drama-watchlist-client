@@ -137,6 +137,33 @@ export class LibraryService {
     );
   }
 
+  updateCategories(
+    entryId: string,
+    categoryIds: string[],
+  ): Promise<LibraryEntry | null> {
+    return this.updateEntry(
+      entryId,
+      null,
+      { categoryIds },
+      'The categories could not be assigned. Please try again.',
+    );
+  }
+
+  removeCategoryReference(categoryId: string): void {
+    this.entriesState.update((entries) =>
+      entries.map((entry) =>
+        entry.categoryIds.includes(categoryId)
+          ? {
+              ...entry,
+              categoryIds: entry.categoryIds.filter(
+                (candidate) => candidate !== categoryId,
+              ),
+            }
+          : entry,
+      ),
+    );
+  }
+
   updatePlaybackPreference(
     entryId: string,
     preference: UpdatePlaybackPreferenceRequest,
