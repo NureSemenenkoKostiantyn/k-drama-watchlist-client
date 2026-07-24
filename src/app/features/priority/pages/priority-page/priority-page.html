@@ -1,0 +1,290 @@
+<section class="priority-page" aria-labelledby="priority-title">
+  <header class="priority-page__header">
+    <div>
+      <p>Your to-watch queue</p>
+      <h1 id="priority-title">Priority board</h1>
+    </div>
+    <a routerLink="/library/to-watch">View to-watch library</a>
+  </header>
+
+  <form class="priority-page__create" [formGroup]="createForm" (ngSubmit)="createLane()">
+    <label>
+      <span>New lane name</span>
+      <input maxlength="100" placeholder="e.g. Watch tonight" formControlName="name" />
+    </label>
+    <button type="submit" [disabled]="isInteractionLocked()">Add lane</button>
+  </form>
+
+  @if (priority.error()) {
+    <p class="priority-page__error" role="alert">{{ priority.error() }}</p>
+  }
+  @if (randomPick()) {
+    <p class="priority-page__pick" role="status">{{ randomPick() }}</p>
+  }
+  @if (caseOpening(); as opening) {
+    <section
+      class="case-opening"
+      aria-labelledby="case-opening-title"
+      [attr.aria-busy]="opening.phase !== 'complete'"
+    >
+      <header>
+        <div>
+          <p>Random pick</p>
+          <h2 id="case-opening-title">{{ opening.laneName }}</h2>
+        </div>
+        @if (opening.phase === 'complete') {
+          <button
+            class="priority-lane__icon-button"
+            type="button"
+            title="Close"
+            aria-label="Close random selection"
+            (click)="closeCaseOpening()"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 6l12 12M18 6 6 18" />
+            </svg>
+          </button>
+        } @else {
+          <button
+            class="case-opening__skip"
+            type="button"
+            (click)="finishCaseOpening()"
+          >
+            Skip animation
+          </button>
+        }
+      </header>
+
+      <div class="case-opening__viewport" aria-hidden="true">
+        <div class="case-opening__marker"></div>
+        <div
+          class="case-opening__track"
+          [class.case-opening__track--spinning]="opening.phase === 'spinning'"
+          [style.transform]="
+            'translate3d(' + caseOpeningOffset() + 'px, 0, 0)'
+          "
+        >
+          @for (item of opening.items; track item.key) {
+            <article
+              class="case-opening__card"
+              [class.case-opening__card--winner]="
+                opening.phase === 'complete' && item.isWinner
+              "
+            >
+              @if (item.entry.media.posterUrl) {
+                <img [src]="item.entry.media.posterUrl" alt="" />
+              } @else {
+                <div class="case-opening__placeholder">
+                  {{ item.entry.media.title.slice(0, 1) }}
+                </div>
+              }
+              <span>{{ item.entry.media.title }}</span>
+            </article>
+          }
+        </div>
+      </div>
+
+      <p class="case-opening__status">
+        @if (opening.phase === 'complete') {
+          Selected <strong>{{ opening.winner.media.title }}</strong>
+        } @else {
+          Opening…
+        }
+      </p>
+    </section>
+  }
+
+  @if (priority.isLoading() || library.isLoading()) {
+    <div class="priority-page__state" role="status">Loading priority board…</div>
+  } @else {
+    <section class="unassigned" aria-labelledby="unassigned-title">
+      <div>
+        <h2 id="unassigned-title">Unassigned</h2>
+        <span>{{ unassigned().length }} titles</span>
+      </div>
+      <div
+        class="priority-items"
+        cdkDropList
+        id="unassigned-priority-items"
+        [cdkDropListData]="unassigned()"
+        [cdkDropListConnectedTo]="itemDropListIds()"
+        (cdkDropListDropped)="dropItem($event)"
+      >
+        @for (entry of unassigned(); track entry.id) {
+          <article
+            class="priority-item"
+            cdkDrag
+            [cdkDragDisabled]="isCaseOpening()"
+          >
+            <a [routerLink]="['/media', entry.media.mediaType, entry.media.tmdbId]">
+              {{ entry.media.title }}
+            </a>
+          </article>
+        } @empty {
+          <p class="priority-items__empty">Drag a title here to remove its priority.</p>
+        }
+      </div>
+    </section>
+
+    <div
+      class="priority-board"
+      cdkDropList
+      cdkDropListOrientation="horizontal"
+      [cdkDropListData]="laneViews()"
+      (cdkDropListDropped)="dropLane($event)"
+    >
+      @for (view of laneViews(); track view.lane.id) {
+        <section
+          class="priority-lane"
+          cdkDrag
+          [cdkDragDisabled]="isCaseOpening()"
+        >
+          <header>
+            @if (editingLaneId() === view.lane.id) {
+              <form
+                [formGroup]="renameForm"
+                (ngSubmit)="renameLane()"
+                (pointerdown)="$event.stopPropagation()"
+              >
+                <input maxlength="100" formControlName="name" aria-label="Lane name" />
+                <button
+                  class="priority-lane__icon-button"
+                  type="submit"
+                  title="Save"
+                  aria-label="Save lane name"
+                  [disabled]="isInteractionLocked()"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m5 12 4 4L19 6" />
+                  </svg>
+                </button>
+                <button
+                  class="priority-lane__icon-button"
+                  type="button"
+                  title="Cancel"
+                  aria-label="Cancel lane rename"
+                  (click)="cancelRename()"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M6 6l12 12M18 6 6 18" />
+                  </svg>
+                </button>
+              </form>
+            } @else {
+              <div>
+                <h2>{{ view.lane.name }}</h2>
+                <span>{{ view.items.length }} titles</span>
+              </div>
+              <div
+                class="priority-lane__actions"
+                (pointerdown)="$event.stopPropagation()"
+              >
+                @if (pendingDeleteLaneId() === view.lane.id) {
+                  <div
+                    class="priority-lane__delete-confirmation"
+                    role="group"
+                    [attr.aria-label]="'Confirm deletion of ' + view.lane.name"
+                  >
+                    <span>Delete this lane?</span>
+                    <button
+                      class="priority-lane__icon-button"
+                      type="button"
+                      title="Confirm deletion"
+                      aria-label="Confirm lane deletion"
+                      [disabled]="isInteractionLocked()"
+                      (click)="deleteLane(view.lane.id)"
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="m5 12 4 4L19 6" />
+                      </svg>
+                    </button>
+                    <button
+                      class="priority-lane__icon-button"
+                      type="button"
+                      title="Cancel deletion"
+                      aria-label="Cancel lane deletion"
+                      [disabled]="isInteractionLocked()"
+                      (click)="cancelDelete()"
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 6l12 12M18 6 6 18" />
+                      </svg>
+                    </button>
+                  </div>
+                } @else {
+                  <button
+                    class="priority-lane__icon-button"
+                    type="button"
+                    title="Pick a random title"
+                    aria-label="Pick a random title"
+                    [disabled]="isInteractionLocked()"
+                    (click)="pickRandom(view)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <rect x="4" y="4" width="16" height="16" rx="3" />
+                      <path d="M8 8h.01M12 12h.01M16 16h.01M16 8h.01M8 16h.01" />
+                    </svg>
+                  </button>
+                  <button
+                    class="priority-lane__icon-button"
+                    type="button"
+                    title="Rename lane"
+                    aria-label="Rename lane"
+                    [disabled]="isInteractionLocked()"
+                    (click)="startRename(view.lane)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m14 5 5 5M4 20l4.5-1L19 8.5 14.5 4 5 13.5z" />
+                    </svg>
+                  </button>
+                  <button
+                    class="priority-lane__icon-button"
+                    type="button"
+                    title="Delete lane"
+                    aria-label="Delete lane"
+                    [disabled]="isInteractionLocked()"
+                    (click)="requestDelete(view.lane.id)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" />
+                    </svg>
+                  </button>
+                }
+              </div>
+            }
+          </header>
+
+          <div
+            class="priority-items priority-items--lane"
+            cdkDropList
+            [id]="laneListId(view.lane.id)"
+            [cdkDropListData]="view.items"
+            [cdkDropListConnectedTo]="itemDropListIds()"
+            (cdkDropListDropped)="dropItem($event)"
+          >
+            @for (entry of view.items; track entry.id) {
+              <article
+                class="priority-item"
+                cdkDrag
+                [cdkDragDisabled]="isCaseOpening()"
+                (pointerdown)="$event.stopPropagation()"
+              >
+                @if (entry.media.posterUrl) {
+                  <img [src]="entry.media.posterUrl" [alt]="entry.media.title + ' poster'" />
+                }
+                <div>
+                  <a [routerLink]="['/media', entry.media.mediaType, entry.media.tmdbId]">
+                    {{ entry.media.title }}
+                  </a>
+                  <span>{{ entry.media.mediaType === 'tv' ? 'TV series' : 'Movie' }}</span>
+                </div>
+              </article>
+            } @empty {
+              <p class="priority-items__empty">Drop to-watch titles here.</p>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  }
+</section>

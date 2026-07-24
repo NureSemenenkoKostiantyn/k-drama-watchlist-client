@@ -82,6 +82,15 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'priority',
+    title: 'Priority board · Drama Watch',
+    canActivate: [profileCompleteGuard],
+    loadComponent: () =>
+      import('./features/priority/pages/priority-page/priority-page').then(
+        ({ PriorityPage }) => PriorityPage,
+      ),
+  },
+  {
     path: '',
     title: 'Drama Watch',
     canActivate: [profileCompleteGuard],
