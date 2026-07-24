@@ -47,6 +47,9 @@
             @if (entry.media.originalTitle !== entry.media.title) {
               <span class="library-card__original-title">{{ entry.media.originalTitle }}</span>
             }
+            @if (entry.media.mediaType === 'tv' && entry.status === 'watching') {
+              <app-progress-controls [entry]="entry" />
+            }
             <div class="library-card__controls">
               <label>
                 <span>Status</span>

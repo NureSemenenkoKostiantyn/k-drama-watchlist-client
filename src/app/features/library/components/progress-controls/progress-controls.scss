@@ -1,0 +1,135 @@
+:host {
+  display: block;
+}
+
+.progress {
+  padding: 1rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 1rem;
+  background: rgb(255 255 255 / 3%);
+}
+
+.progress__heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: start;
+}
+
+.progress__heading p,
+.progress__heading h2,
+.progress__count {
+  margin: 0;
+}
+
+.progress__heading p {
+  color: var(--color-accent-strong);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.progress__heading h2 {
+  margin-top: 0.25rem;
+  font-size: 1.125rem;
+}
+
+.progress__heading strong {
+  color: var(--color-accent-strong);
+}
+
+.progress__bar {
+  height: 0.375rem;
+  margin-top: 0.875rem;
+  overflow: hidden;
+  border-radius: 999rem;
+  background: rgb(255 255 255 / 10%);
+}
+
+.progress__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-accent);
+}
+
+.progress__count {
+  margin-top: 0.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+.progress__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.progress button,
+.progress input {
+  min-height: 2.25rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 0.625rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.progress button {
+  padding: 0 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.progress button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.progress__undo {
+  color: var(--color-accent-strong);
+}
+
+.progress details {
+  margin-top: 1rem;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}
+
+.progress summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.progress form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.progress form label:not(.progress__checkbox) {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.progress form input[type='number'] {
+  width: 100%;
+  padding: 0 0.625rem;
+}
+
+.progress__checkbox {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.progress__checkbox input {
+  min-height: auto;
+}
+
+.progress form button {
+  justify-self: start;
+}

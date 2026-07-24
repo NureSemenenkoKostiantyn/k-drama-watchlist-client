@@ -5,7 +5,13 @@ import { firstValueFrom } from 'rxjs';
 import { readApiErrorMessage } from '../../../core/api/api-error';
 import { environment } from '../../../../environments/environment';
 import { MediaType } from '../../search/models/media';
-import { AddLibraryEntryRequest, LibraryEntry, WatchStatus } from '../models/library';
+import {
+  AddLibraryEntryRequest,
+  LibraryEntry,
+  UpdatePlaybackPreferenceRequest,
+  UpdateProgressRequest,
+  WatchStatus,
+} from '../models/library';
 
 @Injectable({ providedIn: 'root' })
 export class LibraryService {
@@ -98,8 +104,77 @@ export class LibraryService {
     }
   }
 
+  updateProgress(
+    entryId: string,
+    progress: UpdateProgressRequest,
+  ): Promise<LibraryEntry | null> {
+    return this.updateEntry(
+      entryId,
+      'progress',
+      progress,
+      'Your progress could not be updated. Please try again.',
+    );
+  }
+
+  updateRating(entryId: string, rating: number | null): Promise<LibraryEntry | null> {
+    return this.updateEntry(
+      entryId,
+      'rating',
+      { rating },
+      'Your rating could not be updated. Please try again.',
+    );
+  }
+
+  updateDescription(
+    entryId: string,
+    description: string | null,
+  ): Promise<LibraryEntry | null> {
+    return this.updateEntry(
+      entryId,
+      null,
+      { description },
+      'Your description could not be updated. Please try again.',
+    );
+  }
+
+  updatePlaybackPreference(
+    entryId: string,
+    preference: UpdatePlaybackPreferenceRequest,
+  ): Promise<LibraryEntry | null> {
+    return this.updateEntry(
+      entryId,
+      'playback-preference',
+      preference,
+      'Your playback preference could not be updated. Please try again.',
+    );
+  }
+
   clearError(): void {
     this.errorState.set(null);
+  }
+
+  private async updateEntry(
+    entryId: string,
+    endpoint: string | null,
+    body: unknown,
+    fallbackMessage: string,
+  ): Promise<LibraryEntry | null> {
+    this.errorState.set(null);
+    const suffix = endpoint === null ? '' : `/${endpoint}`;
+
+    try {
+      const entry = await firstValueFrom(
+        this.http.patch<LibraryEntry>(
+          `${environment.apiBaseUrl}/library/${entryId}${suffix}`,
+          body,
+        ),
+      );
+      this.upsertEntry(entry);
+      return entry;
+    } catch (error: unknown) {
+      this.errorState.set(readApiErrorMessage(error, fallbackMessage));
+      return null;
+    }
   }
 
   private upsertEntry(entry: LibraryEntry): void {

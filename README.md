@@ -20,7 +20,9 @@ filter. The browser receives normalized media data and image URLs, never the TMD
 The personal library slice adds protected status views at `/library/to-watch`, `/library/watching`,
 and `/library/watched`. Search results and media details provide quick status actions backed by the
 owner-scoped library API. The client receives one shared media snapshot inside each personal entry;
-it does not store or submit user IDs.
+it does not store or submit user IDs. TV entries provide episode increment/decrement, season
+completion, manual correction, and one-step client undo. Media details also support half-point
+ratings, private descriptions, and optional audio and subtitle preferences.
 
 ## Requirements
 
@@ -104,8 +106,10 @@ Personal library code is organized under:
 
 ```text
 src/app/features/library/data-access/
+src/app/features/library/components/
 src/app/features/library/models/
 src/app/features/library/pages/
+src/app/features/library/utils/
 ```
 
 Anonymous users are redirected to `/login`. New accounts continue to `/onboarding` until they have

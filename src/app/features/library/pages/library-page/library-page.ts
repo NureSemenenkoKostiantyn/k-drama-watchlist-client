@@ -8,12 +8,13 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
 
+import { ProgressControls } from '../../components/progress-controls/progress-controls';
 import { LibraryService } from '../../data-access/library.service';
 import { LibraryEntry, WatchStatus } from '../../models/library';
 
 @Component({
   selector: 'app-library-page',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, ProgressControls],
   templateUrl: './library-page.html',
   styleUrl: './library-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
