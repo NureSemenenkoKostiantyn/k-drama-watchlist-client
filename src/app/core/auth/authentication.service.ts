@@ -28,10 +28,14 @@ export class AuthenticationService {
   private readonly sessionState = signal<AuthSession | null>(null);
   private readonly pendingState = signal(false);
   private readonly errorState = signal<string | null>(null);
+  private readonly verificationEmailState = signal<string | null>(null);
+  private readonly emailVerificationRequiredState = signal(false);
 
   readonly session = this.sessionState.asReadonly();
   readonly isPending = this.pendingState.asReadonly();
   readonly error = this.errorState.asReadonly();
+  readonly verificationEmail = this.verificationEmailState.asReadonly();
+  readonly emailVerificationRequired = this.emailVerificationRequiredState.asReadonly();
   readonly isAuthenticated = computed(() => this.sessionState() !== null);
   readonly needsOnboarding = computed(
     () => this.sessionState() !== null && !this.sessionState()?.user.username,
@@ -57,13 +61,17 @@ export class AuthenticationService {
 
   async register(credentials: RegisterCredentials): Promise<boolean> {
     return this.runOperation(async () => {
-      const response = await this.client.signUp.email(credentials);
+      const response = await this.client.signUp.email({
+        ...credentials,
+        callbackURL: applicationUrl('/onboarding'),
+      });
 
       if (response.error) {
         throw response.error;
       }
 
-      await this.loadSession();
+      this.sessionState.set(null);
+      this.verificationEmailState.set(credentials.email);
     });
   }
 
@@ -75,10 +83,62 @@ export class AuthenticationService {
       });
 
       if (response.error) {
+        if (isEmailVerificationError(response.error)) {
+          this.emailVerificationRequiredState.set(true);
+          this.verificationEmailState.set(credentials.email);
+        }
+
         throw response.error;
       }
 
       await this.loadSession();
+    });
+  }
+
+  async sendVerificationEmail(email: string): Promise<boolean> {
+    return this.runOperation(async () => {
+      const response = await this.client.sendVerificationEmail({
+        email,
+        callbackURL: applicationUrl('/onboarding'),
+      });
+
+      if (response.error) {
+        throw response.error;
+      }
+
+      this.verificationEmailState.set(email);
+      this.emailVerificationRequiredState.set(false);
+    });
+  }
+
+  async requestPasswordReset(email: string): Promise<boolean> {
+    return this.runOperation(async () => {
+      const response = await this.client.requestPasswordReset({
+        email,
+        redirectTo: applicationUrl('/reset-password'),
+      });
+
+      if (response.error) {
+        throw response.error;
+      }
+    });
+  }
+
+  async resetPassword(
+    newPassword: string,
+    token: string,
+  ): Promise<boolean> {
+    return this.runOperation(async () => {
+      const response = await this.client.resetPassword({
+        newPassword,
+        token,
+      });
+
+      if (response.error) {
+        throw response.error;
+      }
+
+      this.sessionState.set(null);
     });
   }
 
@@ -108,6 +168,7 @@ export class AuthenticationService {
 
   clearError(): void {
     this.errorState.set(null);
+    this.emailVerificationRequiredState.set(false);
   }
 
   private async runOperation(operation: () => Promise<void>): Promise<boolean> {
@@ -137,6 +198,14 @@ export class AuthenticationService {
 }
 
 function readErrorMessage(error: unknown): string {
+  if (isEmailVerificationError(error)) {
+    return 'Verify your email before logging in.';
+  }
+
+  if (readErrorCode(error) === 'INVALID_TOKEN') {
+    return 'This link is invalid or has expired. Request a new one.';
+  }
+
   if (
     typeof error === 'object' &&
     error !== null &&
@@ -147,4 +216,30 @@ function readErrorMessage(error: unknown): string {
   }
 
   return 'Authentication could not be completed. Please try again.';
+}
+
+function isEmailVerificationError(error: unknown): boolean {
+  const code = readErrorCode(error);
+
+  return (
+    code === 'EMAIL_NOT_VERIFIED' ||
+    (typeof code === 'string' && code.includes('EMAIL_NOT_VERIFIED'))
+  );
+}
+
+function readErrorCode(error: unknown): string | null {
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    typeof error.code === 'string'
+  ) {
+    return error.code;
+  }
+
+  return null;
+}
+
+function applicationUrl(path: string): string {
+  return new URL(path, globalThis.location.origin).toString();
 }

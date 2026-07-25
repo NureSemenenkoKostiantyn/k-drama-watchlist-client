@@ -91,6 +91,30 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'verify-email',
+    title: 'Verify email - Drama Watch',
+    loadComponent: () =>
+      import('./features/auth/pages/verify-email-page/verify-email-page').then(
+        ({ VerifyEmailPage }) => VerifyEmailPage,
+      ),
+  },
+  {
+    path: 'forgot-password',
+    title: 'Forgot password - Drama Watch',
+    loadComponent: () =>
+      import('./features/auth/pages/forgot-password-page/forgot-password-page').then(
+        ({ ForgotPasswordPage }) => ForgotPasswordPage,
+      ),
+  },
+  {
+    path: 'reset-password',
+    title: 'Reset password - Drama Watch',
+    loadComponent: () =>
+      import('./features/auth/pages/reset-password-page/reset-password-page').then(
+        ({ ResetPasswordPage }) => ResetPasswordPage,
+      ),
+  },
+  {
     path: 'wheels',
     title: 'Wheels · Drama Watch',
     canActivate: [profileCompleteGuard],

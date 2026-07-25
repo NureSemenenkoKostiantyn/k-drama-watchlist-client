@@ -1,0 +1,48 @@
+<section class="auth-page" aria-labelledby="verify-email-title">
+  <div class="auth-page__intro">
+    <p class="auth-page__eyebrow">One quick check</p>
+    <h1 id="verify-email-title">Confirm where we should reach you.</h1>
+    <p class="auth-page__summary">
+      Verification keeps your watchlist private and gives you a safe way back into your account.
+    </p>
+  </div>
+
+  <div class="auth-card">
+    <h2>Check your inbox</h2>
+    <p class="auth-card__lead">
+      Follow the link in the email to verify your account. The link expires after one hour.
+    </p>
+
+    @if (sent()) {
+      <p class="auth-card__success" role="status">
+        If the address can receive a verification email, a new link is on its way.
+      </p>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="field">
+        <label for="verification-email">Email</label>
+        <input
+          id="verification-email"
+          type="email"
+          autocomplete="email"
+          formControlName="email"
+          [attr.aria-invalid]="form.controls.email.invalid && form.controls.email.touched"
+        />
+        @if (form.controls.email.invalid && form.controls.email.touched) {
+          <p class="field__error">Enter a valid email address.</p>
+        }
+      </div>
+
+      @if (authentication.error(); as error) {
+        <p class="auth-card__error" role="alert">{{ error }}</p>
+      }
+
+      <button type="submit" [disabled]="authentication.isPending()">
+        {{ authentication.isPending() ? 'Sending…' : 'Resend verification email' }}
+      </button>
+    </form>
+
+    <p class="auth-card__footer">Already verified? <a routerLink="/login">Log in</a></p>
+  </div>
+</section>

@@ -1,25 +1,26 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 
 import { AuthenticationService } from '../../../../core/auth/authentication.service';
 
 @Component({
-  selector: 'app-register-page',
+  selector: 'app-verify-email-page',
   imports: [ReactiveFormsModule, RouterLink],
-  templateUrl: './register-page.html',
+  templateUrl: './verify-email-page.html',
   styleUrl: '../../auth-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RegisterPage {
+export class VerifyEmailPage {
   protected readonly authentication = inject(AuthenticationService);
   private readonly formBuilder = inject(FormBuilder);
-  private readonly router = inject(Router);
 
+  protected readonly sent = signal(Boolean(this.authentication.verificationEmail()));
   protected readonly form = this.formBuilder.nonNullable.group({
-    name: ['', [Validators.required, Validators.maxLength(100)]],
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(128)]],
+    email: [
+      this.authentication.verificationEmail() ?? '',
+      [Validators.required, Validators.email],
+    ],
   });
 
   protected async submit(): Promise<void> {
@@ -30,10 +31,12 @@ export class RegisterPage {
       return;
     }
 
-    const succeeded = await this.authentication.register(this.form.getRawValue());
+    const succeeded = await this.authentication.sendVerificationEmail(
+      this.form.getRawValue().email,
+    );
 
     if (succeeded) {
-      await this.router.navigate(['/verify-email']);
+      this.sent.set(true);
     }
   }
 }
