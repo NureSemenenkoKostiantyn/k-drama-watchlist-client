@@ -30,9 +30,14 @@ pages can be filtered by one category. Category assignment always sends category
 verified by the API.
 
 The protected `/priority` route provides an Angular CDK drag-and-drop board. Users can create,
-rename, delete, collapse, and reorder lanes; reorder titles within a lane; move titles between
-lanes or back to unassigned; and randomly pick from one lane. Only `to_watch` entries appear on the
-board, and each affected lane sends its complete ordered item ID array to the API.
+rename, delete, and reorder lanes; reorder titles within a lane; move titles between lanes or back
+to unassigned; and randomly pick from one lane. Only `to_watch` entries appear on the board, and
+every drag sends all affected lane orders in one API request.
+
+Private wheels are available at `/wheels` and `/wheels/:wheelId`. Users can create wheels, add
+library titles, reorder or disable candidates, adjust weights, avoid the immediately previous
+winner, and review or reset spin history. The backend selects the winner first; the Angular wheel
+then animates to that exact result and respects reduced-motion preferences.
 
 ## Requirements
 
@@ -74,15 +79,10 @@ npm run lint
 npm run typecheck
 npm test
 npm run build
-npm run test:e2e
 ```
 
-Unit and component tests run with Vitest through Angular's test builder. End-to-end tests run with
-Playwright against a real development server. Install its Chromium browser once on a new machine:
-
-```bash
-npx playwright install chromium
-```
+Unit and component tests run with Vitest through Angular's test builder. Browser end-to-end
+automation is intentionally deferred.
 
 ## Project organization
 
@@ -140,6 +140,14 @@ src/app/features/priority/pages/
 
 The priority board supports whole-card and whole-lane drag interactions. Random lane picks use a
 preselected-winner case-opening reel that can be skipped and respects reduced-motion preferences.
+
+Private-wheel code is organized under:
+
+```text
+src/app/features/wheels/data-access/
+src/app/features/wheels/models/
+src/app/features/wheels/pages/
+```
 
 Anonymous users are redirected to `/login`. New accounts continue to `/onboarding` until they have
 a unique username. Browser requests use same-origin `/api/auth/*` routes through the Angular proxy;

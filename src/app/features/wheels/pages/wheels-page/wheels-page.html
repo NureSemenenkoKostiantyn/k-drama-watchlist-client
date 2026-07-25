@@ -1,0 +1,86 @@
+<section class="wheels-page" aria-labelledby="wheels-title">
+  <header class="wheels-page__header">
+    <div>
+      <p>Let chance decide</p>
+      <h1 id="wheels-title">Your wheels</h1>
+      <span>Build weighted shortlists and let the server choose the winner.</span>
+    </div>
+  </header>
+
+  <form class="wheel-create" [formGroup]="createForm" (ngSubmit)="createWheel()">
+    <div class="wheel-create__heading">
+      <p>New wheel</p>
+      <h2>Create a shortlist</h2>
+    </div>
+
+    <label>
+      <span>Name</span>
+      <input
+        formControlName="title"
+        maxlength="100"
+        placeholder="Friday night picks"
+      />
+    </label>
+
+    <label>
+      <span>Description <small>optional</small></span>
+      <textarea
+        formControlName="description"
+        maxlength="1000"
+        rows="3"
+        placeholder="What kind of mood is this wheel for?"
+      ></textarea>
+    </label>
+
+    <label>
+      <span>Selection style</span>
+      <select formControlName="selectionMode">
+        <option value="fully_random">Fully random</option>
+        <option value="avoid_recent_winners">Avoid the last winner</option>
+      </select>
+    </label>
+
+    <button type="submit" [disabled]="isSaving()">
+      {{ isSaving() ? 'Creating…' : 'Create wheel' }}
+    </button>
+  </form>
+
+  @if (wheels.error()) {
+    <p class="wheels-page__error" role="alert">{{ wheels.error() }}</p>
+  }
+
+  @if (wheels.isLoading()) {
+    <div class="wheels-page__state" role="status">Loading your wheels…</div>
+  } @else {
+    <section class="wheel-grid" aria-label="Private wheels">
+      @for (wheel of wheels.wheels(); track wheel.id) {
+        <a class="wheel-card" [routerLink]="['/wheels', wheel.id]">
+          <div
+            class="wheel-card__disc"
+            [class.wheel-card__disc--active]="wheel.enabledItemCount > 0"
+            aria-hidden="true"
+          >
+            <span></span>
+          </div>
+          <div>
+            <p>
+              {{ wheel.selectionMode === 'fully_random' ? 'Fully random' : 'No immediate repeats' }}
+            </p>
+            <h2>{{ wheel.title }}</h2>
+            @if (wheel.description) {
+              <span>{{ wheel.description }}</span>
+            }
+            <strong>
+              {{ wheel.enabledItemCount }} enabled · {{ wheel.itemCount }} total
+            </strong>
+          </div>
+        </a>
+      } @empty {
+        <div class="wheels-page__state">
+          Your first wheel starts here. Give it a name, then add titles from your
+          library.
+        </div>
+      }
+    </section>
+  }
+</section>
