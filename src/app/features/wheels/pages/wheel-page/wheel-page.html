@@ -1,0 +1,360 @@
+<section class="wheel-page" aria-labelledby="wheel-title">
+  <a class="wheel-page__back" routerLink="/wheels">← All wheels</a>
+
+  @if (wheels.error()) {
+    <p class="wheel-page__error" role="alert">{{ wheels.error() }}</p>
+  }
+
+  @if (wheels.isLoading() && !wheel()) {
+    <div class="wheel-page__state" role="status">Loading wheel…</div>
+  } @else if (wheel(); as currentWheel) {
+    <header class="wheel-page__header">
+      <div>
+        <p>Private wheel</p>
+        <h1 id="wheel-title">{{ currentWheel.title }}</h1>
+        @if (currentWheel.description) {
+          <span>{{ currentWheel.description }}</span>
+        }
+      </div>
+      <strong>
+        {{ currentWheel.enabledItemCount }} enabled ·
+        {{ currentWheel.itemCount }} total
+      </strong>
+    </header>
+
+    <div class="wheel-workspace">
+      <section class="wheel-stage" aria-labelledby="spin-title">
+        <div class="wheel-stage__heading">
+          <div>
+            <p>Server-selected result</p>
+            <h2 id="spin-title">Spin the wheel</h2>
+          </div>
+          @if (isSpinning()) {
+            <button type="button" class="wheel-stage__skip" (click)="finishSpin()">
+              Skip animation
+            </button>
+          }
+        </div>
+
+        <div class="wheel-stage__machine">
+          <div class="wheel-stage__pointer" aria-hidden="true"></div>
+          <div
+            class="wheel-stage__disc"
+            [class.wheel-stage__disc--spinning]="isSpinning()"
+            [style.background]="wheelBackground()"
+            [style.transform]="'rotate(' + wheelRotation() + 'deg)'"
+            aria-hidden="true"
+          >
+            <div class="wheel-stage__hub"></div>
+          </div>
+        </div>
+
+        <button
+          class="wheel-stage__spin"
+          type="button"
+          [disabled]="
+            currentWheel.enabledItemCount === 0 ||
+            isSpinning() ||
+            isSaving()
+          "
+          (click)="spin()"
+        >
+          @if (isSpinning()) {
+            Spinning…
+          } @else if (currentWheel.enabledItemCount === 0) {
+            Enable a title first
+          } @else {
+            Spin
+          }
+        </button>
+
+        <ol class="wheel-legend" aria-label="Enabled wheel candidates">
+          @for (item of enabledItems(); track item.id; let index = $index) {
+            <li>
+              <span
+                class="wheel-legend__swatch"
+                [style.background]="segmentColor(index)"
+                aria-hidden="true"
+              ></span>
+              <span>{{ item.media.title }}</span>
+              <strong>×{{ item.weight }}</strong>
+            </li>
+          } @empty {
+            <li class="wheel-legend__empty">
+              Add and enable titles to make this wheel spin.
+            </li>
+          }
+        </ol>
+      </section>
+
+      <aside class="wheel-controls" aria-label="Wheel settings and titles">
+        <form
+          class="wheel-settings"
+          [formGroup]="settingsForm"
+          (ngSubmit)="saveSettings()"
+        >
+          <div>
+            <p>Wheel settings</p>
+            <h2>Details</h2>
+          </div>
+          <label>
+            <span>Name</span>
+            <input formControlName="title" maxlength="100" />
+          </label>
+          <label>
+            <span>Description</span>
+            <textarea formControlName="description" maxlength="1000" rows="3"></textarea>
+          </label>
+          <label>
+            <span>Selection style</span>
+            <select formControlName="selectionMode">
+              <option value="fully_random">Fully random</option>
+              <option value="avoid_recent_winners">Avoid the last winner</option>
+            </select>
+          </label>
+          <button type="submit" [disabled]="isSaving() || isSpinning()">
+            Save settings
+          </button>
+        </form>
+
+        <form
+          class="wheel-add"
+          [formGroup]="addItemForm"
+          (ngSubmit)="addItem()"
+        >
+          <div>
+            <p>Add from library</p>
+            <h2>New candidate</h2>
+          </div>
+          <label>
+            <span>Title</span>
+            <select formControlName="mediaId">
+              <option value="">Choose a title</option>
+              @for (entry of availableEntries(); track entry.id) {
+                <option [value]="entry.mediaId">
+                  {{ entry.media.title }} ·
+                  {{ entry.status === 'to_watch' ? 'To watch' : entry.status === 'watching' ? 'Watching' : 'Watched' }}
+                </option>
+              }
+            </select>
+          </label>
+          <label>
+            <span>Weight</span>
+            <input formControlName="weight" type="number" min="1" max="100" />
+          </label>
+          <button type="submit" [disabled]="isSaving() || isSpinning()">
+            Add title
+          </button>
+          @if (library.entries().length === 0) {
+            <a routerLink="/search">Search for titles to add to your library</a>
+          } @else if (availableEntries().length === 0) {
+            <span>Every library title is already on this wheel.</span>
+          }
+        </form>
+      </aside>
+    </div>
+
+    <section class="wheel-items" aria-labelledby="wheel-items-title">
+      <header>
+        <div>
+          <p>Candidate controls</p>
+          <h2 id="wheel-items-title">Titles</h2>
+        </div>
+        <span>Drag to reorder</span>
+      </header>
+
+      <div
+        class="wheel-items__list"
+        cdkDropList
+        [cdkDropListData]="currentWheel.items"
+        (cdkDropListDropped)="dropItem($event)"
+      >
+        @for (item of currentWheel.items; track item.id) {
+          <article
+            class="wheel-item"
+            [class.wheel-item--disabled]="!item.isEnabled"
+            cdkDrag
+            [cdkDragDisabled]="isSaving() || isSpinning()"
+          >
+            <span class="wheel-item__grip" aria-hidden="true">⠿</span>
+            @if (item.media.posterUrl) {
+              <img [src]="item.media.posterUrl" [alt]="item.media.title + ' poster'" />
+            } @else {
+              <div class="wheel-item__poster" aria-hidden="true">
+                {{ item.media.title.slice(0, 1) }}
+              </div>
+            }
+            <div class="wheel-item__title">
+              <a
+                [routerLink]="[
+                  '/media',
+                  item.media.mediaType,
+                  item.media.tmdbId
+                ]"
+                (pointerdown)="$event.stopPropagation()"
+              >
+                {{ item.media.title }}
+              </a>
+              <span>
+                Selected {{ item.selectionCount }}
+                {{ item.selectionCount === 1 ? 'time' : 'times' }}
+              </span>
+            </div>
+            <label
+              class="wheel-item__weight"
+              (pointerdown)="$event.stopPropagation()"
+            >
+              <span>Weight</span>
+              <input
+                type="number"
+                min="1"
+                max="100"
+                [value]="item.weight"
+                [disabled]="isSaving() || isSpinning()"
+                (change)="updateWeight(item, $event)"
+              />
+            </label>
+            <button
+              type="button"
+              class="wheel-item__toggle"
+              [class.wheel-item__toggle--enabled]="item.isEnabled"
+              [attr.aria-pressed]="item.isEnabled"
+              [disabled]="isSaving() || isSpinning()"
+              (pointerdown)="$event.stopPropagation()"
+              (click)="toggleItem(item)"
+            >
+              {{ item.isEnabled ? 'Enabled' : 'Disabled' }}
+            </button>
+            <button
+              type="button"
+              class="wheel-item__remove"
+              aria-label="Remove title from wheel"
+              title="Remove from wheel"
+              [disabled]="isSaving() || isSpinning()"
+              (pointerdown)="$event.stopPropagation()"
+              (click)="removeItem(item.id)"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13" />
+              </svg>
+            </button>
+          </article>
+        } @empty {
+          <p class="wheel-items__empty">
+            Add a title from your library to create the first segment.
+          </p>
+        }
+      </div>
+    </section>
+
+    <section class="wheel-history" aria-labelledby="wheel-history-title">
+      <header>
+        <div>
+          <p>Previous results</p>
+          <h2 id="wheel-history-title">Spin history</h2>
+        </div>
+        @if (wheels.history().length > 0) {
+          @if (pendingHistoryReset()) {
+            <div class="wheel-history__confirm">
+              <span>Clear all history?</span>
+              <button
+                type="button"
+                [disabled]="isSaving() || isSpinning()"
+                (click)="resetHistory()"
+              >
+                Clear
+              </button>
+              <button type="button" (click)="pendingHistoryReset.set(false)">
+                Cancel
+              </button>
+            </div>
+          } @else {
+            <button
+              type="button"
+              class="wheel-history__reset"
+              [disabled]="isSaving() || isSpinning()"
+              (click)="pendingHistoryReset.set(true)"
+            >
+              Reset history
+            </button>
+          }
+        }
+      </header>
+
+      <ol>
+        @for (spin of wheels.history(); track spin.spinId) {
+          <li>
+            @if (spin.selectedItem.posterUrl) {
+              <img [src]="spin.selectedItem.posterUrl" alt="" />
+            }
+            <div>
+              <strong>{{ spin.selectedItem.title }}</strong>
+              <span>{{ spin.createdAt | date: 'medium' }}</span>
+            </div>
+          </li>
+        } @empty {
+          <li class="wheel-history__empty">No winners yet.</li>
+        }
+      </ol>
+    </section>
+
+    <section class="wheel-danger" aria-labelledby="wheel-danger-title">
+      <div>
+        <p>Danger zone</p>
+        <h2 id="wheel-danger-title">Delete wheel</h2>
+        <span>This removes its candidates and spin history.</span>
+      </div>
+      @if (pendingDelete()) {
+        <div class="wheel-danger__confirm">
+          <strong>Delete “{{ currentWheel.title }}”?</strong>
+          <button
+            type="button"
+            [disabled]="isSaving() || isSpinning()"
+            (click)="deleteWheel()"
+          >
+            Delete permanently
+          </button>
+          <button type="button" (click)="pendingDelete.set(false)">Cancel</button>
+        </div>
+      } @else {
+        <button
+          type="button"
+          [disabled]="isSaving() || isSpinning()"
+          (click)="pendingDelete.set(true)"
+        >
+          Delete wheel
+        </button>
+      }
+    </section>
+  } @else {
+    <div class="wheel-page__state">
+      This wheel could not be found. <a routerLink="/wheels">Return to your wheels.</a>
+    </div>
+  }
+
+  @if (winner(); as completedSpin) {
+    <section class="wheel-winner" role="status" aria-labelledby="wheel-winner-title">
+      <button
+        class="wheel-winner__close"
+        type="button"
+        aria-label="Close winner"
+        (click)="closeWinner()"
+      >
+        ×
+      </button>
+      <p>Tonight’s winner</p>
+      @if (completedSpin.selectedItem.posterUrl) {
+        <img [src]="completedSpin.selectedItem.posterUrl" alt="" />
+      }
+      <h2 id="wheel-winner-title">{{ completedSpin.selectedItem.title }}</h2>
+      <button
+        class="wheel-winner__watch"
+        type="button"
+        [disabled]="isSaving()"
+        (click)="startWinner()"
+      >
+        Start watching
+      </button>
+    </section>
+  }
+</section>

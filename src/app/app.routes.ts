@@ -91,6 +91,24 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'wheels',
+    title: 'Wheels · Drama Watch',
+    canActivate: [profileCompleteGuard],
+    loadComponent: () =>
+      import('./features/wheels/pages/wheels-page/wheels-page').then(
+        ({ WheelsPage }) => WheelsPage,
+      ),
+  },
+  {
+    path: 'wheels/:wheelId',
+    title: 'Wheel · Drama Watch',
+    canActivate: [profileCompleteGuard],
+    loadComponent: () =>
+      import('./features/wheels/pages/wheel-page/wheel-page').then(
+        ({ WheelPage }) => WheelPage,
+      ),
+  },
+  {
     path: '',
     title: 'Drama Watch',
     canActivate: [profileCompleteGuard],
