@@ -8,9 +8,10 @@ routes, Angular `HttpClient` for API access, RxJS for asynchronous streams, and 
 local UI state as features are introduced. Remote data is owned by feature services rather than a
 global state store.
 
-The first authentication slice is implemented with Better Auth's framework-agnostic client. An
-injectable Angular service exposes session state through read-only Signals, route guards protect the
-application by default, and standalone pages provide registration, login, and username onboarding.
+Authentication uses Better Auth's framework-agnostic client. An injectable Angular service exposes
+session state through read-only Signals, route guards protect the application by default, and
+standalone pages provide registration, email verification and resend, login, password recovery,
+password reset, and username onboarding.
 
 The TMDB search slice adds protected `/search` and `/media/:mediaType/:tmdbId` routes. A feature data
 service calls the same-origin NestJS API with Angular `HttpClient`, while Signals own loading, error,
@@ -149,9 +150,12 @@ src/app/features/wheels/models/
 src/app/features/wheels/pages/
 ```
 
-Anonymous users are redirected to `/login`. New accounts continue to `/onboarding` until they have
-a unique username. Browser requests use same-origin `/api/auth/*` routes through the Angular proxy;
-the client never receives the Better Auth secret or MongoDB credentials.
+Anonymous users are redirected to `/login`. New accounts first continue to `/verify-email`; the
+verification link returns them to `/onboarding` to choose a unique username. Login can resend a
+verification message for an unverified account. `/forgot-password` always displays a neutral result
+to avoid revealing whether an account exists, and emailed reset links open `/reset-password`.
+Browser requests use same-origin `/api/auth/*` routes through the Angular proxy; the client never
+receives the Better Auth secret, Resend API key, or MongoDB credentials.
 
 Runtime-independent client configuration lives in `src/environments/environment.ts`. Browser code
 must never contain MongoDB credentials, Better Auth secrets, or the TMDB access token.

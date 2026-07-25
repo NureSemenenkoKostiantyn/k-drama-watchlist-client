@@ -27,7 +27,10 @@
       </div>
 
       <div class="field">
-        <label for="login-password">Password</label>
+        <div class="field__label-row">
+          <label for="login-password">Password</label>
+          <a routerLink="/forgot-password">Forgot password?</a>
+        </div>
         <input
           id="login-password"
           type="password"
@@ -42,6 +45,12 @@
 
       @if (authentication.error(); as error) {
         <p class="auth-card__error" role="alert">{{ error }}</p>
+      }
+
+      @if (authentication.emailVerificationRequired()) {
+        <a class="auth-card__secondary-action" routerLink="/verify-email">
+          Resend verification email
+        </a>
       }
 
       <button type="submit" [disabled]="authentication.isPending()">

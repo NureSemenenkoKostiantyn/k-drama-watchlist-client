@@ -11,6 +11,7 @@ describe('LoginPage', () => {
   const clearError = vi.fn();
   const authentication = {
     clearError,
+    emailVerificationRequired: signal(false),
     error: signal<string | null>(null),
     isPending: signal(false),
     needsOnboarding: signal(false),
@@ -20,6 +21,7 @@ describe('LoginPage', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     authentication.needsOnboarding.set(false);
+    authentication.emailVerificationRequired.set(false);
     signIn.mockResolvedValue(true);
 
     await TestBed.configureTestingModule({

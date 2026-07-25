@@ -81,6 +81,19 @@ form {
   font-weight: 700;
 }
 
+.field__label-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.field__label-row a {
+  color: var(--color-accent-strong);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
 .field input {
   width: 100%;
   min-height: 3rem;
@@ -96,11 +109,20 @@ form {
 }
 
 .field__error,
-.auth-card__error {
+.auth-card__error,
+.auth-card__success {
   margin: 0;
   color: #ffb1c5;
   font-size: 0.8125rem;
   line-height: 1.45;
+}
+
+.auth-card__success {
+  padding: 0.75rem;
+  border: 0.0625rem solid rgb(137 225 187 / 38%);
+  border-radius: 0.75rem;
+  color: #b8f3d5;
+  background: rgb(137 225 187 / 9%);
 }
 
 .field__hint {
@@ -130,6 +152,14 @@ form {
 .auth-card button:disabled {
   cursor: wait;
   opacity: 0.58;
+}
+
+.auth-card__secondary-action {
+  display: block;
+  color: var(--color-accent-strong);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-align: center;
 }
 
 .auth-card__footer {
