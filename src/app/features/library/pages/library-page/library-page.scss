@@ -29,6 +29,9 @@
 }
 
 .library-page__header nav a {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
   padding: 0.625rem 1rem;
   border: 0.0625rem solid var(--color-border);
   border-radius: 999rem;
@@ -182,7 +185,7 @@
 
 .library-card__controls select,
 .library-card__controls button {
-  min-height: 2.5rem;
+  min-height: 2.75rem;
   border: 0.0625rem solid var(--color-border);
   border-radius: 0.625rem;
   color: var(--color-text);
@@ -236,19 +239,4 @@
   border-color: rgb(255 113 154 / 45%);
   color: #ffd1dd;
   background: rgb(255 113 154 / 8%);
-}
-
-@media (max-width: 35rem) {
-  .library-tools {
-    grid-template-columns: 1fr;
-  }
-
-  .library-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .library-card__controls {
-    align-items: stretch;
-    flex-direction: column;
-  }
 }

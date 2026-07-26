@@ -10,11 +10,26 @@
     @if (authentication.isAuthenticated()) {
       <div class="app-shell__authenticated">
         <nav class="app-shell__primary-links" aria-label="Primary">
-          <a routerLink="/">Home</a>
-          <a routerLink="/search">Search</a>
-          <a routerLink="/library">Library</a>
-          <a routerLink="/priority">Priority</a>
-          <a routerLink="/wheels">Wheels</a>
+          <a
+            routerLink="/"
+            routerLinkActive="is-active"
+            ariaCurrentWhenActive="page"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            Home
+          </a>
+          <a routerLink="/search" routerLinkActive="is-active" ariaCurrentWhenActive="page">
+            Search
+          </a>
+          <a routerLink="/library" routerLinkActive="is-active" ariaCurrentWhenActive="page">
+            Library
+          </a>
+          <a routerLink="/priority" routerLinkActive="is-active" ariaCurrentWhenActive="page">
+            Priority
+          </a>
+          <a routerLink="/wheels" routerLinkActive="is-active" ariaCurrentWhenActive="page">
+            Wheels
+          </a>
         </nav>
         <div class="app-shell__account">
           <span>
@@ -40,3 +55,45 @@
 <main id="main-content" class="app-shell__content">
   <router-outlet />
 </main>
+
+@if (authentication.isAuthenticated()) {
+  <nav class="app-shell__mobile-nav" aria-label="Mobile">
+    <a
+      routerLink="/"
+      routerLinkActive="is-active"
+      ariaCurrentWhenActive="page"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="m3 11 9-8 9 8v9h-6v-6H9v6H3z" />
+      </svg>
+      <span>Home</span>
+    </a>
+    <a routerLink="/search" routerLinkActive="is-active" ariaCurrentWhenActive="page">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="10.5" cy="10.5" r="6.5" />
+        <path d="m15.5 15.5 5 5" />
+      </svg>
+      <span>Search</span>
+    </a>
+    <a routerLink="/library" routerLinkActive="is-active" ariaCurrentWhenActive="page">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" />
+      </svg>
+      <span>Library</span>
+    </a>
+    <a routerLink="/priority" routerLinkActive="is-active" ariaCurrentWhenActive="page">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 5h16v4H4zM4 11h16v4H4zM4 17h16v2H4z" />
+      </svg>
+      <span>Priority</span>
+    </a>
+    <a routerLink="/wheels" routerLinkActive="is-active" ariaCurrentWhenActive="page">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="8" />
+        <path d="M12 4v8l5.7 5.7M4 12h8" />
+      </svg>
+      <span>Wheels</span>
+    </a>
+  </nav>
+}

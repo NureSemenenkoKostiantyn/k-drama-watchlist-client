@@ -45,6 +45,10 @@ wheel winner. Users can choose square, story, or landscape output and light, dar
 then download a full-size PNG. Rating, progress, and username fields are configurable. Private
 descriptions are excluded unless the user explicitly enables them for that card.
 
+At mobile widths, authenticated users receive a persistent five-destination bottom navigation for
+Home, Search, Library, Priority, and Wheels. Dense media and library cards adapt for narrow screens,
+and primary controls use touch-friendly targets while desktop navigation and layouts remain intact.
+
 ## Requirements
 
 - Node.js 22.12 or newer within the Node 22 release line

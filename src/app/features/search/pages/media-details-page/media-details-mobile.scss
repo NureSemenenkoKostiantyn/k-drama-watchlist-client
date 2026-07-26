@@ -1,0 +1,32 @@
+@media (max-width: 30rem) {
+  .media-details {
+    padding-top: 1rem;
+  }
+
+  .media-details__content {
+    grid-template-columns: 1fr;
+    align-items: start;
+    min-height: 0;
+  }
+
+  .media-details__poster {
+    width: 8.5rem;
+  }
+
+  .media-details__summary {
+    min-width: 0;
+    padding-bottom: 0;
+  }
+
+  .media-details h1 {
+    max-width: none;
+  }
+
+  .media-details__overview {
+    margin-top: 1rem;
+  }
+
+  .media-details__backdrop {
+    height: 20rem;
+  }
+}

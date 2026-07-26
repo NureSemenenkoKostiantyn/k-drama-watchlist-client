@@ -27,7 +27,7 @@ import { LibraryEntry, WatchStatus } from '../../models/library';
     ProgressControls,
   ],
   templateUrl: './library-page.html',
-  styleUrl: './library-page.scss',
+  styleUrls: ['./library-page.scss', './library-page-mobile.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LibraryPage implements OnInit {
