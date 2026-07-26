@@ -81,4 +81,21 @@ describe('NotificationsPage', () => {
     expect(markRead).toHaveBeenCalledWith('notification-1');
     expect(root.textContent).toContain('0unread');
   });
+
+  it('links wheel invitations directly to the shared wheel', () => {
+    items.set([
+      {
+        ...item,
+        type: 'wheel_invite',
+        entityId: 'wheel-1',
+      },
+    ]);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(root.querySelector('article a')?.getAttribute('href')).toBe(
+      '/wheels/wheel-1',
+    );
+    expect(root.textContent).toContain('shared a wheel with you');
+  });
 });

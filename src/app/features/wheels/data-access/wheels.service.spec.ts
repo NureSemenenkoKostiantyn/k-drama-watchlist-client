@@ -31,6 +31,7 @@ describe('WheelsService', () => {
         id: 'wheel-1',
         title: 'Friday',
         visibility: 'private',
+        role: 'owner',
         selectionMode: 'fully_random',
         itemCount: 0,
         enabledItemCount: 0,
@@ -87,6 +88,14 @@ describe('WheelsService', () => {
         title: 'Goblin',
         posterUrl: 'https://image.example/goblin.jpg',
       },
+      spunBy: {
+        id: 'user-2',
+        username: 'mina',
+        displayUsername: 'Mina',
+        name: 'Mina',
+        joinedAt: '2026-07-24T10:00:00.000Z',
+      },
+      createdAt: '2026-07-26T12:00:00.000Z',
     });
 
     await expect(spinPromise).resolves.toEqual(
@@ -99,8 +108,65 @@ describe('WheelsService', () => {
         selectedItem: expect.objectContaining({
           wheelItemId: 'item-1',
         }),
+        spunBy: expect.objectContaining({ username: 'mina' }),
+        createdAt: '2026-07-26T12:00:00.000Z',
       }),
     );
+  });
+
+  it('adds, changes, and removes a shared wheel member', async () => {
+    const loadPromise = service.loadWheel(wheel.id);
+    http.expectOne(`/api/wheels/${wheel.id}`).flush(wheel);
+    await loadPromise;
+    const member = {
+      role: 'viewer' as const,
+      user: {
+        id: 'user-2',
+        username: 'mina',
+        displayUsername: 'Mina',
+        name: 'Mina',
+        joinedAt: '2026-07-20T10:00:00.000Z',
+      },
+    };
+
+    const addPromise = service.addMember(wheel.id, {
+      username: 'mina',
+      role: 'viewer',
+    });
+    const addRequest = http.expectOne(
+      `/api/wheels/${wheel.id}/members`,
+    );
+    expect(addRequest.request.method).toBe('POST');
+    addRequest.flush(member);
+    await expect(addPromise).resolves.toEqual(member);
+    expect(service.activeWheel()?.members).toContainEqual(member);
+
+    const updatePromise = service.updateMember(
+      wheel.id,
+      member.user.id,
+      'editor',
+    );
+    const updateRequest = http.expectOne(
+      `/api/wheels/${wheel.id}/members/${member.user.id}`,
+    );
+    expect(updateRequest.request.method).toBe('PATCH');
+    updateRequest.flush({ ...member, role: 'editor' });
+    await expect(updatePromise).resolves.toEqual(
+      expect.objectContaining({ role: 'editor' }),
+    );
+    expect(service.activeWheel()?.members[1]?.role).toBe('editor');
+
+    const removePromise = service.removeMember(
+      wheel.id,
+      member.user.id,
+    );
+    const removeRequest = http.expectOne(
+      `/api/wheels/${wheel.id}/members/${member.user.id}`,
+    );
+    expect(removeRequest.request.method).toBe('DELETE');
+    removeRequest.flush(null);
+    await expect(removePromise).resolves.toBe(true);
+    expect(service.activeWheel()?.members).toHaveLength(1);
   });
 });
 
@@ -108,11 +174,24 @@ const wheel: WheelDetails = {
   id: 'wheel-1',
   title: 'Friday',
   visibility: 'private',
+  role: 'owner',
   selectionMode: 'fully_random',
   itemCount: 1,
   enabledItemCount: 1,
   createdAt: '2026-07-24T10:00:00.000Z',
   updatedAt: '2026-07-24T10:00:00.000Z',
+  members: [
+    {
+      role: 'owner',
+      user: {
+        id: 'user-1',
+        username: 'dahyun',
+        displayUsername: 'Dahyun',
+        name: 'Dahyun',
+        joinedAt: '2026-07-20T10:00:00.000Z',
+      },
+    },
+  ],
   items: [
     {
       id: 'item-1',

@@ -10,7 +10,15 @@
   } @else if (wheel(); as currentWheel) {
     <header class="wheel-page__header">
       <div>
-        <p>Private wheel</p>
+        <p>
+          {{
+            currentWheel.role === 'owner'
+              ? 'Your private wheel'
+              : currentWheel.role === 'editor'
+                ? 'Shared wheel · Editor'
+                : 'Shared wheel · Viewer'
+          }}
+        </p>
         <h1 id="wheel-title">{{ currentWheel.title }}</h1>
         @if (currentWheel.description) {
           <span>{{ currentWheel.description }}</span>
@@ -54,6 +62,7 @@
           type="button"
           [disabled]="
             currentWheel.enabledItemCount === 0 ||
+            !canEdit() ||
             isSpinning() ||
             isSaving()
           "
@@ -61,6 +70,8 @@
         >
           @if (isSpinning()) {
             Spinning…
+          } @else if (!canEdit()) {
+            View only
           } @else if (currentWheel.enabledItemCount === 0) {
             Enable a title first
           } @else {
@@ -88,6 +99,7 @@
       </section>
 
       <aside class="wheel-controls" aria-label="Wheel settings and titles">
+        @if (isOwner()) {
         <form
           class="wheel-settings"
           [formGroup]="settingsForm"
@@ -116,7 +128,9 @@
             Save settings
           </button>
         </form>
+        }
 
+        @if (canEdit()) {
         <form
           class="wheel-add"
           [formGroup]="addItemForm"
@@ -151,8 +165,94 @@
             <span>Every library title is already on this wheel.</span>
           }
         </form>
+        }
       </aside>
     </div>
+
+    <section class="wheel-members" aria-labelledby="wheel-members-title">
+      <header>
+        <div>
+          <p>Shared access</p>
+          <h2 id="wheel-members-title">People</h2>
+        </div>
+        <span>
+          {{ currentWheel.members.length }}
+          {{ currentWheel.members.length === 1 ? 'member' : 'members' }}
+        </span>
+      </header>
+
+      @if (isOwner()) {
+        <form
+          class="wheel-members__add"
+          [formGroup]="memberForm"
+          (ngSubmit)="addMember()"
+        >
+          <label>
+            <span>Friend</span>
+            <select formControlName="username">
+              <option value="">Choose an accepted friend</option>
+              @for (friendship of availableFriends(); track friendship.user.id) {
+                <option [value]="friendship.user.username">
+                  {{ friendship.user.name }} · @{{ friendship.user.displayUsername }}
+                </option>
+              }
+            </select>
+          </label>
+          <label>
+            <span>Role</span>
+            <select formControlName="role">
+              <option value="viewer">Viewer</option>
+              <option value="editor">Editor</option>
+            </select>
+          </label>
+          <button type="submit" [disabled]="isSaving() || memberForm.invalid">
+            Share wheel
+          </button>
+          @if (friends().length === 0) {
+            <a routerLink="/friends">Add a friend before sharing a wheel</a>
+          } @else if (availableFriends().length === 0) {
+            <span>Every accepted friend already has access.</span>
+          }
+        </form>
+      }
+
+      <ul>
+        @for (member of currentWheel.members; track member.user.id) {
+          <li>
+            <span class="wheel-members__avatar" aria-hidden="true">
+              {{ member.user.name.slice(0, 1).toUpperCase() }}
+            </span>
+            <div>
+              <a [routerLink]="['/users', member.user.username]">
+                {{ member.user.name }}
+              </a>
+              <span>@{{ member.user.displayUsername }}</span>
+            </div>
+            @if (member.role === 'owner' || !isOwner()) {
+              <strong>{{ member.role }}</strong>
+            } @else {
+              <select
+                [value]="member.role"
+                [disabled]="isSaving()"
+                [attr.aria-label]="'Role for ' + member.user.name"
+                (change)="updateMemberRole(member, $event)"
+              >
+                <option value="viewer">Viewer</option>
+                <option value="editor">Editor</option>
+              </select>
+              <button
+                type="button"
+                [disabled]="isSaving() || isSpinning()"
+                [attr.aria-label]="'Remove ' + member.user.name + ' from wheel'"
+                (click)="removeMember(member)"
+              >
+                Remove
+              </button>
+            }
+          </li>
+        }
+      </ul>
+    </section>
 
     <section class="wheel-items" aria-labelledby="wheel-items-title">
       <header>
@@ -160,7 +260,7 @@
           <p>Candidate controls</p>
           <h2 id="wheel-items-title">Titles</h2>
         </div>
-        <span>Drag to reorder</span>
+        <span>{{ canEdit() ? 'Drag to reorder' : 'View only' }}</span>
       </header>
 
       <div
@@ -174,7 +274,7 @@
             class="wheel-item"
             [class.wheel-item--disabled]="!item.isEnabled"
             cdkDrag
-            [cdkDragDisabled]="isSaving() || isSpinning()"
+            [cdkDragDisabled]="!canEdit() || isSaving() || isSpinning()"
           >
             <span class="wheel-item__grip" aria-hidden="true">⠿</span>
             @if (item.media.posterUrl) {
@@ -200,44 +300,50 @@
                 {{ item.selectionCount === 1 ? 'time' : 'times' }}
               </span>
             </div>
-            <label
-              class="wheel-item__weight"
-              (pointerdown)="$event.stopPropagation()"
-            >
-              <span>Weight</span>
-              <input
-                type="number"
-                min="1"
-                max="100"
-                [value]="item.weight"
+            @if (canEdit()) {
+              <label
+                class="wheel-item__weight"
+                (pointerdown)="$event.stopPropagation()"
+              >
+                <span>Weight</span>
+                <input
+                  type="number"
+                  min="1"
+                  max="100"
+                  [value]="item.weight"
+                  [disabled]="isSaving() || isSpinning()"
+                  (change)="updateWeight(item, $event)"
+                />
+              </label>
+              <button
+                type="button"
+                class="wheel-item__toggle"
+                [class.wheel-item__toggle--enabled]="item.isEnabled"
+                [attr.aria-pressed]="item.isEnabled"
                 [disabled]="isSaving() || isSpinning()"
-                (change)="updateWeight(item, $event)"
-              />
-            </label>
-            <button
-              type="button"
-              class="wheel-item__toggle"
-              [class.wheel-item__toggle--enabled]="item.isEnabled"
-              [attr.aria-pressed]="item.isEnabled"
-              [disabled]="isSaving() || isSpinning()"
-              (pointerdown)="$event.stopPropagation()"
-              (click)="toggleItem(item)"
-            >
-              {{ item.isEnabled ? 'Enabled' : 'Disabled' }}
-            </button>
-            <button
-              type="button"
-              class="wheel-item__remove"
-              aria-label="Remove title from wheel"
-              title="Remove from wheel"
-              [disabled]="isSaving() || isSpinning()"
-              (pointerdown)="$event.stopPropagation()"
-              (click)="removeItem(item.id)"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13" />
-              </svg>
-            </button>
+                (pointerdown)="$event.stopPropagation()"
+                (click)="toggleItem(item)"
+              >
+                {{ item.isEnabled ? 'Enabled' : 'Disabled' }}
+              </button>
+              <button
+                type="button"
+                class="wheel-item__remove"
+                aria-label="Remove title from wheel"
+                title="Remove from wheel"
+                [disabled]="isSaving() || isSpinning()"
+                (pointerdown)="$event.stopPropagation()"
+                (click)="removeItem(item.id)"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13" />
+                </svg>
+              </button>
+            } @else {
+              <span class="wheel-item__weight">
+                Weight {{ item.weight }} · {{ item.isEnabled ? 'Enabled' : 'Disabled' }}
+              </span>
+            }
           </article>
         } @empty {
           <p class="wheel-items__empty">
@@ -253,7 +359,7 @@
           <p>Previous results</p>
           <h2 id="wheel-history-title">Spin history</h2>
         </div>
-        @if (wheels.history().length > 0) {
+        @if (isOwner() && wheels.history().length > 0) {
           @if (pendingHistoryReset()) {
             <div class="wheel-history__confirm">
               <span>Clear all history?</span>
@@ -289,7 +395,12 @@
             }
             <div>
               <strong>{{ spin.selectedItem.title }}</strong>
-              <span>{{ spin.createdAt | date: 'medium' }}</span>
+              <span>
+                {{ spin.createdAt | date: 'medium' }}
+                @if (spin.spunBy) {
+                  · by {{ spin.spunBy.name }}
+                }
+              </span>
             </div>
           </li>
         } @empty {
@@ -298,6 +409,7 @@
       </ol>
     </section>
 
+    @if (isOwner()) {
     <section class="wheel-danger" aria-labelledby="wheel-danger-title">
       <div>
         <p>Danger zone</p>
@@ -326,6 +438,7 @@
         </button>
       }
     </section>
+    }
   } @else {
     <div class="wheel-page__state">
       This wheel could not be found. <a routerLink="/wheels">Return to your wheels.</a>

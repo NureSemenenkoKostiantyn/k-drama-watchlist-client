@@ -2,8 +2,8 @@
   <header class="wheels-page__header">
     <div>
       <p>Let chance decide</p>
-      <h1 id="wheels-title">Your wheels</h1>
-      <span>Build weighted shortlists and let the server choose the winner.</span>
+      <h1 id="wheels-title">Wheels</h1>
+      <span>Build your own shortlist or open a wheel shared with you.</span>
     </div>
   </header>
 
@@ -52,7 +52,7 @@
   @if (wheels.isLoading()) {
     <div class="wheels-page__state" role="status">Loading your wheels…</div>
   } @else {
-    <section class="wheel-grid" aria-label="Private wheels">
+    <section class="wheel-grid" aria-label="Your and shared wheels">
       @for (wheel of wheels.wheels(); track wheel.id) {
         <a class="wheel-card" [routerLink]="['/wheels', wheel.id]">
           <div
@@ -64,7 +64,13 @@
           </div>
           <div>
             <p>
-              {{ wheel.selectionMode === 'fully_random' ? 'Fully random' : 'No immediate repeats' }}
+              {{
+                wheel.role === 'owner'
+                  ? 'Your wheel'
+                  : wheel.role === 'editor'
+                    ? 'Shared · Editor'
+                    : 'Shared · Viewer'
+              }}
             </p>
             <h2>{{ wheel.title }}</h2>
             @if (wheel.description) {
