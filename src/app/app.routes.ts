@@ -92,7 +92,7 @@ export const routes: Routes = [
   },
   {
     path: 'friends',
-    title: 'Find people · Drama Watch',
+    title: 'Friends · Drama Watch',
     canActivate: [profileCompleteGuard],
     loadComponent: () =>
       import(

@@ -51,8 +51,12 @@ then download a full-size PNG. Rating, progress, and username fields are configu
 descriptions are excluded unless the user explicitly enables them for that card.
 
 Phase 2 begins with public profiles at `/users/:username`, the signed-in user's `/profile` shortcut,
-and protected username-prefix search at `/friends`. Public profile UI displays only the public API
-contract and never receives email addresses or other Better Auth internals.
+and a protected friendship hub at `/friends`. The hub separates incoming requests, accepted friends,
+and sent requests while also providing weighted name/username discovery, typo-tolerant similar
+results, and contextual request controls.
+Users can send, accept, decline, cancel, and remove relationships without the browser supplying an
+owner ID. Public profile and friendship UI use only the public API contract and never receive email
+addresses or other Better Auth internals.
 
 At mobile widths, authenticated users receive a persistent five-destination bottom navigation for
 Home, Search, Library, Priority, and Wheels. Dense media and library cards adapt for narrow screens,
@@ -77,6 +81,15 @@ docker compose --file ../k-drama-watchlist-server/compose.yaml up --build --watc
 The client is then available at `http://localhost:4200`. Compose Watch synchronizes changes under
 `src` and `public`, while `proxy.compose.conf.json` sends `/api` requests to the internal `api`
 service. Stop the stack with `docker compose down`.
+
+To add repeatable local demo data, run this after the stack is healthy:
+
+```bash
+docker compose --file ../k-drama-watchlist-server/compose.yaml exec api npm run seed:dev
+```
+
+Sign in with `demo@drama-watch.local` and password `DramaWatch1!`. The guarded seed is local-only,
+does not erase existing data, and can be run again safely.
 
 To run only the client directly on the host, follow the steps below.
 
