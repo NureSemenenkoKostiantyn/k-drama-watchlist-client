@@ -1,0 +1,40 @@
+@media (prefers-reduced-motion: reduce) {
+  .discovery-state__pulse {
+    animation: none;
+  }
+
+  .discovery-card__poster img {
+    transition: none;
+  }
+}
+
+@media (max-width: 40rem) {
+  .discovery {
+    padding-top: 0.5rem;
+  }
+
+  .discovery-hero {
+    min-height: 34rem;
+  }
+
+  .discovery-hero__scrim {
+    background:
+      linear-gradient(0deg, rgb(16 13 24 / 98%) 0%, rgb(16 13 24 / 70%) 58%, transparent 100%);
+  }
+
+  .discovery-hero__content {
+    padding: 1.25rem;
+  }
+
+  .discovery-hero h1 {
+    font-size: clamp(2.5rem, 14vw, 4rem);
+  }
+
+  .discovery-shelf > header {
+    align-items: start;
+  }
+
+  .discovery-shelf > header > a {
+    display: none;
+  }
+}

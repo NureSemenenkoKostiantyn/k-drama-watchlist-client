@@ -18,6 +18,11 @@ service calls the same-origin NestJS API with Angular `HttpClient`, while Signal
 pagination, and result state. The K-drama shortcut searches TV titles with the `KR` origin-country
 filter. The browser receives normalized media data and image URLs, never the TMDB access token.
 
+The protected `/` route is a K-drama discovery portal rather than a generic product introduction.
+It loads one shared response from `/api/discovery/home` and presents a featured title plus
+responsive shelves for popular, currently airing, top-rated, and newly released K-dramas and
+popular movies. Shelf data is non-personal and cached by the backend for 24 hours.
+
 The personal library slice adds protected status views at `/library/to-watch`, `/library/watching`,
 and `/library/watched`. Search results and media details provide quick status actions backed by the
 owner-scoped library API. The client receives one shared media snapshot inside each personal entry;
@@ -44,6 +49,10 @@ Share cards are rendered entirely in the browser from personal media details or 
 wheel winner. Users can choose square, story, or landscape output and light, dark, or poster themes,
 then download a full-size PNG. Rating, progress, and username fields are configurable. Private
 descriptions are excluded unless the user explicitly enables them for that card.
+
+Phase 2 begins with public profiles at `/users/:username`, the signed-in user's `/profile` shortcut,
+and protected username-prefix search at `/friends`. Public profile UI displays only the public API
+contract and never receives email addresses or other Better Auth internals.
 
 At mobile widths, authenticated users receive a persistent five-destination bottom navigation for
 Home, Search, Library, Priority, and Wheels. Dense media and library cards adapt for narrow screens,

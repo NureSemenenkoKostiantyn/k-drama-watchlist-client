@@ -1,37 +1,121 @@
-<section class="hero" aria-labelledby="hero-title">
-  <p class="hero__eyebrow">Your personal watchlist</p>
-  <h1 id="hero-title">Keep every story you want to watch in one place.</h1>
-  <p class="hero__summary">
-    Drama Watch brings search, progress tracking, priority queues, and random picks together in
-    one focused experience.
-  </p>
+<section class="discovery" aria-labelledby="discovery-title">
+  @if (isLoading()) {
+    <div class="discovery-state" role="status">
+      <span class="discovery-state__pulse" aria-hidden="true"></span>
+      Curating the K-drama portal…
+    </div>
+  } @else if (error()) {
+    <div class="discovery-state discovery-state--error" role="alert">
+      <p>{{ error() }}</p>
+      <button type="button" (click)="retry()">Try again</button>
+    </div>
+  } @else if (home(); as discoveryHome) {
+    @if (discoveryHome.featured; as featured) {
+      <article class="discovery-hero">
+        @if (featured.backdropUrl) {
+          <img
+            class="discovery-hero__image"
+            [src]="featured.backdropUrl"
+            alt=""
+            fetchpriority="high"
+          />
+        }
+        <div class="discovery-hero__scrim" aria-hidden="true"></div>
+        <div class="discovery-hero__content">
+          <p>Featured from Korean television</p>
+          <h1 id="discovery-title">{{ featured.title }}</h1>
+          @if (featured.originalTitle !== featured.title) {
+            <span class="discovery-hero__original">
+              {{ featured.originalTitle }}
+            </span>
+          }
+          <div class="discovery-hero__metadata">
+            <span>{{ displayYear(featured) }}</span>
+            @if (displayScore(featured); as score) {
+              <span>TMDB {{ score }}</span>
+            }
+            <span>{{ featured.mediaType === 'tv' ? 'Series' : 'Movie' }}</span>
+          </div>
+          @if (featured.overview) {
+            <p class="discovery-hero__overview">{{ featured.overview }}</p>
+          }
+          <div class="discovery-hero__actions">
+            <a
+              class="discovery-hero__primary"
+              [routerLink]="[
+                '/media',
+                featured.mediaType,
+                featured.tmdbId
+              ]"
+            >
+              View details
+            </a>
+            <a routerLink="/search">Search all titles</a>
+          </div>
+        </div>
+      </article>
+    } @else {
+      <header class="discovery-heading">
+        <p>K-drama portal</p>
+        <h1 id="discovery-title">Find your next Korean story.</h1>
+        <a routerLink="/search">Search all titles</a>
+      </header>
+    }
 
-  <div class="hero__status" role="status">
-    <span class="hero__status-dot" aria-hidden="true"></span>
-    Your personal watchlist is ready.
-  </div>
+    <div class="discovery-shelves">
+      @for (shelf of discoveryHome.shelves; track shelf.key) {
+        @if (shelf.items.length > 0) {
+          <section
+            class="discovery-shelf"
+            [attr.aria-labelledby]="'shelf-' + shelf.key"
+          >
+            <header>
+              <div>
+                <h2 [id]="'shelf-' + shelf.key">{{ shelf.title }}</h2>
+                <p>{{ shelf.description }}</p>
+              </div>
+              @if (shelf.key !== 'popular_movies') {
+                <a routerLink="/search">Explore K-dramas</a>
+              } @else {
+                <a routerLink="/search">Explore movies</a>
+              }
+            </header>
 
-  <a class="hero__action" routerLink="/search">Search titles</a>
-</section>
-
-<section class="capabilities" aria-labelledby="capabilities-title">
-  <h2 id="capabilities-title">Built around the way you watch</h2>
-
-  <div class="capabilities__grid">
-    <article>
-      <span aria-hidden="true">01</span>
-      <h3>Find a title</h3>
-      <p>Search dramas, films, and TV series through a private backend integration.</p>
-    </article>
-    <article>
-      <span aria-hidden="true">02</span>
-      <h3>Track the journey</h3>
-      <p>Keep statuses, episode progress, ratings, notes, and preferences together.</p>
-    </article>
-    <article>
-      <span aria-hidden="true">03</span>
-      <h3>Choose what is next</h3>
-      <p>Organize priorities or let a server-selected wheel make tonight's decision.</p>
-    </article>
-  </div>
+            <div class="discovery-row">
+              @for (media of shelf.items; track media.id) {
+                <a
+                  class="discovery-card"
+                  [routerLink]="[
+                    '/media',
+                    media.mediaType,
+                    media.tmdbId
+                  ]"
+                >
+                  <div class="discovery-card__poster">
+                    @if (media.posterUrl) {
+                      <img
+                        [src]="media.posterUrl"
+                        [alt]="media.title + ' poster'"
+                        loading="lazy"
+                      />
+                    } @else {
+                      <span aria-hidden="true">DW</span>
+                    }
+                    @if (displayScore(media); as score) {
+                      <strong>★ {{ score }}</strong>
+                    }
+                  </div>
+                  <span class="discovery-card__title">{{ media.title }}</span>
+                  <span class="discovery-card__meta">
+                    {{ displayYear(media) }}
+                    · {{ media.mediaType === 'tv' ? 'Series' : 'Movie' }}
+                  </span>
+                </a>
+              }
+            </div>
+          </section>
+        }
+      }
+    </div>
+  }
 </section>
