@@ -200,25 +200,6 @@
   font-size: 1.25rem;
 }
 
-.wheel-winner__watch {
-  grid-column: 2;
-  justify-self: start;
-  min-height: 2.2rem;
-  padding: 0 0.75rem;
-  border: 0;
-  border-radius: 999rem;
-  color: #100d18;
-  background: var(--color-accent);
-  font-size: 0.72rem;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.wheel-winner__watch:disabled {
-  cursor: wait;
-  opacity: 0.55;
-}
-
 .wheel-winner__close {
   position: absolute;
   top: 0.4rem;

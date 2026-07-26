@@ -1,0 +1,67 @@
+.wheel-winner__actions {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.wheel-winner__watch,
+.wheel-winner__share {
+  min-height: 2.2rem;
+  padding: 0 0.75rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 999rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.wheel-winner__watch {
+  border-color: transparent;
+  color: #100d18;
+  background: var(--color-accent);
+}
+
+.wheel-winner__share {
+  color: var(--color-text);
+  background: transparent;
+}
+
+.wheel-winner__watch:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.wheel-share-overlay {
+  position: fixed;
+  z-index: 30;
+  inset: 0;
+  display: grid;
+  padding: clamp(1rem, 4vw, 3rem);
+  overflow-y: auto;
+  place-items: center;
+  background: rgb(8 6 12 / 82%);
+  backdrop-filter: blur(0.7rem);
+}
+
+.wheel-share-overlay__content {
+  position: relative;
+  width: min(100%, 68rem);
+}
+
+.wheel-share-overlay__close {
+  position: absolute;
+  z-index: 2;
+  top: 0.6rem;
+  right: 0.7rem;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  color: var(--color-text-muted);
+  background: transparent;
+  font-size: 1.5rem;
+  cursor: pointer;
+}

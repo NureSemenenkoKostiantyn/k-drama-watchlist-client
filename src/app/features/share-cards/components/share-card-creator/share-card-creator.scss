@@ -1,0 +1,149 @@
+:host {
+  display: block;
+}
+
+.share-card-creator {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 1.25rem;
+  background: #181321;
+}
+
+.share-card-creator > header {
+  display: flex;
+  gap: 1rem;
+  align-items: end;
+  justify-content: space-between;
+}
+
+.share-card-creator header p,
+.share-card-creator header h2 {
+  margin: 0;
+}
+
+.share-card-creator header p {
+  color: var(--color-accent-strong);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.share-card-creator header h2 {
+  margin-top: 0.25rem;
+  font-size: 1.6rem;
+  letter-spacing: -0.035em;
+}
+
+.share-card-creator > header > span {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+}
+
+.share-card-creator__workspace {
+  display: grid;
+  grid-template-columns: minmax(15rem, 0.65fr) minmax(18rem, 1.35fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.share-card-controls,
+.share-card-controls__selects {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.share-card-controls label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.share-card-controls label > span,
+.share-card-controls legend {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.share-card-controls select {
+  width: 100%;
+  min-height: 2.6rem;
+  padding: 0 0.7rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 0.7rem;
+  color: var(--color-text);
+  background: #100d18;
+}
+
+.share-card-controls fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+  margin: 0;
+  padding: 0.8rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 0.8rem;
+}
+
+.share-card-controls fieldset label {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  color: var(--color-text-muted);
+  font-size: 0.76rem;
+}
+
+.share-card-controls fieldset input {
+  accent-color: var(--color-accent);
+}
+
+.share-card-controls__privacy,
+.share-card-controls__success,
+.share-card-controls__error {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.share-card-controls__success {
+  color: #9ee3c5;
+}
+
+.share-card-controls__error {
+  color: #ffd1dd;
+}
+
+.share-card-controls > button {
+  justify-self: start;
+  min-height: 2.65rem;
+  padding: 0 1rem;
+  border: 0;
+  border-radius: 999rem;
+  color: #100d18;
+  background: var(--color-accent);
+  font-size: 0.8rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.share-card-controls > button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+@media (max-width: 48rem) {
+  .share-card-creator__workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 30rem) {
+  .share-card-creator > header {
+    display: grid;
+    align-items: start;
+  }
+
+}

@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 import { vi } from 'vitest';
 
 import { CategoriesService } from '../../../categories/data-access/categories.service';
+import { AuthenticationService } from '../../../../core/auth/authentication.service';
 import { LibraryService } from '../../../library/data-access/library.service';
 import { MediaService } from '../../data-access/media.service';
 import { MediaDetailsPage } from './media-details-page';
@@ -24,6 +25,12 @@ describe('MediaDetailsPage', () => {
                 tmdbId: '1',
               }),
             },
+          },
+        },
+        {
+          provide: AuthenticationService,
+          useValue: {
+            session: signal(null).asReadonly(),
           },
         },
         {

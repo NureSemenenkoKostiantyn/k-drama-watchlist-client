@@ -1,0 +1,184 @@
+.share-card-preview-stage {
+  display: grid;
+  gap: 0.65rem;
+  min-width: 0;
+  justify-items: center;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border-radius: 1rem;
+  background:
+    linear-gradient(45deg, rgb(255 255 255 / 3%) 25%, transparent 25%) 0 0 / 1rem 1rem,
+    linear-gradient(-45deg, rgb(255 255 255 / 3%) 25%, transparent 25%) 0 0 / 1rem 1rem,
+    #100d18;
+}
+
+.share-card-preview-stage > p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+  text-align: center;
+}
+
+.share-card-preview {
+  position: relative;
+  display: grid;
+  width: min(100%, 31rem);
+  padding: 7%;
+  overflow: hidden;
+  grid-template-rows: auto 1fr auto;
+  color: #f8f7fb;
+  background:
+    radial-gradient(circle at 15% 8%, rgb(255 113 154 / 45%), transparent 55%),
+    #100d18;
+  box-shadow: 0 1rem 3rem rgb(0 0 0 / 35%);
+}
+
+.share-card-preview--square {
+  aspect-ratio: 1;
+}
+
+.share-card-preview--story {
+  width: min(75%, 20rem);
+  aspect-ratio: 9 / 16;
+}
+
+.share-card-preview--landscape {
+  width: 100%;
+  aspect-ratio: 1200 / 630;
+}
+
+.share-card-preview--light {
+  color: #17101f;
+  background:
+    radial-gradient(circle at 15% 8%, rgb(181 31 88 / 30%), transparent 55%),
+    #f7f1f5;
+}
+
+.share-card-preview__image,
+.share-card-preview__overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.share-card-preview__image {
+  object-fit: cover;
+  opacity: 0.22;
+}
+
+.share-card-preview--light .share-card-preview__image {
+  opacity: 0.12;
+}
+
+.share-card-preview--poster .share-card-preview__image {
+  opacity: 0.86;
+}
+
+.share-card-preview__overlay {
+  background: linear-gradient(to bottom, transparent 4%, #100d18 84%);
+}
+
+.share-card-preview--light .share-card-preview__overlay {
+  background: linear-gradient(to bottom, transparent 4%, #f7f1f5 84%);
+}
+
+.share-card-preview--poster .share-card-preview__overlay {
+  background: linear-gradient(to bottom, rgb(16 13 24 / 10%), #100d18 88%);
+}
+
+.share-card-preview__brand,
+.share-card-preview__content,
+.share-card-preview footer {
+  position: relative;
+  z-index: 1;
+}
+
+.share-card-preview__brand {
+  color: #ff96b5;
+  font-size: clamp(0.45rem, 1.5vw, 0.7rem);
+  font-weight: 850;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.share-card-preview--light .share-card-preview__brand,
+.share-card-preview--light .share-card-preview__eyebrow,
+.share-card-preview--light strong {
+  color: #b51f58;
+}
+
+.share-card-preview__content {
+  align-self: end;
+}
+
+.share-card-preview__eyebrow {
+  display: block;
+  color: #ff96b5;
+  font-size: clamp(0.45rem, 1.5vw, 0.7rem);
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.share-card-preview h3 {
+  max-width: 14ch;
+  margin: 0.35em 0 0;
+  font-size: clamp(1.25rem, 5vw, 3rem);
+  letter-spacing: -0.055em;
+  line-height: 0.95;
+}
+
+.share-card-preview strong {
+  display: block;
+  margin-top: 0.45em;
+  color: #ff719a;
+  font-size: clamp(0.8rem, 3vw, 1.7rem);
+}
+
+.share-card-preview__content > span:not(.share-card-preview__eyebrow) {
+  display: block;
+  margin-top: 0.35rem;
+  color: #c7bdcf;
+  font-size: clamp(0.48rem, 1.3vw, 0.75rem);
+}
+
+.share-card-preview--light .share-card-preview__content > span {
+  color: #62576b;
+}
+
+.share-card-preview blockquote {
+  display: -webkit-box;
+  margin: 0.6rem 0 0;
+  overflow: hidden;
+  color: inherit;
+  font-size: clamp(0.52rem, 1.4vw, 0.8rem);
+  font-style: italic;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.share-card-preview footer {
+  display: flex;
+  gap: 0.8rem;
+  align-items: end;
+  justify-content: space-between;
+  padding-top: 0.7rem;
+  border-top: 0.0625rem solid rgb(255 255 255 / 22%);
+  font-size: clamp(0.45rem, 1.2vw, 0.68rem);
+  font-weight: 700;
+}
+
+.share-card-preview--light footer {
+  border-top-color: rgb(23 16 31 / 25%);
+}
+
+.share-card-preview--landscape h3 {
+  font-size: clamp(1.2rem, 4vw, 2.65rem);
+}
+
+@media (max-width: 30rem) {
+  .share-card-preview--story {
+    width: min(90%, 18rem);
+  }
+}

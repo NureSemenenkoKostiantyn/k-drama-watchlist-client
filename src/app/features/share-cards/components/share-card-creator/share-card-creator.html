@@ -1,0 +1,157 @@
+@if (source(); as cardSource) {
+  <section class="share-card-creator" aria-labelledby="share-card-title">
+    <header>
+      <div>
+        <p>Made for sharing</p>
+        <h2 id="share-card-title">Create a card</h2>
+      </div>
+      <span>PNG · no upload required</span>
+    </header>
+
+    <div class="share-card-creator__workspace">
+      <form class="share-card-controls">
+        <div class="share-card-controls__selects">
+          <label>
+            <span>Card type</span>
+            <select [value]="template()" (change)="changeTemplate($event)">
+              @for (option of templateOptions(); track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            <span>Format</span>
+            <select [value]="format()" (change)="changeFormat($event)">
+              <option value="square">Square · 1080 × 1080</option>
+              <option value="story">Story · 1080 × 1920</option>
+              <option value="landscape">Landscape · 1200 × 630</option>
+            </select>
+          </label>
+          <label>
+            <span>Theme</span>
+            <select [value]="theme()" (change)="changeTheme($event)">
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+              <option value="poster">Poster</option>
+            </select>
+          </label>
+        </div>
+
+        <fieldset>
+          <legend>Include</legend>
+          @if (cardSource.rating !== undefined) {
+            <label>
+              <input
+                type="checkbox"
+                [checked]="includeRating()"
+                (change)="setToggle(includeRating, $event)"
+              />
+              Rating
+            </label>
+          }
+          @if (cardSource.progress) {
+            <label>
+              <input
+                type="checkbox"
+                [checked]="includeProgress()"
+                (change)="setToggle(includeProgress, $event)"
+              />
+              Progress
+            </label>
+          }
+          @if (cardSource.description) {
+            <label>
+              <input
+                id="include-description"
+                type="checkbox"
+                [checked]="includeDescription()"
+                (change)="setToggle(includeDescription, $event)"
+              />
+              Private description
+            </label>
+          }
+          @if (cardSource.username) {
+            <label>
+              <input
+                type="checkbox"
+                [checked]="includeUsername()"
+                (change)="setToggle(includeUsername, $event)"
+              />
+              Username
+            </label>
+          }
+        </fieldset>
+
+        @if (cardSource.description) {
+          <p class="share-card-controls__privacy">
+            Your private description stays off the card unless you enable it.
+          </p>
+        }
+
+        <button type="button" [disabled]="isDownloading()" (click)="download()">
+          {{ isDownloading() ? 'Preparing PNG…' : 'Download PNG' }}
+        </button>
+        @if (exportMessage()) {
+          <p class="share-card-controls__success" role="status">
+            {{ exportMessage() }}
+          </p>
+        }
+        @if (exportError()) {
+          <p class="share-card-controls__error" role="alert">
+            {{ exportError() }}
+          </p>
+        }
+      </form>
+
+      <div class="share-card-preview-stage">
+        <article
+          class="share-card-preview"
+          [class.share-card-preview--square]="format() === 'square'"
+          [class.share-card-preview--story]="format() === 'story'"
+          [class.share-card-preview--landscape]="format() === 'landscape'"
+          [class.share-card-preview--light]="theme() === 'light'"
+          [class.share-card-preview--poster]="theme() === 'poster'"
+          aria-label="Share card preview"
+        >
+          @if (cardSource.backdropUrl ?? cardSource.posterUrl; as imageUrl) {
+            <img class="share-card-preview__image" [src]="imageUrl" alt="" />
+          }
+          <div class="share-card-preview__overlay"></div>
+          <span class="share-card-preview__brand">Drama Watch</span>
+          <div class="share-card-preview__content">
+            <span class="share-card-preview__eyebrow">{{ templateLabel() }}</span>
+            <h3>{{ cardSource.title }}</h3>
+            @if (template() === 'wheel_result') {
+              <strong>{{ cardSource.wheelTitle ?? 'Tonight’s pick' }}</strong>
+            } @else if (template() === 'completed') {
+              <strong>Watched</strong>
+            } @else if (includeRating() && ratingLabel()) {
+              <strong>{{ ratingLabel() }}</strong>
+            } @else if (includeProgress() && progressLabel()) {
+              <strong>{{ progressLabel() }}</strong>
+            } @else {
+              <strong>Worth watching</strong>
+            }
+
+            @if (includeProgress() && progressLabel()) {
+              <span>{{ progressLabel() }} · {{ episodeLabel() }}</span>
+            }
+            @if (includeRating() && ratingLabel() && template() !== 'rating') {
+              <span>Rated {{ ratingLabel() }}</span>
+            }
+            @if (includeDescription() && cardSource.description) {
+              <blockquote>{{ cardSource.description }}</blockquote>
+            }
+          </div>
+          <footer>
+            @if (includeUsername() && cardSource.username) {
+              <span>@{{ cardSource.username.replace('@', '') }}</span>
+            }
+            <span>dahyun.best</span>
+          </footer>
+        </article>
+        <p>Preview scales to fit. The downloaded PNG uses the full selected dimensions.</p>
+      </div>
+    </div>
+  </section>
+}
