@@ -127,6 +127,14 @@ export const routes: Routes = [
       ).then(({ PublicProfilePage }) => PublicProfilePage),
   },
   {
+    path: 'users/:username/library',
+    title: 'Shared library - Drama Watch',
+    loadComponent: () =>
+      import(
+        './features/users/pages/friend-library-page/friend-library-page'
+      ).then(({ FriendLibraryPage }) => FriendLibraryPage),
+  },
+  {
     path: 'users/:username',
     title: 'Profile · Drama Watch',
     loadComponent: () =>

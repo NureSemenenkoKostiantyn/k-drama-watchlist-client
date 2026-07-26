@@ -62,7 +62,15 @@ The social suggestion slice adds a split inbox at `/suggestions` with Pending, H
 views. A compact recommendation list drives a focused detail panel; pending titles can be added to
 `to_watch` or dismissed, while accepted suggestions preserve an existing personal entry. Every
 media-details page can suggest its current title to an accepted friend with an optional private
-message.
+message. It also shows accepted friends who have the title in their library, including their
+lifecycle status, optional rating, and a friend-rating average. Private library details are not
+returned to the browser.
+
+Profiles now link to `/users/:username/library`. The shared-library page supports status, type,
+minimum-rating, named genre and country selectors, inclusive release-year ranges, server-backed
+sorting, poster-grid and compact-list views, and pagination. Owners choose Private, Friends, or
+Public visibility from the reusable settings panel on `/profile`; the browser receives only the
+server's public-safe library projection.
 
 A protected notification center at `/notifications` shows friend requests, accepted friendships,
 and received recommendations. The header bell exposes the unread count, while the feed supports

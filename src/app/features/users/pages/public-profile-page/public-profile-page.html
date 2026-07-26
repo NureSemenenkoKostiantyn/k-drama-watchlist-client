@@ -32,10 +32,19 @@
 
       <div class="profile-card__actions">
         <a routerLink="/friends">Find people</a>
+        <a
+          [routerLink]="['/users', currentProfile.username, 'library']"
+        >
+          {{ isOwnProfile(currentProfile) ? 'Preview shared library' : 'View library' }}
+        </a>
         @if (isOwnProfile(currentProfile)) {
           <a routerLink="/library">Open your library</a>
         }
       </div>
     </article>
+
+    @if (isOwnProfile(currentProfile)) {
+      <app-library-visibility-settings />
+    }
   }
 </section>

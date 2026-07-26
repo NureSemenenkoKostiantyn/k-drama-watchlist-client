@@ -1,0 +1,44 @@
+.friend-library__state {
+  margin-top: 1.25rem;
+  padding: 2rem;
+  border: 0.0625rem dashed var(--color-border);
+  border-radius: 1.25rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.friend-library__state h2,
+.friend-library__state p {
+  margin: 0;
+}
+
+.friend-library__state p {
+  margin-top: 0.4rem;
+}
+
+.friend-library__state a {
+  display: inline-block;
+  margin-top: 1rem;
+  color: var(--color-text);
+  font-weight: 750;
+}
+
+.friend-library__state--error {
+  border-color: rgb(255 113 154 / 40%);
+  color: #ffd1dd;
+}
+
+.friend-library__pagination {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.friend-library__pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}

@@ -6,6 +6,7 @@ import { environment } from '../../../../environments/environment';
 import {
   Friendship,
   FriendshipsOverview,
+  MediaFriendContext,
 } from '../models/friendship';
 
 @Injectable({ providedIn: 'root' })
@@ -16,6 +17,17 @@ export class FriendsService {
   list(): Promise<FriendshipsOverview> {
     return firstValueFrom(
       this.http.get<FriendshipsOverview>(this.baseUrl),
+    );
+  }
+
+  mediaContext(
+    mediaType: 'movie' | 'tv',
+    tmdbId: number,
+  ): Promise<MediaFriendContext> {
+    return firstValueFrom(
+      this.http.get<MediaFriendContext>(
+        `${environment.apiBaseUrl}/media/${mediaType}/${tmdbId}/friend-context`,
+      ),
     );
   }
 

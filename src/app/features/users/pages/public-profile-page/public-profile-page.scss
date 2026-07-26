@@ -1,5 +1,6 @@
 .public-profile {
   display: grid;
+  gap: 1rem;
   min-height: min(40rem, calc(100vh - 4.5rem));
   place-items: center;
   padding-block: clamp(2rem, 8vw, 6rem);

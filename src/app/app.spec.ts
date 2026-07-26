@@ -5,6 +5,7 @@ import { vi } from 'vitest';
 
 import { AuthenticationService } from './core/auth/authentication.service';
 import { NotificationsService } from './features/notifications/data-access/notifications.service';
+import { SettingsService } from './features/settings/data-access/settings.service';
 import { App } from './app';
 
 describe('App', () => {
@@ -19,6 +20,7 @@ describe('App', () => {
     unreadCount: 0,
   });
   const clearNotifications = vi.fn();
+  const clearSettings = vi.fn();
 
   beforeEach(async () => {
     authenticated.set(false);
@@ -27,6 +29,7 @@ describe('App', () => {
     unreadCount.set(0);
     refreshNotifications.mockClear();
     clearNotifications.mockClear();
+    clearSettings.mockClear();
 
     await TestBed.configureTestingModule({
       imports: [App],
@@ -47,6 +50,12 @@ describe('App', () => {
             unreadCount: unreadCount.asReadonly(),
             refresh: refreshNotifications,
             clear: clearNotifications,
+          },
+        },
+        {
+          provide: SettingsService,
+          useValue: {
+            clear: clearSettings,
           },
         },
       ],

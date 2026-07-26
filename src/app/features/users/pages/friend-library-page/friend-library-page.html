@@ -1,0 +1,242 @@
+<section class="friend-library">
+  @if (profile(); as currentProfile) {
+    <a
+      class="friend-library__back"
+      [routerLink]="['/users', currentProfile.username]"
+    >
+      &larr; Back to profile
+    </a>
+
+    <header class="friend-library__header">
+      @if (currentProfile.image) {
+        <img [src]="currentProfile.image" alt="" width="72" height="72" />
+      } @else {
+        <div class="friend-library__avatar" aria-hidden="true">
+          {{ initials(currentProfile) }}
+        </div>
+      }
+
+      <div>
+        <p>{{ '@' + currentProfile.displayUsername }}</p>
+        <h1>{{ currentProfile.name }}'s library</h1>
+        @if (library(); as currentLibrary) {
+          <span>
+            {{ visibilityLabel(currentLibrary.visibility) }}
+            &middot;
+            {{ currentLibrary.totalResults }}
+            {{ currentLibrary.totalResults === 1 ? 'title' : 'titles' }}
+          </span>
+        }
+      </div>
+    </header>
+  }
+
+  @if (isLoading()) {
+    <div class="friend-library__state" role="status">
+      Loading library&hellip;
+    </div>
+  } @else if (error()) {
+    <div class="friend-library__state friend-library__state--error" role="alert">
+      <h2>Library unavailable</h2>
+      <p>{{ error() }}</p>
+      <a routerLink="/friends">Open friends</a>
+    </div>
+  } @else if (library(); as currentLibrary) {
+    <form
+      class="friend-library__filters"
+      [formGroup]="filters"
+      (ngSubmit)="applyFilters()"
+    >
+      <label>
+        <span>Status</span>
+        <select formControlName="status">
+          <option value="">All statuses</option>
+          <option value="to_watch">To watch</option>
+          <option value="watching">Watching</option>
+          <option value="watched">Watched</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Type</span>
+        <select formControlName="mediaType">
+          <option value="">Movies and TV</option>
+          <option value="tv">TV series</option>
+          <option value="movie">Movies</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Genre</span>
+        <select formControlName="genreId">
+          <option [ngValue]="null">Any genre</option>
+          @for (genre of genreOptions; track genre.value) {
+            <option [ngValue]="genre.value">{{ genre.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>Country</span>
+        <select formControlName="country">
+          <option value="">Any country</option>
+          @for (country of countryOptions; track country.value) {
+            <option [value]="country.value">{{ country.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>Minimum rating</span>
+        <input
+          type="number"
+          min="1"
+          max="10"
+          step="0.5"
+          placeholder="Any"
+          formControlName="minRating"
+        />
+      </label>
+
+      <label>
+        <span>Year from</span>
+        <input
+          type="number"
+          min="1900"
+          max="2100"
+          placeholder="Any"
+          formControlName="yearFrom"
+        />
+      </label>
+
+      <label>
+        <span>Year to</span>
+        <input
+          type="number"
+          min="1900"
+          max="2100"
+          placeholder="Any"
+          formControlName="yearTo"
+        />
+      </label>
+
+      <label>
+        <span>Sort by</span>
+        <select formControlName="sort">
+          @for (option of sortOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </label>
+
+      @if (filters.hasError('yearRange') && filters.touched) {
+        <p class="friend-library__filter-error" role="alert">
+          The starting year cannot be after the ending year.
+        </p>
+      }
+
+      <div class="friend-library__filter-actions">
+        <button type="submit">Apply filters</button>
+        <button type="button" (click)="clearFilters()">Clear</button>
+      </div>
+    </form>
+
+    <div class="friend-library__toolbar">
+      <p>
+        {{ currentLibrary.totalResults }}
+        {{ currentLibrary.totalResults === 1 ? 'result' : 'results' }}
+      </p>
+      <div aria-label="Library view">
+        <button
+          type="button"
+          [class.is-active]="view() === 'grid'"
+          [attr.aria-pressed]="view() === 'grid'"
+          (click)="view.set('grid')"
+        >
+          Grid
+        </button>
+        <button
+          type="button"
+          [class.is-active]="view() === 'list'"
+          [attr.aria-pressed]="view() === 'list'"
+          (click)="view.set('list')"
+        >
+          List
+        </button>
+      </div>
+    </div>
+
+    @if (currentLibrary.items.length === 0) {
+      <div class="friend-library__state">
+        No titles match these filters.
+      </div>
+    } @else {
+      <div
+        class="friend-library__items"
+        [class.friend-library__items--list]="view() === 'list'"
+      >
+        @for (item of currentLibrary.items; track item.media.id) {
+          <a
+            class="friend-library__item"
+            [routerLink]="[
+              '/media',
+              item.media.mediaType,
+              item.media.tmdbId,
+            ]"
+          >
+            <div class="friend-library__poster">
+              @if (item.media.posterUrl) {
+                <img
+                  [src]="item.media.posterUrl"
+                  [alt]="item.media.title + ' poster'"
+                />
+              } @else {
+                <span>No poster</span>
+              }
+            </div>
+
+            <div class="friend-library__item-copy">
+              <div>
+                <span>{{ statusLabel(item.status) }}</span>
+                @if (displayYear(item.media); as year) {
+                  <small>{{ year }}</small>
+                }
+              </div>
+              <h2>{{ item.media.title }}</h2>
+              @if (item.media.originalTitle !== item.media.title) {
+                <p>{{ item.media.originalTitle }}</p>
+              }
+              @if (item.rating !== undefined) {
+                <strong>{{ item.rating.toFixed(1) }} / 10</strong>
+              } @else {
+                <small>Not rated</small>
+              }
+            </div>
+          </a>
+        }
+      </div>
+    }
+
+    @if (currentLibrary.totalPages > 1) {
+      <nav class="friend-library__pagination" aria-label="Library pages">
+        <button
+          type="button"
+          [disabled]="currentLibrary.page <= 1"
+          (click)="goToPage(currentLibrary.page - 1)"
+        >
+          Previous
+        </button>
+        <span>
+          Page {{ currentLibrary.page }} of {{ currentLibrary.totalPages }}
+        </span>
+        <button
+          type="button"
+          [disabled]="currentLibrary.page >= currentLibrary.totalPages"
+          (click)="goToPage(currentLibrary.page + 1)"
+        >
+          Next
+        </button>
+      </nav>
+    }
+  }
+</section>

@@ -53,6 +53,26 @@ describe('FriendsService', () => {
     await expect(result).resolves.toEqual(overview);
   });
 
+  it('loads public-safe friend context for a media title', async () => {
+    const context = {
+      friends: [
+        {
+          user: friendship.user,
+          status: 'watching' as const,
+          rating: 8.5,
+        },
+      ],
+    };
+    const result = service.mediaContext('tv', 1);
+    const request = http.expectOne(
+      '/api/media/tv/1/friend-context',
+    );
+
+    expect(request.request.method).toBe('GET');
+    request.flush(context);
+    await expect(result).resolves.toEqual(context);
+  });
+
   it('sends and accepts friend requests', async () => {
     const requested = service.request('dahyun.fan');
     const request = http.expectOne('/api/friends/request');
