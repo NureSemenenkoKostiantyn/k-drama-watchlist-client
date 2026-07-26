@@ -1,0 +1,70 @@
+<section class="people-search" aria-labelledby="people-search-title">
+  <header class="people-search__header">
+    <p>Phase 2 · Social</p>
+    <h1 id="people-search-title">Find people</h1>
+    <span>Search by username to discover another Drama Watch profile.</span>
+  </header>
+
+  <form
+    class="people-search__form"
+    [formGroup]="searchForm"
+    (ngSubmit)="search()"
+  >
+    <label for="people-query">Username</label>
+    <div>
+      <input
+        id="people-query"
+        formControlName="query"
+        autocomplete="off"
+        maxlength="30"
+        placeholder="dahyun.fan"
+      />
+      <button type="submit" [disabled]="isLoading()">
+        {{ isLoading() ? 'Searching…' : 'Search' }}
+      </button>
+    </div>
+    @if (
+      searchForm.controls.query.touched &&
+      searchForm.controls.query.invalid
+    ) {
+      <small>Enter 2–30 letters, numbers, underscores, or dots.</small>
+    }
+  </form>
+
+  @if (error()) {
+    <p class="people-search__error" role="alert">{{ error() }}</p>
+  }
+
+  @if (!isLoading() && hasSearched()) {
+    <section class="people-results" aria-label="People search results">
+      @for (profile of results(); track profile.id) {
+        <a
+          class="people-card"
+          [routerLink]="['/users', profile.username]"
+        >
+          @if (profile.image) {
+            <img
+              [src]="profile.image"
+              alt=""
+              width="56"
+              height="56"
+            />
+          } @else {
+            <span class="people-card__avatar" aria-hidden="true">
+              {{ initials(profile) }}
+            </span>
+          }
+          <span class="people-card__identity">
+            <strong>{{ profile.name }}</strong>
+            <span>@{{ profile.displayUsername }}</span>
+          </span>
+          <span class="people-card__action">Open profile</span>
+        </a>
+      } @empty {
+        <div class="people-search__empty">
+          No profiles start with that username.
+        </div>
+      }
+    </section>
+  }
+</section>

@@ -30,14 +30,18 @@
           <a routerLink="/wheels" routerLinkActive="is-active" ariaCurrentWhenActive="page">
             Wheels
           </a>
+          <a routerLink="/friends" routerLinkActive="is-active" ariaCurrentWhenActive="page">
+            People
+          </a>
         </nav>
         <div class="app-shell__account">
-          <span>
+          <a class="app-shell__profile-link" routerLink="/profile">
             {{
               authentication.session()?.user?.displayUsername ??
+                authentication.session()?.user?.username ??
                 authentication.session()?.user?.name
             }}
-          </span>
+          </a>
           <button type="button" (click)="signOut()" [disabled]="authentication.isPending()">
             Sign out
           </button>

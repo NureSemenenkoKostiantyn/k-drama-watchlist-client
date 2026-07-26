@@ -91,6 +91,32 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'friends',
+    title: 'Find people · Drama Watch',
+    canActivate: [profileCompleteGuard],
+    loadComponent: () =>
+      import(
+        './features/users/pages/people-search-page/people-search-page'
+      ).then(({ PeopleSearchPage }) => PeopleSearchPage),
+  },
+  {
+    path: 'profile',
+    title: 'Your profile · Drama Watch',
+    canActivate: [profileCompleteGuard],
+    loadComponent: () =>
+      import(
+        './features/users/pages/public-profile-page/public-profile-page'
+      ).then(({ PublicProfilePage }) => PublicProfilePage),
+  },
+  {
+    path: 'users/:username',
+    title: 'Profile · Drama Watch',
+    loadComponent: () =>
+      import(
+        './features/users/pages/public-profile-page/public-profile-page'
+      ).then(({ PublicProfilePage }) => PublicProfilePage),
+  },
+  {
     path: 'verify-email',
     title: 'Verify email - Drama Watch',
     loadComponent: () =>

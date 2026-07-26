@@ -1,0 +1,41 @@
+<section class="public-profile" aria-labelledby="profile-title">
+  @if (isLoading()) {
+    <div class="public-profile__state" role="status">Loading profile…</div>
+  } @else if (error()) {
+    <div class="public-profile__state public-profile__state--error" role="alert">
+      <p>{{ error() }}</p>
+      <a routerLink="/friends">Find another profile</a>
+    </div>
+  } @else if (profile(); as currentProfile) {
+    <article class="profile-card">
+      @if (currentProfile.image) {
+        <img
+          [src]="currentProfile.image"
+          alt=""
+          width="112"
+          height="112"
+        />
+      } @else {
+        <div class="profile-card__avatar" aria-hidden="true">
+          {{ initials(currentProfile) }}
+        </div>
+      }
+
+      <div class="profile-card__identity">
+        <p>{{ isOwnProfile(currentProfile) ? 'Your profile' : 'Drama Watch profile' }}</p>
+        <h1 id="profile-title">{{ currentProfile.name }}</h1>
+        <strong>@{{ currentProfile.displayUsername }}</strong>
+        <span>
+          Joined {{ currentProfile.joinedAt | date: 'MMMM yyyy' }}
+        </span>
+      </div>
+
+      <div class="profile-card__actions">
+        <a routerLink="/friends">Find people</a>
+        @if (isOwnProfile(currentProfile)) {
+          <a routerLink="/library">Open your library</a>
+        }
+      </div>
+    </article>
+  }
+</section>

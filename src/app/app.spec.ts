@@ -9,7 +9,7 @@ import { App } from './app';
 describe('App', () => {
   const authenticated = signal(false);
   const session = signal<{
-    user: { name: string; displayUsername?: string };
+    user: { name: string; username?: string; displayUsername?: string };
   } | null>(null);
   const signOut = vi.fn().mockResolvedValue(true);
 
@@ -79,5 +79,10 @@ describe('App', () => {
       '/priority',
       '/wheels',
     ]);
+    expect(
+      (fixture.nativeElement as HTMLElement)
+        .querySelector('.app-shell__profile-link')
+        ?.getAttribute('href'),
+    ).toBe('/profile');
   });
 });
