@@ -1,0 +1,66 @@
+<section class="notifications" aria-labelledby="notifications-title">
+  <header>
+    <div>
+      <p>Activity</p>
+      <h1 id="notifications-title">Notifications</h1>
+      <span>Friend requests, recommendations, and shared activity.</span>
+    </div>
+    <button
+      type="button"
+      [disabled]="
+        notifications.unreadCount() === 0 || isMarkingAll()
+      "
+      (click)="markAllRead()"
+    >
+      {{ isMarkingAll() ? 'Updating...' : 'Mark all as read' }}
+    </button>
+  </header>
+
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+
+  @if (isLoading()) {
+    <p class="state" role="status">Loading notifications...</p>
+  } @else {
+    <div class="summary">
+      <strong>{{ notifications.unreadCount() }}</strong>
+      <span>unread</span>
+    </div>
+
+    <div class="feed">
+      @for (notification of notifications.items(); track notification.id) {
+        <article [class.is-unread]="!notification.isRead">
+          <a
+            [routerLink]="target(notification)"
+            (click)="markRead(notification)"
+          >
+            <span class="mark" aria-hidden="true"></span>
+            <span class="copy">
+              <span>{{ label(notification.type) }}</span>
+              <strong>{{ message(notification) }}</strong>
+              <time [attr.datetime]="notification.createdAt">
+                {{ notification.createdAt | date: 'medium' }}
+              </time>
+            </span>
+          </a>
+          @if (!notification.isRead) {
+            <button
+              type="button"
+              [disabled]="activeId() !== null"
+              (click)="markRead(notification)"
+            >
+              Mark read
+            </button>
+          }
+        </article>
+      } @empty {
+        <div class="empty">
+          <span aria-hidden="true">✦</span>
+          <h2>You are all caught up</h2>
+          <p>New social activity will appear here.</p>
+        </div>
+      }
+    </div>
+  }
+</section>

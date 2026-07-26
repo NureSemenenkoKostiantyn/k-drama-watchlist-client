@@ -64,6 +64,10 @@ views. A compact recommendation list drives a focused detail panel; pending titl
 media-details page can suggest its current title to an accepted friend with an optional private
 message.
 
+A protected notification center at `/notifications` shows friend requests, accepted friendships,
+and received recommendations. The header bell exposes the unread count, while the feed supports
+individual and bulk read actions and links each notification to its relevant social screen.
+
 At mobile widths, authenticated users receive a persistent five-destination bottom navigation for
 Home, Search, Library, Priority, and Wheels. Dense media and library cards adapt for narrow screens,
 and primary controls use touch-friendly targets while desktop navigation and layouts remain intact.

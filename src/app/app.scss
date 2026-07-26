@@ -100,6 +100,47 @@
   color: var(--color-text);
 }
 
+.app-shell__notifications-link {
+  position: relative;
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  place-items: center;
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+.app-shell__notifications-link:hover,
+.app-shell__notifications-link.is-active {
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+}
+
+.app-shell__notifications-link svg {
+  width: 1.25rem;
+  fill: none;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.app-shell__notifications-link span {
+  position: absolute;
+  top: -0.1rem;
+  right: -0.2rem;
+  min-width: 1.15rem;
+  padding: 0.15rem 0.3rem;
+  border-radius: 999rem;
+  color: #100d18;
+  background: var(--color-accent);
+  font-size: 0.6rem;
+  font-weight: 850;
+  line-height: 1;
+  text-align: center;
+}
+
 .app-shell__account button,
 .app-shell__auth-links a {
   min-height: 2.75rem;

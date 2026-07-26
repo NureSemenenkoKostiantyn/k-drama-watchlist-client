@@ -109,6 +109,15 @@ export const routes: Routes = [
       ).then(({ SuggestionsPage }) => SuggestionsPage),
   },
   {
+    path: 'notifications',
+    title: 'Notifications - Drama Watch',
+    canActivate: [profileCompleteGuard],
+    loadComponent: () =>
+      import(
+        './features/notifications/pages/notifications-page/notifications-page'
+      ).then(({ NotificationsPage }) => NotificationsPage),
+  },
+  {
     path: 'profile',
     title: 'Your profile · Drama Watch',
     canActivate: [profileCompleteGuard],
