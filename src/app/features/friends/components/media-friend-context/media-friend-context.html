@@ -1,0 +1,61 @@
+<section class="friend-context" aria-labelledby="friend-context-title">
+  <div class="friend-context__heading">
+    <div>
+      <p>Your circle</p>
+      <h2 id="friend-context-title">Friends on this title</h2>
+    </div>
+
+    @if (averageRating(); as rating) {
+      <span class="friend-context__average">
+        <strong>{{ rating }}</strong>
+        friend average
+      </span>
+    }
+  </div>
+
+  @if (isLoading()) {
+    <p class="friend-context__state" role="status">Loading friend activity&hellip;</p>
+  } @else if (error()) {
+    <p class="friend-context__state friend-context__state--error" role="status">
+      {{ error() }}
+    </p>
+  } @else if (activities().length === 0) {
+    <p class="friend-context__state">
+      None of your friends have this title in their library yet.
+    </p>
+  } @else {
+    <div class="friend-context__grid">
+      @for (activity of activities(); track activity.user.id) {
+        <article class="friend-context__card">
+          <a
+            class="friend-context__profile"
+            [routerLink]="['/users', activity.user.username]"
+          >
+            @if (activity.user.image) {
+              <img
+                [src]="activity.user.image"
+                [alt]="activity.user.displayUsername + ' profile picture'"
+              />
+            } @else {
+              <span aria-hidden="true">{{ initials(activity) }}</span>
+            }
+
+            <span>
+              <strong>{{ activity.user.displayUsername }}</strong>
+              <small>{{ '@' + activity.user.username }}</small>
+            </span>
+          </a>
+
+          <div class="friend-context__watch">
+            <span>{{ statusLabel(activity.status) }}</span>
+            @if (activity.rating !== undefined) {
+              <strong>{{ activity.rating.toFixed(1) }} / 10</strong>
+            } @else {
+              <small>Not rated</small>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>

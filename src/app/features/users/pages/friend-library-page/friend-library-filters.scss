@@ -1,0 +1,78 @@
+.friend-library__filters {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.625rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 1.25rem;
+  background: var(--color-surface);
+}
+
+.friend-library__filters label {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.friend-library__filters label > span {
+  color: var(--color-text-muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.friend-library__filters input,
+.friend-library__filters select {
+  width: 100%;
+  min-height: 2.65rem;
+  padding: 0 0.65rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 0.7rem;
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+}
+
+.friend-library__filter-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.friend-library__filter-actions button {
+  min-height: 2.5rem;
+  padding: 0 0.85rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 999rem;
+  color: var(--color-text);
+  background: transparent;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.friend-library__filter-actions button:first-child {
+  border-color: transparent;
+  color: #100d18;
+  background: var(--color-accent);
+}
+
+.friend-library__filter-error {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #ffd1dd;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 64rem) {
+  .friend-library__filters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 36rem) {
+  .friend-library__filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -93,6 +93,9 @@ describe('MediaDetailsPage', () => {
               incomingRequests: [],
               outgoingRequests: [],
             }),
+            mediaContext: vi.fn().mockResolvedValue({
+              friends: [],
+            }),
           },
         },
         {

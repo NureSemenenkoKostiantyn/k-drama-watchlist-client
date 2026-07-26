@@ -1,0 +1,59 @@
+<section class="visibility-settings" aria-labelledby="library-visibility-title">
+  <div>
+    <p>Privacy</p>
+    <h2 id="library-visibility-title">Library visibility</h2>
+    <span>Choose who can browse your public-safe watchlist.</span>
+  </div>
+
+  @if (settings.isLoading()) {
+    <p class="visibility-settings__status" role="status">Loading settings&hellip;</p>
+  } @else {
+    <form (ngSubmit)="save()">
+      <label>
+        <input
+          type="radio"
+          value="private"
+          [formControl]="visibility"
+        />
+        <span>
+          <strong>Private</strong>
+          <small>Only you can browse it.</small>
+        </span>
+      </label>
+      <label>
+        <input
+          type="radio"
+          value="friends"
+          [formControl]="visibility"
+        />
+        <span>
+          <strong>Friends</strong>
+          <small>Only accepted friends can browse it.</small>
+        </span>
+      </label>
+      <label>
+        <input
+          type="radio"
+          value="public"
+          [formControl]="visibility"
+        />
+        <span>
+          <strong>Public</strong>
+          <small>Anyone with your profile link can browse it.</small>
+        </span>
+      </label>
+
+      <button type="submit" [disabled]="isSaving()">
+        {{ isSaving() ? 'Saving...' : 'Save visibility' }}
+      </button>
+    </form>
+  }
+
+  @if (settings.error()) {
+    <p class="visibility-settings__status visibility-settings__status--error" role="alert">
+      {{ settings.error() }}
+    </p>
+  } @else if (savedMessage()) {
+    <p class="visibility-settings__status" role="status">{{ savedMessage() }}</p>
+  }
+</section>

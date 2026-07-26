@@ -15,6 +15,7 @@ import {
 import { environment } from '../environments/environment';
 import { AuthenticationService } from './core/auth/authentication.service';
 import { NotificationsService } from './features/notifications/data-access/notifications.service';
+import { SettingsService } from './features/settings/data-access/settings.service';
 
 @Component({
   selector: 'app-root',
@@ -27,6 +28,7 @@ export class App {
   protected readonly appName = environment.appName;
   protected readonly authentication = inject(AuthenticationService);
   protected readonly notifications = inject(NotificationsService);
+  private readonly settings = inject(SettingsService);
   protected readonly notificationBadge = computed(() => {
     const count = this.notifications.unreadCount();
     return count === 0 ? null : count > 99 ? '99+' : String(count);
@@ -45,6 +47,7 @@ export class App {
         void this.notifications.refresh().catch(() => undefined);
       } else {
         this.notifications.clear();
+        this.settings.clear();
       }
     });
   }

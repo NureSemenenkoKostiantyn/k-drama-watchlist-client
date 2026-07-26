@@ -1,0 +1,102 @@
+:host {
+  display: block;
+  width: min(100%, 42rem);
+}
+
+.visibility-settings {
+  padding: clamp(1.25rem, 5vw, 2rem);
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 1.5rem;
+  background: var(--color-surface);
+}
+
+.visibility-settings p,
+.visibility-settings h2,
+.visibility-settings span {
+  margin: 0;
+}
+
+.visibility-settings > div > p {
+  color: var(--color-accent-strong);
+  font-size: 0.6875rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.visibility-settings h2 {
+  margin-top: 0.35rem;
+  font-size: 1.75rem;
+  letter-spacing: -0.04em;
+}
+
+.visibility-settings > div > span {
+  display: block;
+  margin-top: 0.4rem;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+}
+
+.visibility-settings form {
+  display: grid;
+  gap: 0.625rem;
+  margin-top: 1.25rem;
+}
+
+.visibility-settings label {
+  display: flex;
+  gap: 0.75rem;
+  align-items: start;
+  padding: 0.85rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 0.875rem;
+  cursor: pointer;
+}
+
+.visibility-settings label:has(input:checked) {
+  border-color: var(--color-accent-strong);
+  background: rgb(255 113 154 / 8%);
+}
+
+.visibility-settings input {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.15rem;
+  accent-color: var(--color-accent);
+}
+
+.visibility-settings label span {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.visibility-settings label small {
+  color: var(--color-text-muted);
+}
+
+.visibility-settings button {
+  min-height: 2.75rem;
+  justify-self: start;
+  padding: 0 1rem;
+  border: 0;
+  border-radius: 999rem;
+  color: #100d18;
+  background: var(--color-accent);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.visibility-settings button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.visibility-settings__status {
+  margin-top: 0.85rem !important;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.visibility-settings__status--error {
+  color: #ffd1dd;
+}

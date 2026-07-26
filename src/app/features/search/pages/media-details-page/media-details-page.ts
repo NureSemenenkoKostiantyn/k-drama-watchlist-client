@@ -16,6 +16,7 @@ import { readApiErrorMessage } from '../../../../core/api/api-error';
 import { AuthenticationService } from '../../../../core/auth/authentication.service';
 import { EntryCategoryPicker } from '../../../categories/components/entry-category-picker/entry-category-picker';
 import { CategoriesService } from '../../../categories/data-access/categories.service';
+import { MediaFriendContextComponent } from '../../../friends/components/media-friend-context/media-friend-context';
 import { ProgressControls } from '../../../library/components/progress-controls/progress-controls';
 import { LibraryService } from '../../../library/data-access/library.service';
 import {
@@ -35,6 +36,7 @@ import { MediaDetails, MediaType } from '../../models/media';
     ReactiveFormsModule,
     RouterLink,
     EntryCategoryPicker,
+    MediaFriendContextComponent,
     ProgressControls,
     ShareCardCreator,
     SuggestToFriend,

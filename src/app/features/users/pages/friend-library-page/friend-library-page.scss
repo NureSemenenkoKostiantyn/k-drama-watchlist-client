@@ -1,0 +1,214 @@
+:host {
+  display: block;
+}
+
+.friend-library {
+  padding: clamp(1.25rem, 5vw, 3rem) 0 clamp(4rem, 8vw, 7rem);
+}
+
+.friend-library__back {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.friend-library__header {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1.25rem;
+  padding: clamp(1rem, 4vw, 1.75rem);
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at 90% 0%, rgb(255 113 154 / 14%), transparent 16rem),
+    var(--color-surface);
+}
+
+.friend-library__header img,
+.friend-library__avatar {
+  flex: 0 0 4.5rem;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+}
+
+.friend-library__header img {
+  object-fit: cover;
+}
+
+.friend-library__avatar {
+  display: grid;
+  place-items: center;
+  color: #100d18;
+  background: linear-gradient(135deg, var(--color-accent), #ffd0df);
+  font-size: 1.25rem;
+  font-weight: 850;
+}
+
+.friend-library__header p,
+.friend-library__header h1,
+.friend-library__header span,
+.friend-library__toolbar p,
+.friend-library__item-copy h2,
+.friend-library__item-copy p {
+  margin: 0;
+}
+
+.friend-library__header p {
+  color: var(--color-accent-strong);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.friend-library__header h1 {
+  margin-top: 0.25rem;
+  font-size: clamp(1.75rem, 5vw, 3rem);
+  letter-spacing: -0.045em;
+}
+
+.friend-library__header span {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.friend-library__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 1.25rem 0 0.75rem;
+}
+
+.friend-library__toolbar p {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.friend-library__toolbar div {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.friend-library__toolbar button,
+.friend-library__pagination button {
+  min-height: 2.35rem;
+  padding: 0 0.8rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 999rem;
+  color: var(--color-text);
+  background: transparent;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.friend-library__toolbar button.is-active {
+  border-color: transparent;
+  color: #100d18;
+  background: var(--color-accent);
+}
+
+.friend-library__items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+  gap: 0.875rem;
+}
+
+.friend-library__item {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+  overflow: hidden;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 1rem;
+  color: inherit;
+  background: var(--color-surface);
+}
+
+.friend-library__poster {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  place-items: center;
+  color: var(--color-text-muted);
+  background: var(--color-surface-raised);
+}
+
+.friend-library__poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.friend-library__item-copy {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+  padding: 1rem 1.125rem 1.125rem;
+}
+
+.friend-library__item-copy > div {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.friend-library__item-copy span {
+  color: var(--color-accent-strong);
+  font-size: 0.65rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.friend-library__item-copy small,
+.friend-library__item-copy p {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+}
+
+.friend-library__item-copy h2 {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.friend-library__item-copy > strong {
+  margin-top: 0.15rem;
+  font-size: 0.82rem;
+}
+
+.friend-library__items--list {
+  grid-template-columns: 1fr;
+}
+
+.friend-library__items--list .friend-library__item {
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  grid-template-rows: 1fr;
+}
+
+.friend-library__items--list .friend-library__poster {
+  aspect-ratio: 2 / 3;
+}
+
+.friend-library__items--list .friend-library__item-copy {
+  align-content: center;
+  padding: 0.875rem 1rem;
+}
+
+@media (max-width: 32rem) {
+  .friend-library__header {
+    align-items: start;
+  }
+
+  .friend-library__header img,
+  .friend-library__avatar {
+    flex-basis: 3.5rem;
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+}

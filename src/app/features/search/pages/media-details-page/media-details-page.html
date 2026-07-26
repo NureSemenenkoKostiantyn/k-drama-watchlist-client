@@ -117,6 +117,11 @@
         </div>
       </div>
 
+      <app-media-friend-context
+        [mediaType]="item.mediaType"
+        [tmdbId]="item.tmdbId"
+      />
+
       <app-suggest-to-friend [media]="item" />
 
       @if (currentEntry(); as entry) {
