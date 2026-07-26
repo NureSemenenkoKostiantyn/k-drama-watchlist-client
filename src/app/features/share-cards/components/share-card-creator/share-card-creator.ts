@@ -8,7 +8,10 @@ import {
   signal,
 } from '@angular/core';
 
-import { ShareCardExportService } from '../../data-access/share-card-export.service';
+import {
+  ShareCardDelivery,
+  ShareCardExportService,
+} from '../../data-access/share-card-export.service';
 import {
   ShareCardFormat,
   ShareCardSource,
@@ -40,7 +43,11 @@ export class ShareCardCreator {
   protected readonly includeDescription = signal(false);
   protected readonly includeProgress = signal(false);
   protected readonly includeUsername = signal(true);
+  protected readonly isSharing = signal(false);
   protected readonly isDownloading = signal(false);
+  protected readonly isExporting = computed(
+    () => this.isSharing() || this.isDownloading(),
+  );
   protected readonly exportMessage = signal<string | null>(null);
   protected readonly exportError = signal<string | null>(null);
   protected readonly templateOptions = computed<TemplateOption[]>(() => {
@@ -161,7 +168,7 @@ export class ShareCardCreator {
   protected async download(): Promise<void> {
     const source = this.source();
 
-    if (!source || this.isDownloading()) {
+    if (!source || this.isExporting()) {
       return;
     }
 
@@ -191,6 +198,40 @@ export class ShareCardCreator {
       this.isDownloading.set(false);
     }
   }
+
+  protected async share(): Promise<void> {
+    const source = this.source();
+
+    if (!source || this.isExporting()) {
+      return;
+    }
+
+    this.isSharing.set(true);
+    this.exportMessage.set(null);
+    this.exportError.set(null);
+
+    try {
+      const delivery = await this.exporter.share({
+        source,
+        configuration: {
+          template: this.template(),
+          format: this.format(),
+          theme: this.theme(),
+          includeRating: this.includeRating(),
+          includeDescription: this.includeDescription(),
+          includeProgress: this.includeProgress(),
+          includeUsername: this.includeUsername(),
+        },
+      });
+      this.exportMessage.set(shareMessage(delivery));
+    } catch {
+      this.exportError.set(
+        'The card could not be shared. You can still download the PNG.',
+      );
+    } finally {
+      this.isSharing.set(false);
+    }
+  }
 }
 
 function defaultTemplate(source: ShareCardSource): ShareCardTemplate {
@@ -217,4 +258,17 @@ function readSelectValue(event: Event): string | null {
   return event.target instanceof HTMLSelectElement
     ? event.target.value
     : null;
+}
+
+function shareMessage(delivery: ShareCardDelivery): string | null {
+  switch (delivery) {
+    case 'shared':
+      return 'Your card was shared.';
+    case 'copied':
+      return 'PNG copied. Paste it into your post or message.';
+    case 'downloaded':
+      return 'Sharing is unavailable here, so the PNG was downloaded.';
+    case 'cancelled':
+      return null;
+  }
 }

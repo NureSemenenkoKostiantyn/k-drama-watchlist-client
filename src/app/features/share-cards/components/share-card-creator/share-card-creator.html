@@ -5,7 +5,7 @@
         <p>Made for sharing</p>
         <h2 id="share-card-title">Create a card</h2>
       </div>
-      <span>PNG · no upload required</span>
+      <span>Share or download · no upload required</span>
     </header>
 
     <div class="share-card-creator__workspace">
@@ -88,9 +88,23 @@
           </p>
         }
 
-        <button type="button" [disabled]="isDownloading()" (click)="download()">
-          {{ isDownloading() ? 'Preparing PNG…' : 'Download PNG' }}
-        </button>
+        <div class="share-card-controls__actions">
+          <button
+            type="button"
+            [disabled]="isExporting()"
+            (click)="share()"
+          >
+            {{ isSharing() ? 'Preparing card…' : 'Share card' }}
+          </button>
+          <button
+            type="button"
+            class="share-card-controls__secondary"
+            [disabled]="isExporting()"
+            (click)="download()"
+          >
+            {{ isDownloading() ? 'Preparing PNG…' : 'Download PNG' }}
+          </button>
+        </div>
         @if (exportMessage()) {
           <p class="share-card-controls__success" role="status">
             {{ exportMessage() }}

@@ -1,7 +1,9 @@
 import {
   buildShareCardSvg,
   createShareCardFilename,
+  deliverShareCardBlob,
 } from './share-card-export.service';
+import { vi } from 'vitest';
 
 describe('share card export', () => {
   it.each([
@@ -70,5 +72,52 @@ describe('share card export', () => {
       'crash-landing-on-you',
     );
     expect(createShareCardFilename('도깨비')).toBe('drama-watch-card');
+  });
+
+  it('shares the generated PNG as a file when native sharing supports it', async () => {
+    const share = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('navigator', {
+      canShare: vi.fn().mockReturnValue(true),
+      share,
+    });
+
+    await expect(
+      deliverShareCardBlob(
+        new Blob(['png'], { type: 'image/png' }),
+        'goblin-square.png',
+        'Goblin',
+      ),
+    ).resolves.toBe('shared');
+
+    expect(share).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Goblin · Drama Watch',
+        files: [expect.objectContaining({ name: 'goblin-square.png' })],
+      }),
+    );
+    vi.unstubAllGlobals();
+  });
+
+  it('copies the PNG when native file sharing is unavailable', async () => {
+    const write = vi.fn().mockResolvedValue(undefined);
+    class TestClipboardItem {
+      constructor(readonly items: Record<string, Blob>) {}
+    }
+    vi.stubGlobal('navigator', {
+      canShare: vi.fn().mockReturnValue(false),
+      clipboard: { write },
+    });
+    vi.stubGlobal('ClipboardItem', TestClipboardItem);
+
+    await expect(
+      deliverShareCardBlob(
+        new Blob(['png'], { type: 'image/png' }),
+        'goblin-square.png',
+        'Goblin',
+      ),
+    ).resolves.toBe('copied');
+
+    expect(write).toHaveBeenCalledOnce();
+    vi.unstubAllGlobals();
   });
 });
