@@ -17,7 +17,10 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
+import { AuthenticationService } from '../../../../core/auth/authentication.service';
 import { LibraryService } from '../../../library/data-access/library.service';
+import { ShareCardCreator } from '../../../share-cards/components/share-card-creator/share-card-creator';
+import { ShareCardSource } from '../../../share-cards/models/share-card';
 import { WheelsService } from '../../data-access/wheels.service';
 import {
   WheelItem,
@@ -46,6 +49,7 @@ const fullRotations = 6;
     DatePipe,
     ReactiveFormsModule,
     RouterLink,
+    ShareCardCreator,
   ],
   templateUrl: './wheel-page.html',
   styleUrls: [
@@ -53,6 +57,7 @@ const fullRotations = 6;
     './wheel-animation.scss',
     './wheel-items.scss',
     './wheel-history.scss',
+    './wheel-share.scss',
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -60,6 +65,7 @@ export class WheelPage implements OnInit, OnDestroy {
   private readonly formBuilder = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly authentication = inject(AuthenticationService);
   private spinTimer: ReturnType<typeof setTimeout> | undefined;
   private readonly wheelId = this.route.snapshot.paramMap.get('wheelId') ?? '';
   protected readonly library = inject(LibraryService);
@@ -69,6 +75,7 @@ export class WheelPage implements OnInit, OnDestroy {
   protected readonly wheelRotation = signal(0);
   protected readonly pendingSpin = signal<WheelSpin | null>(null);
   protected readonly winner = signal<WheelSpin | null>(null);
+  protected readonly winnerShareOpen = signal(false);
   protected readonly pendingDelete = signal(false);
   protected readonly pendingHistoryReset = signal(false);
   protected readonly wheel = this.wheels.activeWheel;
@@ -86,6 +93,28 @@ export class WheelPage implements OnInit, OnDestroy {
   protected readonly wheelBackground = computed(() =>
     buildWheelBackground(this.enabledItems()),
   );
+  protected readonly winnerShareSource = computed<ShareCardSource | null>(() => {
+    const spin = this.winner();
+    const wheel = this.wheel();
+
+    if (!spin || !wheel) {
+      return null;
+    }
+
+    const item = wheel.items.find(
+      (candidate) => candidate.id === spin.selectedItem.wheelItemId,
+    );
+    const user = this.authentication.session()?.user;
+
+    return {
+      kind: 'wheel_result',
+      title: spin.selectedItem.title,
+      posterUrl: spin.selectedItem.posterUrl,
+      backdropUrl: item?.media.backdropUrl,
+      username: user?.displayUsername ?? user?.username ?? user?.name,
+      wheelTitle: wheel.title,
+    };
+  });
   protected readonly settingsForm = this.formBuilder.nonNullable.group({
     title: ['', [Validators.required, Validators.maxLength(100)]],
     description: ['', [Validators.maxLength(1000)]],
@@ -239,6 +268,7 @@ export class WheelPage implements OnInit, OnDestroy {
 
     this.clearSpinTimer();
     this.winner.set(null);
+    this.winnerShareOpen.set(false);
     this.pendingSpin.set(null);
     this.isSpinning.set(true);
     const spin = await this.wheels.spin(this.wheelId);
@@ -291,6 +321,11 @@ export class WheelPage implements OnInit, OnDestroy {
 
   protected closeWinner(): void {
     this.winner.set(null);
+    this.winnerShareOpen.set(false);
+  }
+
+  protected closeWinnerShare(): void {
+    this.winnerShareOpen.set(false);
   }
 
   protected async startWinner(): Promise<void> {
@@ -314,6 +349,7 @@ export class WheelPage implements OnInit, OnDestroy {
 
     if (entry) {
       this.winner.set(null);
+      this.winnerShareOpen.set(false);
     }
   }
 
@@ -329,6 +365,7 @@ export class WheelPage implements OnInit, OnDestroy {
     if (reset) {
       this.pendingHistoryReset.set(false);
       this.winner.set(null);
+      this.winnerShareOpen.set(false);
     }
   }
 

@@ -1,0 +1,63 @@
+.media-share {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: end;
+  padding: 0 clamp(1.25rem, 4vw, 3rem) clamp(1.25rem, 4vw, 3rem);
+}
+
+.media-share p,
+.media-share h2,
+.media-share span {
+  margin: 0;
+}
+
+.media-share p {
+  color: var(--color-accent-strong);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.media-share h2 {
+  margin-top: 0.375rem;
+  font-size: 2rem;
+  letter-spacing: -0.035em;
+}
+
+.media-share span {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+}
+
+.media-share > button {
+  min-height: 2.65rem;
+  padding: 0 1rem;
+  border: 0;
+  border-radius: 999rem;
+  color: #100d18;
+  background: var(--color-accent);
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.media-share app-share-card-creator {
+  grid-column: 1 / -1;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 42rem) {
+  .media-share {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .media-share > button {
+    justify-self: start;
+  }
+}

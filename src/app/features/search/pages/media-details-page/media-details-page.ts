@@ -13,6 +13,7 @@ import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { readApiErrorMessage } from '../../../../core/api/api-error';
+import { AuthenticationService } from '../../../../core/auth/authentication.service';
 import { EntryCategoryPicker } from '../../../categories/components/entry-category-picker/entry-category-picker';
 import { CategoriesService } from '../../../categories/data-access/categories.service';
 import { ProgressControls } from '../../../library/components/progress-controls/progress-controls';
@@ -22,6 +23,8 @@ import {
   LibraryEntry,
   WatchStatus,
 } from '../../../library/models/library';
+import { ShareCardCreator } from '../../../share-cards/components/share-card-creator/share-card-creator';
+import { ShareCardSource } from '../../../share-cards/models/share-card';
 import { MediaService } from '../../data-access/media.service';
 import { MediaDetails, MediaType } from '../../models/media';
 
@@ -32,15 +35,17 @@ import { MediaDetails, MediaType } from '../../models/media';
     RouterLink,
     EntryCategoryPicker,
     ProgressControls,
+    ShareCardCreator,
   ],
   templateUrl: './media-details-page.html',
-  styleUrl: './media-details-page.scss',
+  styleUrls: ['./media-details-page.scss', './media-share.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MediaDetailsPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly mediaService = inject(MediaService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly authentication = inject(AuthenticationService);
   private syncedEntryId: string | null = null;
   protected readonly library = inject(LibraryService);
   protected readonly categories = inject(CategoriesService);
@@ -51,9 +56,39 @@ export class MediaDetailsPage implements OnInit {
   protected readonly isUpdatingLibrary = signal(false);
   protected readonly isSavingTracking = signal(false);
   protected readonly savedMessage = signal<string | null>(null);
+  protected readonly shareCardOpen = signal(false);
   protected readonly currentEntry = computed(() => {
     const media = this.media();
     return media ? this.library.entryFor(media.mediaType, media.tmdbId) : undefined;
+  });
+  protected readonly shareCardSource = computed<ShareCardSource | null>(() => {
+    const entry = this.currentEntry();
+
+    if (!entry) {
+      return null;
+    }
+
+    const user = this.authentication.session()?.user;
+
+    return {
+      kind: 'media',
+      title: entry.media.title,
+      originalTitle: entry.media.originalTitle,
+      posterUrl: entry.media.posterUrl,
+      backdropUrl: entry.media.backdropUrl,
+      username: user?.displayUsername ?? user?.username ?? user?.name,
+      status: entry.status,
+      rating: entry.rating,
+      description: entry.description,
+      progress: entry.progress
+        ? {
+            currentSeason: entry.progress.currentSeason,
+            currentEpisode: entry.progress.currentEpisode,
+            completedEpisodes: entry.progress.completedEpisodes,
+            totalEpisodes: entry.progress.totalEpisodesSnapshot,
+          }
+        : undefined,
+    };
   });
   protected readonly personalForm = this.formBuilder.group({
     rating: [null as number | null, [Validators.min(1), Validators.max(10)]],

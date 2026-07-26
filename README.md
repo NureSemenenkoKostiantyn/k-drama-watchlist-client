@@ -40,6 +40,11 @@ library titles, reorder or disable candidates, adjust weights, avoid the immedia
 winner, and review or reset spin history. The backend selects the winner first; the Angular wheel
 then animates to that exact result and respects reduced-motion preferences.
 
+Share cards are rendered entirely in the browser from personal media details or a server-selected
+wheel winner. Users can choose square, story, or landscape output and light, dark, or poster themes,
+then download a full-size PNG. Rating, progress, and username fields are configurable. Private
+descriptions are excluded unless the user explicitly enables them for that card.
+
 ## Requirements
 
 - Node.js 22.12 or newer within the Node 22 release line
@@ -148,6 +153,14 @@ Private-wheel code is organized under:
 src/app/features/wheels/data-access/
 src/app/features/wheels/models/
 src/app/features/wheels/pages/
+```
+
+Share-card preview and PNG export code is organized under:
+
+```text
+src/app/features/share-cards/components/
+src/app/features/share-cards/data-access/
+src/app/features/share-cards/models/
 ```
 
 Anonymous users are redirected to `/login`. New accounts first continue to `/verify-email`; the

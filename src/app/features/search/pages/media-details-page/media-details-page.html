@@ -204,6 +204,26 @@
             <p class="tracking__saved" role="status">{{ savedMessage() }}</p>
           }
         </section>
+
+        <section class="media-share" aria-labelledby="media-share-title">
+          <div>
+            <p>Share your watch</p>
+            <h2 id="media-share-title">Create a share card</h2>
+            <span>
+              Export a rating, progress, completed, or recommendation card as a PNG.
+            </span>
+          </div>
+          <button
+            type="button"
+            [attr.aria-expanded]="shareCardOpen()"
+            (click)="shareCardOpen.set(!shareCardOpen())"
+          >
+            {{ shareCardOpen() ? 'Close card creator' : 'Create card' }}
+          </button>
+          @if (shareCardOpen() && shareCardSource(); as source) {
+            <app-share-card-creator [source]="source" />
+          }
+        </section>
       }
 
       @if (regularSeasons().length > 0) {

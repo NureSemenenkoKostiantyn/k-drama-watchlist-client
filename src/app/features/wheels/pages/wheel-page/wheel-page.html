@@ -347,14 +347,44 @@
         <img [src]="completedSpin.selectedItem.posterUrl" alt="" />
       }
       <h2 id="wheel-winner-title">{{ completedSpin.selectedItem.title }}</h2>
-      <button
-        class="wheel-winner__watch"
-        type="button"
-        [disabled]="isSaving()"
-        (click)="startWinner()"
-      >
-        Start watching
-      </button>
+      <div class="wheel-winner__actions">
+        <button
+          class="wheel-winner__watch"
+          type="button"
+          [disabled]="isSaving()"
+          (click)="startWinner()"
+        >
+          Start watching
+        </button>
+        <button
+          class="wheel-winner__share"
+          type="button"
+          (click)="winnerShareOpen.set(true)"
+        >
+          Create winner card
+        </button>
+      </div>
+    </section>
+  }
+
+  @if (winnerShareOpen() && winnerShareSource(); as source) {
+    <section
+      class="wheel-share-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Create wheel winner card"
+    >
+      <div class="wheel-share-overlay__content">
+        <button
+          type="button"
+          class="wheel-share-overlay__close"
+          aria-label="Close share card creator"
+          (click)="closeWinnerShare()"
+        >
+          ×
+        </button>
+        <app-share-card-creator [source]="source" />
+      </div>
     </section>
   }
 </section>
