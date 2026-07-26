@@ -1,0 +1,171 @@
+:host,
+article {
+  display: block;
+  min-height: 100%;
+}
+
+article {
+  position: relative;
+  overflow: hidden;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 18rem;
+  opacity: 0.18;
+  mask-image: linear-gradient(#000 20%, transparent);
+}
+
+.backdrop img,
+.poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(8rem, 11rem) minmax(0, 1fr);
+  gap: clamp(1.25rem, 3vw, 2.25rem);
+  padding: clamp(1.25rem, 4vw, 3rem);
+}
+
+.poster {
+  display: grid;
+  overflow: hidden;
+  aspect-ratio: 2 / 3;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 0.85rem;
+  place-items: center;
+  align-self: start;
+  color: var(--color-text-muted);
+  background: var(--color-surface-raised);
+  text-decoration: none;
+}
+
+.body {
+  min-width: 0;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+}
+
+.meta > span:first-child {
+  padding: 0.25rem 0.55rem;
+  border-radius: 999rem;
+  background: rgb(255 255 255 / 7%);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.meta > span:first-child.is-accepted {
+  color: var(--color-accent-strong);
+}
+
+h2 {
+  margin: 0.7rem 0 0;
+  font-size: clamp(2rem, 5vw, 3.8rem);
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+}
+
+:is(.original, .friend, .no-message) {
+  color: var(--color-text-muted);
+}
+
+.original {
+  margin: 0.45rem 0 0;
+}
+
+.friend {
+  margin: 1.35rem 0 0;
+}
+
+.friend a {
+  color: var(--color-text);
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.friend a span {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+blockquote {
+  display: grid;
+  gap: 0.4rem;
+  margin: 1.25rem 0 0;
+  padding: 1rem;
+  border-left: 0.18rem solid var(--color-accent);
+  background: rgb(255 255 255 / 4%);
+  line-height: 1.6;
+}
+
+blockquote span {
+  color: var(--color-accent-strong);
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.no-message {
+  margin-top: 1.25rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1.5rem;
+}
+
+.actions :is(button, a) {
+  display: inline-grid;
+  min-height: 2.7rem;
+  padding: 0 1rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 999rem;
+  place-items: center;
+  color: var(--color-text);
+  background: transparent;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.actions button.is-primary {
+  border-color: transparent;
+  color: #100d18;
+  background: var(--color-accent);
+}
+
+.actions button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+@media (max-width: 50rem) {
+  .grid {
+    grid-template-columns: 7rem minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 34rem) {
+  .grid {
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  :is(.friend, blockquote, .no-message, .actions) {
+    grid-column: 1 / -1;
+  }
+}

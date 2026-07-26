@@ -100,6 +100,15 @@ export const routes: Routes = [
       ).then(({ PeopleSearchPage }) => PeopleSearchPage),
   },
   {
+    path: 'suggestions',
+    title: 'Suggestions · Drama Watch',
+    canActivate: [profileCompleteGuard],
+    loadComponent: () =>
+      import(
+        './features/suggestions/pages/suggestions-page/suggestions-page'
+      ).then(({ SuggestionsPage }) => SuggestionsPage),
+  },
+  {
     path: 'profile',
     title: 'Your profile · Drama Watch',
     canActivate: [profileCompleteGuard],

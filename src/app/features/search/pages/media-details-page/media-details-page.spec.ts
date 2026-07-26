@@ -7,6 +7,8 @@ import { vi } from 'vitest';
 import { CategoriesService } from '../../../categories/data-access/categories.service';
 import { AuthenticationService } from '../../../../core/auth/authentication.service';
 import { LibraryService } from '../../../library/data-access/library.service';
+import { FriendsService } from '../../../friends/data-access/friends.service';
+import { SuggestionsService } from '../../../suggestions/data-access/suggestions.service';
 import { MediaService } from '../../data-access/media.service';
 import { MediaDetailsPage } from './media-details-page';
 
@@ -81,6 +83,22 @@ describe('MediaDetailsPage', () => {
             load: vi.fn().mockResolvedValue(true),
             entryFor: vi.fn().mockReturnValue(undefined),
             setStatus: vi.fn().mockResolvedValue(null),
+          },
+        },
+        {
+          provide: FriendsService,
+          useValue: {
+            list: vi.fn().mockResolvedValue({
+              friends: [],
+              incomingRequests: [],
+              outgoingRequests: [],
+            }),
+          },
+        },
+        {
+          provide: SuggestionsService,
+          useValue: {
+            create: vi.fn(),
           },
         },
       ],

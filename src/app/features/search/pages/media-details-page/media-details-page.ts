@@ -25,6 +25,7 @@ import {
 } from '../../../library/models/library';
 import { ShareCardCreator } from '../../../share-cards/components/share-card-creator/share-card-creator';
 import { ShareCardSource } from '../../../share-cards/models/share-card';
+import { SuggestToFriend } from '../../../suggestions/components/suggest-to-friend/suggest-to-friend';
 import { MediaService } from '../../data-access/media.service';
 import { MediaDetails, MediaType } from '../../models/media';
 
@@ -36,6 +37,7 @@ import { MediaDetails, MediaType } from '../../models/media';
     EntryCategoryPicker,
     ProgressControls,
     ShareCardCreator,
+    SuggestToFriend,
   ],
   templateUrl: './media-details-page.html',
   styleUrls: [
