@@ -10,9 +10,28 @@ interface ShareCardAssets {
   backdropDataUrl?: string;
 }
 
+export type ShareCardDelivery =
+  | 'shared'
+  | 'copied'
+  | 'downloaded'
+  | 'cancelled';
+
 @Injectable({ providedIn: 'root' })
 export class ShareCardExportService {
   async download(request: ShareCardExportRequest): Promise<void> {
+    const { blob, filename } = await this.render(request);
+    downloadBlob(blob, filename);
+  }
+
+  async share(request: ShareCardExportRequest): Promise<ShareCardDelivery> {
+    const { blob, filename } = await this.render(request);
+
+    return deliverShareCardBlob(blob, filename, request.source.title);
+  }
+
+  private async render(
+    request: ShareCardExportRequest,
+  ): Promise<{ blob: Blob; filename: string }> {
     const [posterDataUrl, backdropDataUrl] = await Promise.all([
       loadImageDataUrl(request.source.posterUrl),
       loadImageDataUrl(request.source.backdropUrl),
@@ -39,14 +58,59 @@ export class ShareCardExportService {
 
       context.drawImage(image, 0, 0, dimensions.width, dimensions.height);
       const png = await canvasToBlob(canvas);
-      downloadBlob(
-        png,
-        `${createShareCardFilename(request.source.title)}-${request.configuration.format}.png`,
-      );
+
+      return {
+        blob: png,
+        filename: `${createShareCardFilename(request.source.title)}-${request.configuration.format}.png`,
+      };
     } finally {
       URL.revokeObjectURL(svgUrl);
     }
   }
+}
+
+export async function deliverShareCardBlob(
+  blob: Blob,
+  filename: string,
+  title: string,
+): Promise<ShareCardDelivery> {
+  const file = new File([blob], filename, { type: 'image/png' });
+  const shareData: ShareData = {
+    title: `${title} · Drama Watch`,
+    text: `My Drama Watch card for ${title}`,
+    files: [file],
+  };
+
+  if (
+    typeof navigator.share === 'function' &&
+    navigator.canShare?.(shareData)
+  ) {
+    try {
+      await navigator.share(shareData);
+      return 'shared';
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return 'cancelled';
+      }
+    }
+  }
+
+  if (
+    typeof ClipboardItem !== 'undefined' &&
+    typeof navigator.clipboard?.write === 'function'
+  ) {
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob }),
+      ]);
+      return 'copied';
+    } catch {
+      // Fall back to a download when clipboard permission is unavailable.
+    }
+  }
+
+  downloadBlob(blob, filename);
+  return 'downloaded';
 }
 
 export function buildShareCardSvg(

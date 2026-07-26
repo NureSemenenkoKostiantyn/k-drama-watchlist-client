@@ -116,7 +116,13 @@
   color: #ffd1dd;
 }
 
-.share-card-controls > button {
+.share-card-controls__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.share-card-controls__actions button {
   justify-self: start;
   min-height: 2.65rem;
   padding: 0 1rem;
@@ -129,7 +135,13 @@
   cursor: pointer;
 }
 
-.share-card-controls > button:disabled {
+.share-card-controls__actions .share-card-controls__secondary {
+  border: 0.0625rem solid var(--color-border);
+  color: var(--color-text);
+  background: transparent;
+}
+
+.share-card-controls__actions button:disabled {
   cursor: wait;
   opacity: 0.55;
 }

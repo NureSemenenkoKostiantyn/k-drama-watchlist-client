@@ -47,8 +47,10 @@ then animates to that exact result and respects reduced-motion preferences.
 
 Share cards are rendered entirely in the browser from personal media details or a server-selected
 wheel winner. Users can choose square, story, or landscape output and light, dark, or poster themes,
-then download a full-size PNG. Rating, progress, and username fields are configurable. Private
-descriptions are excluded unless the user explicitly enables them for that card.
+then share the generated PNG through the browser or operating-system share sheet, copy it when
+image clipboard access is available, or download it as a fallback. Rating, progress, and username
+fields are configurable. Private descriptions are excluded unless the user explicitly enables
+them for that card. Cards are never uploaded by this flow.
 
 Phase 2 begins with public profiles at `/users/:username`, the signed-in user's `/profile` shortcut,
 and a protected friendship hub at `/friends`. The hub separates incoming requests, accepted friends,

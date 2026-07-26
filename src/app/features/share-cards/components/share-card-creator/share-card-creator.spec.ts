@@ -9,15 +9,17 @@ describe('ShareCardCreator', () => {
   let componentRef: ComponentRef<ShareCardCreator>;
   let fixture: ComponentFixture<ShareCardCreator>;
   const download = vi.fn().mockResolvedValue(undefined);
+  const share = vi.fn().mockResolvedValue('shared');
 
   beforeEach(async () => {
     download.mockClear();
+    share.mockClear();
     await TestBed.configureTestingModule({
       imports: [ShareCardCreator],
       providers: [
         {
           provide: ShareCardExportService,
-          useValue: { download },
+          useValue: { download, share },
         },
       ],
     }).compileComponents();
@@ -67,5 +69,27 @@ describe('ShareCardCreator', () => {
         }),
       }),
     );
+  });
+
+  it('shares the generated PNG with the selected configuration', async () => {
+    const root = componentRef.location.nativeElement as HTMLElement;
+    const shareButton = Array.from(root.querySelectorAll('button')).find(
+      (button) => button.textContent?.includes('Share card'),
+    );
+
+    shareButton?.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(share).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: expect.objectContaining({ title: 'Goblin' }),
+        configuration: expect.objectContaining({
+          template: 'rating',
+          includeDescription: false,
+        }),
+      }),
+    );
+    expect(root.textContent).toContain('Your card was shared.');
   });
 });
