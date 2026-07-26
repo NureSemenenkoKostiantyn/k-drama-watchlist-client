@@ -58,6 +58,12 @@ Users can send, accept, decline, cancel, and remove relationships without the br
 owner ID. Public profile and friendship UI use only the public API contract and never receive email
 addresses or other Better Auth internals.
 
+The social suggestion slice adds a split inbox at `/suggestions` with Pending, History, and Sent
+views. A compact recommendation list drives a focused detail panel; pending titles can be added to
+`to_watch` or dismissed, while accepted suggestions preserve an existing personal entry. Every
+media-details page can suggest its current title to an accepted friend with an optional private
+message.
+
 At mobile widths, authenticated users receive a persistent five-destination bottom navigation for
 Home, Search, Library, Priority, and Wheels. Dense media and library cards adapt for narrow screens,
 and primary controls use touch-friendly targets while desktop navigation and layouts remain intact.

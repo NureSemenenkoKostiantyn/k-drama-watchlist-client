@@ -1,0 +1,90 @@
+@let item = suggestion();
+
+<article>
+  @if (item.media.backdropUrl) {
+    <div class="backdrop" aria-hidden="true">
+      <img [src]="item.media.backdropUrl" alt="" />
+    </div>
+  }
+
+  <div class="grid">
+    <a
+      class="poster"
+      [routerLink]="['/media', item.media.mediaType, item.media.tmdbId]"
+    >
+      @if (item.media.posterUrl) {
+        <img
+          [src]="item.media.posterUrl"
+          [alt]="item.media.title + ' poster'"
+        />
+      } @else {
+        <span>No poster</span>
+      }
+    </a>
+
+    <div class="body">
+      <div class="meta">
+        <span [class]="'is-' + item.status">
+          {{ statusLabel(item.status) }}
+        </span>
+        <span>
+          {{ item.media.mediaType === 'tv' ? 'TV series' : 'Movie' }}
+          @if (year(item); as releaseYear) {
+            · {{ releaseYear }}
+          }
+        </span>
+      </div>
+
+      <h2>{{ item.media.title }}</h2>
+      @if (item.media.originalTitle !== item.media.title) {
+        <p class="original">{{ item.media.originalTitle }}</p>
+      }
+
+      <p class="friend">
+        {{ view() === 'sent' ? 'Sent to' : 'Suggested by' }}
+        <a [routerLink]="['/users', item.user.username]">
+          {{ item.user.name }}
+          <span>&#64;{{ item.user.displayUsername }}</span>
+        </a>
+      </p>
+
+      @if (item.message) {
+        <blockquote>
+          <span>Personal note</span>
+          {{ item.message }}
+        </blockquote>
+      } @else {
+        <p class="no-message">No personal message was included.</p>
+      }
+
+      <div class="actions">
+        @if (view() === 'pending' && item.status === 'pending') {
+          <button
+            type="button"
+            class="is-primary"
+            [disabled]="acting()"
+            (click)="acceptSuggestion.emit(item)"
+          >
+            {{ acting() ? 'Adding...' : 'Add to watchlist' }}
+          </button>
+          <button
+            type="button"
+            [disabled]="acting()"
+            (click)="dismissSuggestion.emit(item)"
+          >
+            Dismiss
+          </button>
+        }
+        <a
+          [routerLink]="[
+            '/media',
+            item.media.mediaType,
+            item.media.tmdbId
+          ]"
+        >
+          Open title
+        </a>
+      </div>
+    </div>
+  </div>
+</article>

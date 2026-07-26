@@ -1,0 +1,49 @@
+<section class="suggest-friend" aria-labelledby="suggest-friend-title">
+  <header>
+    <p>Recommend it</p>
+    <h2 id="suggest-friend-title">Suggest to a friend</h2>
+  </header>
+
+  @if (isLoadingFriends()) {
+    <p class="suggest-friend__muted" role="status">Loading friends...</p>
+  } @else if (friends().length === 0) {
+    <p class="suggest-friend__muted">
+      Add a friend before sharing recommendations.
+      <a routerLink="/friends">Find people</a>
+    </p>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="send()">
+      <label>
+        Friend
+        <select formControlName="username">
+          @for (friendship of friends(); track friendship.id) {
+            <option [value]="friendship.user.username">
+              {{ friendship.user.name }} (&#64;{{ friendship.user.displayUsername }})
+            </option>
+          }
+        </select>
+      </label>
+
+      <label>
+        Message <span>Optional</span>
+        <textarea
+          formControlName="message"
+          maxlength="500"
+          rows="3"
+          placeholder="Why should they watch it?"
+        ></textarea>
+      </label>
+
+      <button type="submit" [disabled]="form.invalid || isSending()">
+        {{ isSending() ? 'Sending...' : 'Send suggestion' }}
+      </button>
+    </form>
+  }
+
+  @if (error()) {
+    <p class="suggest-friend__error" role="alert">{{ error() }}</p>
+  }
+  @if (notice()) {
+    <p class="suggest-friend__notice" role="status">{{ notice() }}</p>
+  }
+</section>

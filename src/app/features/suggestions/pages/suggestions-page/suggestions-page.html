@@ -1,0 +1,112 @@
+<section class="suggestions" aria-labelledby="suggestions-title">
+  <header class="suggestions__header">
+    <p>Recommendations</p>
+    <h1 id="suggestions-title">Suggestions</h1>
+    <span>Share titles with friends and decide what joins your watchlist.</span>
+  </header>
+
+  @if (error()) {
+    <p class="suggestions__error" role="alert">{{ error() }}</p>
+  }
+  @if (notice()) {
+    <p class="suggestions__notice" role="status">{{ notice() }}</p>
+  }
+
+  @if (isLoading()) {
+    <p class="suggestions__state" role="status">Loading suggestions...</p>
+  } @else {
+    <nav class="tabs" aria-label="Suggestion views">
+      <button
+        type="button"
+        [class.is-active]="activeView() === 'pending'"
+        [attr.aria-pressed]="activeView() === 'pending'"
+        (click)="setView('pending')"
+      >
+        Pending
+        <span>{{ pendingSuggestions().length }}</span>
+      </button>
+      <button
+        type="button"
+        [class.is-active]="activeView() === 'history'"
+        [attr.aria-pressed]="activeView() === 'history'"
+        (click)="setView('history')"
+      >
+        History
+        <span>{{ historySuggestions().length }}</span>
+      </button>
+      <button
+        type="button"
+        [class.is-active]="activeView() === 'sent'"
+        [attr.aria-pressed]="activeView() === 'sent'"
+        (click)="setView('sent')"
+      >
+        Sent
+        <span>{{ overview().sent.length }}</span>
+      </button>
+    </nav>
+
+    <section class="inbox" aria-label="Suggestions inbox">
+      <div class="list" aria-label="Suggestion list">
+        @for (suggestion of visibleSuggestions(); track suggestion.id) {
+          <button
+            type="button"
+            class="item"
+            [class.is-selected]="isSelected(suggestion.id)"
+            [attr.aria-current]="
+              isSelected(suggestion.id) ? 'true' : null
+            "
+            (click)="selectSuggestion(suggestion)"
+          >
+            <span class="thumb">
+              @if (suggestion.media.posterUrl) {
+                <img [src]="suggestion.media.posterUrl" alt="" />
+              } @else {
+                <span>{{ suggestion.media.mediaType === 'tv' ? 'TV' : 'Film' }}</span>
+              }
+            </span>
+            <span class="item-copy">
+              <span class="item-meta">
+                {{ activeView() === 'sent' ? 'To' : 'From' }}
+                &#64;{{ suggestion.user.displayUsername }}
+              </span>
+              <strong>{{ suggestion.media.title }}</strong>
+              <span>
+                @if (suggestion.message) {
+                  {{ suggestion.message }}
+                } @else {
+                  No message
+                }
+              </span>
+            </span>
+            <span
+              class="item-status"
+              [class]="'item-status is-' + suggestion.status"
+            >
+              {{ statusLabel(suggestion.status) }}
+            </span>
+          </button>
+        } @empty {
+          <p class="list-empty">{{ emptyState() }}</p>
+        }
+      </div>
+
+      <div class="detail">
+        @if (selectedSuggestion(); as suggestion) {
+          <app-suggestion-detail
+            [suggestion]="suggestion"
+            [view]="activeView()"
+            [acting]="isActing(suggestion.id)"
+            (acceptSuggestion)="accept($event)"
+            (dismissSuggestion)="dismiss($event)"
+          />
+        } @else {
+          <div class="detail-empty">
+            <span aria-hidden="true">✦</span>
+            <h2>Nothing selected</h2>
+            <p>{{ emptyState() }}</p>
+          </div>
+        }
+      </div>
+    </section>
+  }
+</section>
