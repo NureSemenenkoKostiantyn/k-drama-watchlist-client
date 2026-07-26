@@ -40,10 +40,12 @@ rename, delete, and reorder lanes; reorder titles within a lane; move titles bet
 to unassigned; and randomly pick from one lane. Only `to_watch` entries appear on the board, and
 every drag sends all affected lane orders in one API request.
 
-Private wheels are available at `/wheels` and `/wheels/:wheelId`. Users can create wheels, add
-library titles, reorder or disable candidates, adjust weights, avoid the immediately previous
-winner, and review or reset spin history. The backend selects the winner first; the Angular wheel
-then animates to that exact result and respects reduced-motion preferences.
+Private owned and accepted-friend shared wheels are available at `/wheels` and
+`/wheels/:wheelId`. Owners can share a wheel with friends as editors or viewers. Editors can add,
+reorder, disable, and weight candidates and spin the wheel; viewers receive a read-only wheel and
+attributed shared history. Only owners can change settings, members, history, or delete the wheel.
+The backend selects the winner first; Angular then animates to that exact result and respects
+reduced-motion preferences.
 
 Share cards are rendered entirely in the browser from personal media details or a server-selected
 wheel winner. Users can choose square, story, or landscape output and light, dark, or poster themes,
@@ -109,7 +111,8 @@ docker compose --file ../k-drama-watchlist-server/compose.yaml exec api npm run 
 ```
 
 Sign in with `demo@drama-watch.local` and password `DramaWatch1!`. The guarded seed is local-only,
-does not erase existing data, and can be run again safely.
+does not erase existing data, and can be run again safely. It includes one owned wheel, one wheel
+shared with the demo account as an editor, members in different roles, and attributed spin history.
 
 To run only the client directly on the host, follow the steps below.
 
@@ -193,7 +196,7 @@ src/app/features/priority/pages/
 The priority board supports whole-card and whole-lane drag interactions. Random lane picks use a
 preselected-winner case-opening reel that can be skipped and respects reduced-motion preferences.
 
-Private-wheel code is organized under:
+Owned and shared wheel code is organized under:
 
 ```text
 src/app/features/wheels/data-access/
