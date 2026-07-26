@@ -1,0 +1,19 @@
+@media (max-width: 40rem) {
+  .priority-page__header,
+  .priority-page__create {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .priority-page {
+    padding-top: 2rem;
+  }
+
+  .priority-page__create button {
+    align-self: flex-start;
+  }
+
+  .priority-lane {
+    flex-basis: min(18rem, calc(100vw - 3rem));
+  }
+}

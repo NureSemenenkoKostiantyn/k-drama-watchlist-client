@@ -21,7 +21,7 @@ import { MediaSearchRequest, MediaSummary, SearchMediaType } from '../../models/
   selector: 'app-search-page',
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './search-page.html',
-  styleUrl: './search-page.scss',
+  styleUrls: ['./search-page.scss', './search-page-mobile.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SearchPage implements OnInit {

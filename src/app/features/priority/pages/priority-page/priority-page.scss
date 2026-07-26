@@ -73,7 +73,7 @@
 
 .priority-page input,
 .priority-page button {
-  min-height: 2.5rem;
+  min-height: 2.75rem;
   border: 0.0625rem solid var(--color-border);
   border-radius: 0.625rem;
   color: var(--color-text);
@@ -182,14 +182,14 @@
 }
 
 .priority-lane__actions button {
-  min-height: 2rem;
+  min-height: 2.75rem;
   padding: 0 0.5rem;
 }
 
 .priority-lane__icon-button {
   display: inline-grid;
-  width: 2rem;
-  min-height: 2rem !important;
+  width: 2.75rem;
+  min-height: 2.75rem !important;
   padding: 0 !important;
   place-items: center;
 }
@@ -233,6 +233,7 @@
 
 .priority-item {
   gap: 0.625rem;
+  min-height: 3.25rem;
   padding: 0.5rem;
   border: 0.0625rem solid var(--color-border);
   border-radius: 0.75rem;
@@ -270,12 +271,4 @@
 
 .cdk-drag-placeholder {
   opacity: 0.25;
-}
-
-@media (max-width: 40rem) {
-  .priority-page__header,
-  .priority-page__create {
-    align-items: stretch;
-    flex-direction: column;
-  }
 }

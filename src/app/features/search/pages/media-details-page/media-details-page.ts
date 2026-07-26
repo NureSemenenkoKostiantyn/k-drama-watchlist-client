@@ -38,7 +38,11 @@ import { MediaDetails, MediaType } from '../../models/media';
     ShareCardCreator,
   ],
   templateUrl: './media-details-page.html',
-  styleUrls: ['./media-details-page.scss', './media-share.scss'],
+  styleUrls: [
+    './media-details-page.scss',
+    './media-share.scss',
+    './media-details-mobile.scss',
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MediaDetailsPage implements OnInit {

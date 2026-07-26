@@ -16,6 +16,9 @@
 }
 
 .app-shell__header {
+  position: sticky;
+  z-index: 8;
+  top: 0;
   border-bottom: 0.0625rem solid var(--color-border);
   background: rgb(16 13 24 / 75%);
   backdrop-filter: blur(1rem);
@@ -80,7 +83,8 @@
   text-decoration: none;
 }
 
-.app-shell__primary-links a:hover {
+.app-shell__primary-links a:hover,
+.app-shell__primary-links a.is-active {
   color: var(--color-text);
 }
 
@@ -91,6 +95,7 @@
 
 .app-shell__account button,
 .app-shell__auth-links a {
+  min-height: 2.75rem;
   border: 0;
   color: var(--color-text);
   background: transparent;
@@ -114,12 +119,20 @@
 
 @media (max-width: 30rem) {
   .app-shell__account span,
-  .app-shell__auth-links > :first-child,
-  .app-shell__primary-links > :first-child {
+  .app-shell__auth-links > :first-child {
     display: none;
   }
 
   .app-shell__authenticated {
     gap: 0.75rem;
+  }
+
+  .app-shell__brand > span:last-child {
+    display: none;
+  }
+
+  .app-shell__header-content,
+  .app-shell__content {
+    width: min(calc(100% - 1rem), var(--content-width));
   }
 }

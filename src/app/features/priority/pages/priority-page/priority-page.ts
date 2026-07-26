@@ -59,7 +59,11 @@ const caseOpeningDurationMs = 5_200;
     RouterLink,
   ],
   templateUrl: './priority-page.html',
-  styleUrls: ['./priority-page.scss', './case-opening.scss'],
+  styleUrls: [
+    './priority-page.scss',
+    './priority-mobile.scss',
+    './case-opening.scss',
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PriorityPage implements OnInit, OnDestroy {
