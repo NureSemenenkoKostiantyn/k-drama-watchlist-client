@@ -42,6 +42,20 @@
           </a>
         </nav>
         <div class="app-shell__account">
+          <a
+            class="app-shell__notifications-link"
+            routerLink="/notifications"
+            routerLinkActive="is-active"
+            ariaCurrentWhenActive="page"
+            [attr.aria-label]="notificationLabel()"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 9a6 6 0 0 1 12 0v5l2 3H4l2-3zM10 20h4" />
+            </svg>
+            @if (notificationBadge(); as badge) {
+              <span>{{ badge }}</span>
+            }
+          </a>
           <a class="app-shell__profile-link" routerLink="/profile">
             {{
               authentication.session()?.user?.displayUsername ??

@@ -4,6 +4,7 @@ import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 
 import { AuthenticationService } from './core/auth/authentication.service';
+import { NotificationsService } from './features/notifications/data-access/notifications.service';
 import { App } from './app';
 
 describe('App', () => {
@@ -12,11 +13,20 @@ describe('App', () => {
     user: { name: string; username?: string; displayUsername?: string };
   } | null>(null);
   const signOut = vi.fn().mockResolvedValue(true);
+  const unreadCount = signal(0);
+  const refreshNotifications = vi.fn().mockResolvedValue({
+    items: [],
+    unreadCount: 0,
+  });
+  const clearNotifications = vi.fn();
 
   beforeEach(async () => {
     authenticated.set(false);
     session.set(null);
     signOut.mockClear();
+    unreadCount.set(0);
+    refreshNotifications.mockClear();
+    clearNotifications.mockClear();
 
     await TestBed.configureTestingModule({
       imports: [App],
@@ -29,6 +39,14 @@ describe('App', () => {
             isPending: signal(false).asReadonly(),
             session: session.asReadonly(),
             signOut,
+          },
+        },
+        {
+          provide: NotificationsService,
+          useValue: {
+            unreadCount: unreadCount.asReadonly(),
+            refresh: refreshNotifications,
+            clear: clearNotifications,
           },
         },
       ],
@@ -84,5 +102,28 @@ describe('App', () => {
         .querySelector('.app-shell__profile-link')
         ?.getAttribute('href'),
     ).toBe('/profile');
+  });
+
+  it('shows the unread notification count for an authenticated user', async () => {
+    authenticated.set(true);
+    unreadCount.set(3);
+    session.set({
+      user: {
+        name: 'Dahyun',
+        displayUsername: 'dahyun',
+      },
+    });
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const link = (fixture.nativeElement as HTMLElement).querySelector(
+      '.app-shell__notifications-link',
+    );
+    expect(link?.getAttribute('href')).toBe('/notifications');
+    expect(link?.getAttribute('aria-label')).toBe(
+      'Notifications, 3 unread',
+    );
+    expect(link?.textContent).toContain('3');
   });
 });
