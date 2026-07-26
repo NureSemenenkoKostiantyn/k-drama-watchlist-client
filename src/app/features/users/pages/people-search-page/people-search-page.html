@@ -1,70 +1,296 @@
 <section class="people-search" aria-labelledby="people-search-title">
   <header class="people-search__header">
-    <p>Phase 2 · Social</p>
-    <h1 id="people-search-title">Find people</h1>
-    <span>Search by username to discover another Drama Watch profile.</span>
+    <p>Phase 2 &middot; Social</p>
+    <h1 id="people-search-title">Friends and people</h1>
+    <span>
+      Manage requests, open your friends' profiles, or find someone by
+      username.
+    </span>
   </header>
 
-  <form
-    class="people-search__form"
-    [formGroup]="searchForm"
-    (ngSubmit)="search()"
-  >
-    <label for="people-query">Username</label>
-    <div>
-      <input
-        id="people-query"
-        formControlName="query"
-        autocomplete="off"
-        maxlength="30"
-        placeholder="dahyun.fan"
-      />
-      <button type="submit" [disabled]="isLoading()">
-        {{ isLoading() ? 'Searching…' : 'Search' }}
-      </button>
+  @if (friendshipError()) {
+    <p class="people-search__error" role="alert">
+      {{ friendshipError() }}
+    </p>
+  }
+  @if (notice()) {
+    <p class="people-search__notice" role="status">{{ notice() }}</p>
+  }
+
+  @if (isLoadingFriendships()) {
+    <div class="people-search__loading" role="status">
+      Loading friendships...
     </div>
-    @if (
-      searchForm.controls.query.touched &&
-      searchForm.controls.query.invalid
-    ) {
-      <small>Enter 2–30 letters, numbers, underscores, or dots.</small>
-    }
-  </form>
-
-  @if (error()) {
-    <p class="people-search__error" role="alert">{{ error() }}</p>
-  }
-
-  @if (!isLoading() && hasSearched()) {
-    <section class="people-results" aria-label="People search results">
-      @for (profile of results(); track profile.id) {
-        <a
-          class="people-card"
-          [routerLink]="['/users', profile.username]"
-        >
-          @if (profile.image) {
-            <img
-              [src]="profile.image"
-              alt=""
-              width="56"
-              height="56"
-            />
-          } @else {
-            <span class="people-card__avatar" aria-hidden="true">
-              {{ initials(profile) }}
-            </span>
+  } @else {
+    @if (friendships().incomingRequests.length > 0) {
+      <section
+        class="relationship-section"
+        aria-labelledby="incoming-title"
+      >
+        <header>
+          <h2 id="incoming-title">Requests for you</h2>
+          <span>{{ friendships().incomingRequests.length }}</span>
+        </header>
+        <div class="people-results">
+          @for (
+            friendship of friendships().incomingRequests;
+            track friendship.id
+          ) {
+            <article class="people-card">
+              <a
+                class="people-card__profile"
+                [routerLink]="['/users', friendship.user.username]"
+              >
+                @if (friendship.user.image) {
+                  <img
+                    [src]="friendship.user.image"
+                    alt=""
+                    width="56"
+                    height="56"
+                  />
+                } @else {
+                  <span class="people-card__avatar" aria-hidden="true">
+                    {{ initials(friendship.user) }}
+                  </span>
+                }
+                <span class="people-card__identity">
+                  <strong>{{ friendship.user.name }}</strong>
+                  <span>&#64;{{ friendship.user.displayUsername }}</span>
+                </span>
+              </a>
+              <div class="people-card__buttons">
+                <button
+                  type="button"
+                  class="people-card__primary"
+                  [disabled]="isActing(friendship.id)"
+                  (click)="acceptFriendship(friendship)"
+                >
+                  Accept
+                </button>
+                <button
+                  type="button"
+                  [disabled]="isActing(friendship.id)"
+                  (click)="rejectFriendship(friendship)"
+                >
+                  Decline
+                </button>
+              </div>
+            </article>
           }
-          <span class="people-card__identity">
-            <strong>{{ profile.name }}</strong>
-            <span>@{{ profile.displayUsername }}</span>
-          </span>
-          <span class="people-card__action">Open profile</span>
-        </a>
-      } @empty {
-        <div class="people-search__empty">
-          No profiles start with that username.
         </div>
-      }
+      </section>
+    }
+
+    <section class="relationship-section" aria-labelledby="friends-title">
+      <header>
+        <h2 id="friends-title">Your friends</h2>
+        <span>{{ friendships().friends.length }}</span>
+      </header>
+      <div class="people-results">
+        @for (friendship of friendships().friends; track friendship.id) {
+          <article class="people-card">
+            <a
+              class="people-card__profile"
+              [routerLink]="['/users', friendship.user.username]"
+            >
+              @if (friendship.user.image) {
+                <img
+                  [src]="friendship.user.image"
+                  alt=""
+                  width="56"
+                  height="56"
+                />
+              } @else {
+                <span class="people-card__avatar" aria-hidden="true">
+                  {{ initials(friendship.user) }}
+                </span>
+              }
+              <span class="people-card__identity">
+                <strong>{{ friendship.user.name }}</strong>
+                <span>&#64;{{ friendship.user.displayUsername }}</span>
+              </span>
+            </a>
+            <div class="people-card__buttons">
+              <a [routerLink]="['/users', friendship.user.username]">
+                Profile
+              </a>
+              <button
+                type="button"
+                [disabled]="isActing(friendship.id)"
+                (click)="removeFriendship(friendship)"
+              >
+                Remove
+              </button>
+            </div>
+          </article>
+        } @empty {
+          <div class="people-search__empty">
+            Your accepted friends will appear here.
+          </div>
+        }
+      </div>
     </section>
+
+    @if (friendships().outgoingRequests.length > 0) {
+      <section
+        class="relationship-section"
+        aria-labelledby="outgoing-title"
+      >
+        <header>
+          <h2 id="outgoing-title">Sent requests</h2>
+          <span>{{ friendships().outgoingRequests.length }}</span>
+        </header>
+        <div class="people-results">
+          @for (
+            friendship of friendships().outgoingRequests;
+            track friendship.id
+          ) {
+            <article class="people-card">
+              <a
+                class="people-card__profile"
+                [routerLink]="['/users', friendship.user.username]"
+              >
+                @if (friendship.user.image) {
+                  <img
+                    [src]="friendship.user.image"
+                    alt=""
+                    width="56"
+                    height="56"
+                  />
+                } @else {
+                  <span class="people-card__avatar" aria-hidden="true">
+                    {{ initials(friendship.user) }}
+                  </span>
+                }
+                <span class="people-card__identity">
+                  <strong>{{ friendship.user.name }}</strong>
+                  <span>&#64;{{ friendship.user.displayUsername }}</span>
+                </span>
+              </a>
+              <div class="people-card__buttons">
+                <span>Pending</span>
+                <button
+                  type="button"
+                  [disabled]="isActing(friendship.id)"
+                  (click)="removeFriendship(friendship)"
+                >
+                  Cancel
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+    }
   }
+
+  <section class="people-search__discovery" aria-labelledby="find-title">
+    <header>
+      <p>Discover</p>
+      <h2 id="find-title">Find people</h2>
+    </header>
+
+    <form
+      class="people-search__form"
+      [formGroup]="searchForm"
+      (ngSubmit)="search()"
+    >
+      <label for="people-query">Name or username</label>
+      <div>
+        <input
+          id="people-query"
+          formControlName="query"
+          autocomplete="off"
+          maxlength="50"
+          placeholder="Dahyun or dahyun.fan"
+        />
+        <button type="submit" [disabled]="isLoading()">
+          {{ isLoading() ? 'Searching...' : 'Search' }}
+        </button>
+      </div>
+      @if (
+        searchForm.controls.query.touched &&
+        searchForm.controls.query.invalid
+      ) {
+        <small>
+          Enter 2-50 letters, numbers, spaces, or common name punctuation.
+        </small>
+      }
+    </form>
+
+    @if (error()) {
+      <p class="people-search__error" role="alert">{{ error() }}</p>
+    }
+
+    @if (!isLoading() && hasSearched()) {
+      <div class="people-results" aria-label="People search results">
+        @for (profile of results(); track profile.id) {
+          <article class="people-card">
+            <a
+              class="people-card__profile"
+              [routerLink]="['/users', profile.username]"
+            >
+              @if (profile.image) {
+                <img
+                  [src]="profile.image"
+                  alt=""
+                  width="56"
+                  height="56"
+                />
+              } @else {
+                <span class="people-card__avatar" aria-hidden="true">
+                  {{ initials(profile) }}
+                </span>
+              }
+              <span class="people-card__identity">
+                <strong>{{ profile.name }}</strong>
+                <span>&#64;{{ profile.displayUsername }}</span>
+              </span>
+            </a>
+
+            @if (relationshipFor(profile.id); as relationship) {
+              <div class="people-card__buttons">
+                @if (relationship.status === 'accepted') {
+                  <span>Friends</span>
+                } @else if (relationship.direction === 'outgoing') {
+                  <span>Request sent</span>
+                  <button
+                    type="button"
+                    [disabled]="isActing(relationship.id)"
+                    (click)="removeFriendship(relationship)"
+                  >
+                    Cancel
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="people-card__primary"
+                    [disabled]="isActing(relationship.id)"
+                    (click)="acceptFriendship(relationship)"
+                  >
+                    Accept
+                  </button>
+                }
+              </div>
+            } @else {
+              <div class="people-card__buttons">
+                <button
+                  type="button"
+                  class="people-card__primary"
+                  [disabled]="isActing(profile.id)"
+                  (click)="requestFriend(profile)"
+                >
+                  Add friend
+                </button>
+              </div>
+            }
+          </article>
+        } @empty {
+          <div class="people-search__empty">
+            No matching or similar profiles were found.
+          </div>
+        }
+      </div>
+    }
+  </section>
 </section>

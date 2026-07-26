@@ -1,7 +1,7 @@
 .people-search {
   display: grid;
-  gap: 1.5rem;
-  max-width: 48rem;
+  gap: 2rem;
+  max-width: 56rem;
   padding-block: clamp(2rem, 7vw, 5rem);
 }
 
@@ -85,92 +85,27 @@
   color: #ffd1dd;
 }
 
-.people-search__error {
+.people-search__error,
+.people-search__notice,
+.people-search__loading {
   margin: 0;
 }
 
-.people-results {
-  display: grid;
-  gap: 0.75rem;
-}
-
-.people-card {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.875rem;
-  padding: 1rem;
-  border: 0.0625rem solid var(--color-border);
-  border-radius: 1rem;
-  background: var(--color-surface);
-  text-decoration: none;
-}
-
-.people-card:hover {
-  border-color: rgb(255 113 154 / 55%);
-  background: var(--color-surface-raised);
-}
-
-.people-card img,
-.people-card__avatar {
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 50%;
-}
-
-.people-card img {
-  object-fit: cover;
-}
-
-.people-card__avatar {
-  display: grid;
-  place-items: center;
-  color: #100d18;
-  background: linear-gradient(135deg, var(--color-accent), #ffd0df);
-  font-weight: 800;
-}
-
-.people-card__identity {
-  display: grid;
-  min-width: 0;
-  gap: 0.25rem;
-}
-
-.people-card__identity strong,
-.people-card__identity span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.people-card__identity span,
-.people-card__action {
+.people-search__notice,
+.people-search__loading {
   color: var(--color-text-muted);
-  font-size: 0.8125rem;
 }
 
-.people-card__action {
-  font-weight: 700;
-}
-
-.people-search__empty {
-  padding: 2rem;
-  border: 0.0625rem dashed var(--color-border);
-  border-radius: 1rem;
-  color: var(--color-text-muted);
-  text-align: center;
+.people-search__notice {
+  padding: 0.875rem 1rem;
+  border: 0.0625rem solid rgb(122 226 170 / 30%);
+  border-radius: 0.875rem;
+  color: #b9f5d2;
+  background: rgb(122 226 170 / 8%);
 }
 
 @media (max-width: 34rem) {
   .people-search__form > div {
     grid-template-columns: 1fr;
-  }
-
-  .people-card {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .people-card__action {
-    display: none;
   }
 }

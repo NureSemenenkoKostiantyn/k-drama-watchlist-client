@@ -40,12 +40,12 @@ describe('UsersService', () => {
     await expect(result).resolves.toEqual(profile);
   });
 
-  it('searches username prefixes with an explicit result limit', async () => {
-    const result = service.search('dah', 5);
+  it('searches names and usernames with an explicit result limit', async () => {
+    const result = service.search('Dahyun', 5);
     const request = http.expectOne(
       (candidate) =>
         candidate.url === '/api/users/search' &&
-        candidate.params.get('q') === 'dah' &&
+        candidate.params.get('q') === 'Dahyun' &&
         candidate.params.get('limit') === '5',
     );
 
