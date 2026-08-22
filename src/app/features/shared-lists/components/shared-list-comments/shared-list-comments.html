@@ -1,0 +1,55 @@
+<section class="comments" [class.is-open]="expanded()">
+  <button class="comments__toggle" type="button" (click)="toggle()" [attr.aria-expanded]="expanded()">
+    <span>Discussion</span>
+    <strong>{{ expanded() ? 'Hide comments' : 'Show comments' }}</strong>
+  </button>
+
+  @if (expanded()) {
+    <div class="comments__body">
+      @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+      @if (loading()) {
+        <p class="state" role="status">Loading comments…</p>
+      } @else {
+        <ol class="thread">
+          @for (comment of topLevel(); track comment.id) {
+            <li>
+              <article class="comment" [class.is-deleted]="comment.isDeleted">
+                <header><a [routerLink]="['/users', comment.author.username]">{{ comment.author.displayUsername }}</a><time [attr.datetime]="comment.createdAt">{{ comment.createdAt | date: 'short' }}</time>@if (comment.editedAt && !comment.isDeleted) { <small>edited</small> }</header>
+                @if (comment.isDeleted) {
+                  <p class="deleted">Comment deleted</p>
+                } @else if (isHidden(comment)) {
+                  <button class="spoiler" type="button" (click)="reveal(comment.id)">Spoiler hidden · reveal</button>
+                } @else {
+                  <p>{{ comment.body }}</p>
+                }
+                @if (!comment.isDeleted) {
+                  <footer>@if (canComment()) { <button type="button" (click)="startReply(comment)">Reply</button> }@if (isOwn(comment)) { <button type="button" (click)="startEdit(comment)">Edit</button> }@if (canDelete(comment)) { <button type="button" (click)="delete(comment)">Delete</button> }</footer>
+                }
+              </article>
+
+              @if (replies(comment.id).length) {
+                <ol class="replies">
+                  @for (reply of replies(comment.id); track reply.id) {
+                    <li><article class="comment" [class.is-deleted]="reply.isDeleted"><header><a [routerLink]="['/users', reply.author.username]">{{ reply.author.displayUsername }}</a><time [attr.datetime]="reply.createdAt">{{ reply.createdAt | date: 'short' }}</time>@if (reply.editedAt && !reply.isDeleted) { <small>edited</small> }</header>@if (reply.isDeleted) { <p class="deleted">Reply deleted</p> } @else if (isHidden(reply)) { <button class="spoiler" type="button" (click)="reveal(reply.id)">Spoiler hidden · reveal</button> } @else { <p>{{ reply.body }}</p> }@if (!reply.isDeleted) { <footer>@if (isOwn(reply)) { <button type="button" (click)="startEdit(reply)">Edit</button> }@if (canDelete(reply)) { <button type="button" (click)="delete(reply)">Delete</button> }</footer> }</article></li>
+                  }
+                </ol>
+              }
+            </li>
+          } @empty {
+            <li class="state">No comments yet.</li>
+          }
+        </ol>
+
+        @if (canComment()) {
+          <form [formGroup]="form" (ngSubmit)="submit()">
+            <div class="compose-heading"><strong>{{ editing() ? 'Edit comment' : replyTo() ? 'Reply to ' + replyTo()!.author.displayUsername : 'Add a comment' }}</strong>@if (editing() || replyTo()) { <button type="button" (click)="cancelCompose()">Cancel</button> }</div>
+            <textarea formControlName="body" rows="3" maxlength="2000" placeholder="Keep it friendly and useful"></textarea>
+            <div class="compose-actions"><label><input formControlName="hasSpoiler" type="checkbox" /> Hide as spoiler</label><button type="submit" [disabled]="saving()">{{ saving() ? 'Saving…' : editing() ? 'Save edit' : 'Post' }}</button></div>
+          </form>
+        } @else {
+          <p class="state">Viewers can read the discussion. Ask the owner for commenter access to join in.</p>
+        }
+      }
+    </div>
+  }
+</section>

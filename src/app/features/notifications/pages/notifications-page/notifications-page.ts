@@ -91,6 +91,13 @@ export class NotificationsPage implements OnInit {
         return notification.entityId
           ? `/wheels/${notification.entityId}`
           : '/wheels';
+      case 'shared_list_invite':
+      case 'shared_list_comment':
+      case 'comment_reply':
+      case 'shared_item_updated':
+        return notification.entityId
+          ? `/lists/${notification.entityId}`
+          : '/lists';
       default:
         return '/notifications';
     }

@@ -185,6 +185,33 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'lists',
+    title: 'Shared lists · Drama Watch',
+    canActivate: [profileCompleteGuard],
+    loadComponent: () =>
+      import('./features/shared-lists/pages/shared-lists-page/shared-lists-page').then(
+        ({ SharedListsPage }) => SharedListsPage,
+      ),
+  },
+  {
+    path: 'lists/invites/:token',
+    title: 'Join shared list · Drama Watch',
+    canActivate: [profileCompleteGuard],
+    loadComponent: () =>
+      import(
+        './features/shared-lists/pages/shared-list-invite-page/shared-list-invite-page'
+      ).then(({ SharedListInvitePage }) => SharedListInvitePage),
+  },
+  {
+    path: 'lists/:listId',
+    title: 'Shared list · Drama Watch',
+    canActivate: [profileCompleteGuard],
+    loadComponent: () =>
+      import('./features/shared-lists/pages/shared-list-page/shared-list-page').then(
+        ({ SharedListPage }) => SharedListPage,
+      ),
+  },
+  {
     path: '',
     title: 'Drama Watch',
     canActivate: [profileCompleteGuard],

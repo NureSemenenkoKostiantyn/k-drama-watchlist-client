@@ -1,0 +1,130 @@
+import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
+import { DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+
+import { LibraryService } from '../../../library/data-access/library.service';
+import { SharedListComments } from '../../components/shared-list-comments/shared-list-comments';
+import { SharedListsService } from '../../data-access/shared-lists.service';
+import { SharedListItem, SharedListRole } from '../../models/shared-list';
+
+@Component({
+  selector: 'app-shared-list-page',
+  imports: [CdkDrag, CdkDropList, DatePipe, ReactiveFormsModule, RouterLink, SharedListComments],
+  templateUrl: './shared-list-page.html',
+  styleUrls: ['./shared-list-page.scss', './shared-list-items.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class SharedListPage implements OnInit {
+  private readonly formBuilder = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly listId = this.route.snapshot.paramMap.get('listId') ?? '';
+  protected readonly sharedLists = inject(SharedListsService);
+  protected readonly library = inject(LibraryService);
+  protected readonly list = this.sharedLists.activeList;
+  protected readonly isSaving = signal(false);
+  protected readonly pendingDelete = signal(false);
+  protected readonly invite = signal<{ url: string; expiresAt: string } | null>(null);
+  protected readonly copied = signal(false);
+  protected readonly isOwner = computed(() => this.list()?.role === 'owner');
+  protected readonly canEdit = computed(() => ['owner', 'editor'].includes(this.list()?.role ?? ''));
+  protected readonly availableEntries = computed(() => {
+    const used = new Set(this.list()?.items.map((item) => item.mediaId) ?? []);
+    return this.library.entries().filter((entry) => !used.has(entry.mediaId));
+  });
+  protected readonly settingsForm = this.formBuilder.nonNullable.group({
+    title: ['', [Validators.required, Validators.maxLength(100)]],
+    description: ['', [Validators.maxLength(2000)]],
+  });
+  protected readonly addForm = this.formBuilder.nonNullable.group({ mediaId: ['', Validators.required] });
+  protected readonly inviteForm = this.formBuilder.nonNullable.group({
+    role: this.formBuilder.nonNullable.control<Exclude<SharedListRole, 'owner'>>('viewer'),
+  });
+
+  ngOnInit(): void {
+    if (!this.listId) {
+      void this.router.navigate(['/lists']);
+      return;
+    }
+    void this.load();
+  }
+
+  protected async saveSettings(): Promise<void> {
+    if (!this.isOwner() || this.settingsForm.invalid || this.isSaving()) return;
+    const value = this.settingsForm.getRawValue();
+    this.isSaving.set(true);
+    await this.sharedLists.update(this.listId, {
+      title: value.title.trim(),
+      description: value.description.trim() || null,
+    });
+    this.isSaving.set(false);
+  }
+
+  protected async addItem(): Promise<void> {
+    if (!this.canEdit() || this.addForm.invalid || this.isSaving()) return;
+    this.isSaving.set(true);
+    const item = await this.sharedLists.addItem(this.listId, this.addForm.getRawValue().mediaId);
+    this.isSaving.set(false);
+    if (item) this.addForm.reset({ mediaId: '' });
+  }
+
+  protected async updateStatus(item: SharedListItem, event: Event): Promise<void> {
+    const groupStatus = (event.target as HTMLSelectElement).value as 'planned' | 'watching' | 'finished';
+    await this.sharedLists.updateItem(this.listId, item.id, { groupStatus });
+  }
+
+  protected async updateNote(item: SharedListItem, event: Event): Promise<void> {
+    const note = (event.target as HTMLTextAreaElement).value.trim();
+    await this.sharedLists.updateItem(this.listId, item.id, { note: note || null });
+  }
+
+  protected async updateProgress(item: SharedListItem, season: string, episode: string): Promise<void> {
+    await this.sharedLists.updateItem(this.listId, item.id, {
+      groupProgress: {
+        currentSeason: Math.max(0, Number(season) || 0),
+        currentEpisode: Math.max(0, Number(episode) || 0),
+      },
+    });
+  }
+
+  protected async removeItem(itemId: string): Promise<void> {
+    await this.sharedLists.deleteItem(this.listId, itemId);
+  }
+
+  protected async drop(event: CdkDragDrop<SharedListItem[]>): Promise<void> {
+    if (!this.canEdit() || event.previousIndex === event.currentIndex) return;
+    const ids = [...(this.list()?.items.map((item) => item.id) ?? [])];
+    moveItemInArray(ids, event.previousIndex, event.currentIndex);
+    if (!(await this.sharedLists.reorder(this.listId, ids))) await this.sharedLists.loadList(this.listId);
+  }
+
+  protected async createInvite(): Promise<void> {
+    const result = await this.sharedLists.createInvite(this.listId, this.inviteForm.getRawValue().role);
+    if (result) this.invite.set({ url: result.acceptUrl, expiresAt: result.expiresAt });
+  }
+
+  protected async copyInvite(): Promise<void> {
+    const url = this.invite()?.url;
+    if (!url) return;
+    await navigator.clipboard.writeText(url);
+    this.copied.set(true);
+  }
+
+  protected async deleteList(): Promise<void> {
+    if (!this.pendingDelete()) {
+      this.pendingDelete.set(true);
+      return;
+    }
+    if (await this.sharedLists.delete(this.listId)) await this.router.navigate(['/lists']);
+  }
+
+  private async load(): Promise<void> {
+    const [loaded] = await Promise.all([this.sharedLists.loadList(this.listId), this.library.load()]);
+    const list = this.list();
+    if (loaded && list?.role === 'owner') {
+      this.settingsForm.setValue({ title: list.title, description: list.description ?? '' });
+    }
+  }
+}
