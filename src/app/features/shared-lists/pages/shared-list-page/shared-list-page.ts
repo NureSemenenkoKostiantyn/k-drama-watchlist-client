@@ -7,7 +7,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LibraryService } from '../../../library/data-access/library.service';
 import { SharedListComments } from '../../components/shared-list-comments/shared-list-comments';
 import { SharedListsService } from '../../data-access/shared-lists.service';
-import { SharedListItem, SharedListRole } from '../../models/shared-list';
+import { SharedListItem, SharedListMember, SharedListRole } from '../../models/shared-list';
 
 @Component({
   selector: 'app-shared-list-page',
@@ -26,7 +26,9 @@ export class SharedListPage implements OnInit {
   protected readonly list = this.sharedLists.activeList;
   protected readonly isSaving = signal(false);
   protected readonly pendingDelete = signal(false);
-  protected readonly invite = signal<{ url: string; expiresAt: string } | null>(null);
+  protected readonly activeMemberId = signal<string | null>(null);
+  protected readonly pendingMemberRemovalId = signal<string | null>(null);
+  protected readonly invite = signal<{ url: string; expiresAt: string; target: string } | null>(null);
   protected readonly copied = signal(false);
   protected readonly isOwner = computed(() => this.list()?.role === 'owner');
   protected readonly canEdit = computed(() => ['owner', 'editor'].includes(this.list()?.role ?? ''));
@@ -40,6 +42,7 @@ export class SharedListPage implements OnInit {
   });
   protected readonly addForm = this.formBuilder.nonNullable.group({ mediaId: ['', Validators.required] });
   protected readonly inviteForm = this.formBuilder.nonNullable.group({
+    username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(30), Validators.pattern(/^[a-zA-Z0-9_.]+$/)]],
     role: this.formBuilder.nonNullable.control<Exclude<SharedListRole, 'owner'>>('viewer'),
   });
 
@@ -101,8 +104,41 @@ export class SharedListPage implements OnInit {
   }
 
   protected async createInvite(): Promise<void> {
-    const result = await this.sharedLists.createInvite(this.listId, this.inviteForm.getRawValue().role);
-    if (result) this.invite.set({ url: result.acceptUrl, expiresAt: result.expiresAt });
+    if (!this.isOwner() || this.inviteForm.invalid) return;
+    const value = this.inviteForm.getRawValue();
+    const result = await this.sharedLists.createInvite(
+      this.listId,
+      value.username.trim(),
+      value.role,
+    );
+    if (result) {
+      this.invite.set({
+        url: result.acceptUrl,
+        expiresAt: result.expiresAt,
+        target: result.target.displayUsername,
+      });
+    }
+  }
+
+  protected async updateMember(member: SharedListMember, event: Event): Promise<void> {
+    const role = (event.target as HTMLSelectElement).value as Exclude<SharedListRole, 'owner'>;
+    if (!this.isOwner() || role === member.role || this.activeMemberId() !== null) return;
+    this.activeMemberId.set(member.user.id);
+    await this.sharedLists.updateMember(this.listId, member.user.id, role);
+    this.activeMemberId.set(null);
+  }
+
+  protected async removeMember(member: SharedListMember): Promise<void> {
+    if (!this.isOwner() || this.activeMemberId() !== null) return;
+    if (this.pendingMemberRemovalId() !== member.user.id) {
+      this.pendingMemberRemovalId.set(member.user.id);
+      return;
+    }
+    this.activeMemberId.set(member.user.id);
+    if (await this.sharedLists.removeMember(this.listId, member.user.id)) {
+      this.pendingMemberRemovalId.set(null);
+    }
+    this.activeMemberId.set(null);
   }
 
   protected async copyInvite(): Promise<void> {

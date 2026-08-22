@@ -21,9 +21,11 @@ export class SharedListInvitePage implements OnInit {
   }
 
   private async accept(): Promise<void> {
-    const token = this.route.snapshot.paramMap.get('token') ?? '';
-    if (token) {
-      const list = await this.sharedLists.acceptInvite(token);
+    const identifier = this.route.snapshot.paramMap.get('token')
+      ?? this.route.snapshot.paramMap.get('inviteId')
+      ?? '';
+    if (identifier) {
+      const list = await this.sharedLists.acceptInvite(identifier);
       if (list) {
         await this.router.navigate(['/lists', list.id], { replaceUrl: true });
         return;

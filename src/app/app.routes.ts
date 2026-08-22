@@ -194,6 +194,15 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'lists/invitations/:inviteId',
+    title: 'Join shared list · Drama Watch',
+    canActivate: [profileCompleteGuard],
+    loadComponent: () =>
+      import(
+        './features/shared-lists/pages/shared-list-invite-page/shared-list-invite-page'
+      ).then(({ SharedListInvitePage }) => SharedListInvitePage),
+  },
+  {
     path: 'lists/invites/:token',
     title: 'Join shared list · Drama Watch',
     canActivate: [profileCompleteGuard],

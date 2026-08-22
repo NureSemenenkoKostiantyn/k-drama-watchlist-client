@@ -98,4 +98,21 @@ describe('NotificationsPage', () => {
     );
     expect(root.textContent).toContain('shared a wheel with you');
   });
+
+  it('links targeted list invitations to the invitation acceptance route', () => {
+    items.set([
+      {
+        ...item,
+        type: 'shared_list_invite',
+        entityId: 'invite-1',
+      },
+    ]);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(root.querySelector('article a')?.getAttribute('href')).toBe(
+      '/lists/invitations/invite-1',
+    );
+    expect(root.textContent).toContain('invited you to a shared list');
+  });
 });
