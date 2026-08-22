@@ -1,0 +1,12 @@
+<section class="invite-page" aria-labelledby="invite-title">
+  <div>
+    <p>Shared watchlist</p>
+    <h1 id="invite-title">{{ accepting() ? 'Joining the list…' : 'Invitation unavailable' }}</h1>
+    @if (accepting()) {
+      <span role="status">Checking your secure invitation and adding your assigned role.</span>
+    } @else {
+      <span role="alert">{{ sharedLists.error() ?? 'This link is invalid or expired.' }}</span>
+      <a routerLink="/lists">Go to shared lists</a>
+    }
+  </div>
+</section>

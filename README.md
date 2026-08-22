@@ -47,6 +47,15 @@ attributed shared history. Only owners can change settings, members, history, or
 The backend selects the winner first; Angular then animates to that exact result and respects
 reduced-motion preferences.
 
+The first collaborative shared-list slice is available at `/lists` and `/lists/:listId`. Owners can
+create seven-day one-time invite links carrying editor, commenter, or viewer access. Owners and
+editors add titles from their personal libraries, drag the complete shared order, and update shared
+notes, group lifecycle state, and season/episode progress. Owners, editors, and commenters can open
+lazy-loaded plain-text discussions, post one-level replies, mark spoilers, and manage their own
+comments; viewers receive read-only threads and list owners can moderate deletion. Spoilers remain
+covered until explicitly revealed. Owner-only settings and explicit deletion confirmation stay
+separate from editorial controls; `/lists/invites/:token` accepts secure links for signed-in users.
+
 Share cards are rendered entirely in the browser from personal media details or a server-selected
 wheel winner. Users can choose square, story, or landscape output and light, dark, or poster themes,
 then share the generated PNG through the browser or operating-system share sheet, copy it when
@@ -111,8 +120,9 @@ docker compose --file ../k-drama-watchlist-server/compose.yaml exec api npm run 
 ```
 
 Sign in with `demo@drama-watch.local` and password `DramaWatch1!`. The guarded seed is local-only,
-does not erase existing data, and can be run again safely. It includes one owned wheel, one wheel
-shared with the demo account as an editor, members in different roles, and attributed spin history.
+does not erase existing data, and can be run again safely. It includes owned/shared wheels and
+shared lists, members in different roles, attributed spin history, example group progress, and a
+spoiler-marked shared-list discussion.
 
 To run only the client directly on the host, follow the steps below.
 

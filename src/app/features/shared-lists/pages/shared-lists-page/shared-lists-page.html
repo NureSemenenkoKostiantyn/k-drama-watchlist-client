@@ -1,0 +1,35 @@
+<section class="lists-page" aria-labelledby="lists-title">
+  <header>
+    <p>Plan together</p>
+    <h1 id="lists-title">Shared lists</h1>
+    <span>Build an ordered watchlist, invite people with a role, and track group progress.</span>
+  </header>
+
+  <form class="list-create" [formGroup]="form" (ngSubmit)="create()">
+    <div><p>New list</p><h2>Start a watchlist</h2></div>
+    <label><span>Name</span><input formControlName="title" maxlength="100" placeholder="Weekend dramas" /></label>
+    <label><span>Description <small>optional</small></span><textarea formControlName="description" maxlength="2000" rows="2" placeholder="What should everyone know?"></textarea></label>
+    <button type="submit" [disabled]="isSaving()">{{ isSaving() ? 'Creating…' : 'Create list' }}</button>
+  </form>
+
+  @if (sharedLists.error()) { <p class="state state--error" role="alert">{{ sharedLists.error() }}</p> }
+  @if (sharedLists.isLoading()) {
+    <div class="state" role="status">Loading shared lists…</div>
+  } @else {
+    <section class="list-grid" aria-label="Your shared lists">
+      @for (list of sharedLists.lists(); track list.id) {
+        <a class="list-card" [routerLink]="['/lists', list.id]">
+          <div class="list-card__mark" aria-hidden="true"><span></span><span></span><span></span></div>
+          <div>
+            <p>{{ list.role === 'owner' ? 'Your list' : 'Shared · ' + list.role }}</p>
+            <h2>{{ list.title }}</h2>
+            @if (list.description) { <span>{{ list.description }}</span> }
+            <strong>{{ list.itemCount }} {{ list.itemCount === 1 ? 'title' : 'titles' }}</strong>
+          </div>
+        </a>
+      } @empty {
+        <div class="state">Create the first list, then invite someone as an editor, commenter, or viewer.</div>
+      }
+    </section>
+  }
+</section>
