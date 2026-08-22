@@ -53,7 +53,7 @@ export class NotificationsPage implements OnInit {
       case 'comment_reply':
         return `${actor} replied to your comment.`;
       case 'wheel_invite':
-        return `${actor} invited you to a wheel.`;
+        return `${actor} shared a wheel with you.`;
       case 'shared_item_updated':
         return `${actor} updated a shared title.`;
     }
@@ -74,7 +74,7 @@ export class NotificationsPage implements OnInit {
       case 'comment_reply':
         return 'Reply';
       case 'wheel_invite':
-        return 'Wheel invitation';
+        return 'Shared wheel';
       case 'shared_item_updated':
         return 'Shared update';
     }
@@ -87,6 +87,10 @@ export class NotificationsPage implements OnInit {
         return '/friends';
       case 'suggestion_received':
         return '/suggestions';
+      case 'wheel_invite':
+        return notification.entityId
+          ? `/wheels/${notification.entityId}`
+          : '/wheels';
       default:
         return '/notifications';
     }

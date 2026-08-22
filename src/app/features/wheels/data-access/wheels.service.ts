@@ -5,12 +5,14 @@ import { firstValueFrom } from 'rxjs';
 import { readApiErrorMessage } from '../../../core/api/api-error';
 import { environment } from '../../../../environments/environment';
 import {
+  AddWheelMemberRequest,
   CreateWheelRequest,
   UpdateWheelItemRequest,
   UpdateWheelRequest,
   Wheel,
   WheelDetails,
   WheelItem,
+  WheelMember,
   WheelSpin,
   WheelSpinHistory,
 } from '../models/wheel';
@@ -128,6 +130,78 @@ export class WheelsService {
     }
   }
 
+  async addMember(
+    wheelId: string,
+    input: AddWheelMemberRequest,
+  ): Promise<WheelMember | null> {
+    this.errorState.set(null);
+
+    try {
+      const member = await firstValueFrom(
+        this.http.post<WheelMember>(
+          `${environment.apiBaseUrl}/wheels/${wheelId}/members`,
+          input,
+        ),
+      );
+      this.updateActiveMembers(wheelId, (members) => [
+        ...members,
+        member,
+      ]);
+      return member;
+    } catch (error: unknown) {
+      this.setError(error, 'This friend could not be added to the wheel.');
+      return null;
+    }
+  }
+
+  async updateMember(
+    wheelId: string,
+    memberUserId: string,
+    role: AddWheelMemberRequest['role'],
+  ): Promise<WheelMember | null> {
+    this.errorState.set(null);
+
+    try {
+      const member = await firstValueFrom(
+        this.http.patch<WheelMember>(
+          `${environment.apiBaseUrl}/wheels/${wheelId}/members/${memberUserId}`,
+          { role },
+        ),
+      );
+      this.updateActiveMembers(wheelId, (members) =>
+        members.map((candidate) =>
+          candidate.user.id === member.user.id ? member : candidate,
+        ),
+      );
+      return member;
+    } catch (error: unknown) {
+      this.setError(error, 'The wheel member role could not be updated.');
+      return null;
+    }
+  }
+
+  async removeMember(
+    wheelId: string,
+    memberUserId: string,
+  ): Promise<boolean> {
+    this.errorState.set(null);
+
+    try {
+      await firstValueFrom(
+        this.http.delete<void>(
+          `${environment.apiBaseUrl}/wheels/${wheelId}/members/${memberUserId}`,
+        ),
+      );
+      this.updateActiveMembers(wheelId, (members) =>
+        members.filter((member) => member.user.id !== memberUserId),
+      );
+      return true;
+    } catch (error: unknown) {
+      this.setError(error, 'The friend could not be removed from this wheel.');
+      return false;
+    }
+  }
+
   async addItem(
     wheelId: string,
     mediaId: string,
@@ -226,22 +300,18 @@ export class WheelsService {
           {},
         ),
       );
-      const selectedAt = new Date().toISOString();
       this.updateActiveItems(wheelId, (items) =>
         items.map((item) =>
           item.id === spin.selectedItem.wheelItemId
             ? {
                 ...item,
-                lastSelectedAt: selectedAt,
+                lastSelectedAt: spin.createdAt,
                 selectionCount: item.selectionCount + 1,
               }
             : item,
         ),
       );
-      this.historyState.update((history) => [
-        { ...spin, createdAt: selectedAt },
-        ...history,
-      ]);
+      this.historyState.update((history) => [spin, ...history]);
       return spin;
     } catch (error: unknown) {
       this.setError(error, 'The wheel could not be spun.');
@@ -320,6 +390,17 @@ export class WheelsService {
     });
   }
 
+  private updateActiveMembers(
+    wheelId: string,
+    update: (members: WheelMember[]) => WheelMember[],
+  ): void {
+    this.activeWheelState.update((wheel) =>
+      !wheel || wheel.id !== wheelId
+        ? wheel
+        : { ...wheel, members: update(wheel.members) },
+    );
+  }
+
   private syncSummary(wheel: WheelDetails): void {
     const summary = toWheel(wheel);
     this.wheelsState.update((wheels) => {
@@ -340,6 +421,7 @@ function toWheel(wheel: WheelDetails): Wheel {
     id: wheel.id,
     title: wheel.title,
     visibility: wheel.visibility,
+    role: wheel.role,
     selectionMode: wheel.selectionMode,
     itemCount: wheel.itemCount,
     enabledItemCount: wheel.enabledItemCount,
