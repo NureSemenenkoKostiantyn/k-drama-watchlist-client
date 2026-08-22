@@ -48,12 +48,15 @@ The backend selects the winner first; Angular then animates to that exact result
 reduced-motion preferences.
 
 The first collaborative shared-list slice is available at `/lists` and `/lists/:listId`. Owners can
-create seven-day one-time invite links carrying editor, commenter, or viewer access. Owners and
+send targeted seven-day one-time invitations to an exact username with editor, commenter, or viewer
+access. Only the target can accept from the link or their in-app notification. Owners and
 editors add titles from their personal libraries, drag the complete shared order, and update shared
 notes, group lifecycle state, and season/episode progress. Owners, editors, and commenters can open
 lazy-loaded plain-text discussions, post one-level replies, mark spoilers, and manage their own
 comments; viewers receive read-only threads and list owners can moderate deletion. Spoilers remain
-covered until explicitly revealed. Owner-only settings and explicit deletion confirmation stay
+covered until explicitly revealed. Owners can change non-owner roles or remove members through
+inline, confirmed access controls; ownership remains fixed. Shared-item activity notifications link
+members back to the changed list. Owner-only settings and explicit deletion confirmation stay
 separate from editorial controls; `/lists/invites/:token` accepts secure links for signed-in users.
 
 Share cards are rendered entirely in the browser from personal media details or a server-selected

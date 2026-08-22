@@ -9,6 +9,7 @@ import {
   SharedListDetails,
   SharedListInvite,
   SharedListItem,
+  SharedListMember,
   SharedListRole,
   UpdateSharedListItemRequest,
 } from '../models/shared-list';
@@ -86,9 +87,13 @@ export class SharedListsService {
     }
   }
 
-  createInvite(listId: string, role: Exclude<SharedListRole, 'owner'>): Promise<SharedListInvite | null> {
+  createInvite(
+    listId: string,
+    username: string,
+    role: Exclude<SharedListRole, 'owner'>,
+  ): Promise<SharedListInvite | null> {
     return this.request(
-      this.http.post<SharedListInvite>(`${this.baseUrl}/${listId}/invites`, { role }),
+      this.http.post<SharedListInvite>(`${this.baseUrl}/${listId}/invites`, { username, role }),
       'The invitation link could not be created.',
     );
   }
@@ -102,6 +107,44 @@ export class SharedListsService {
         this.sync(list);
       },
     );
+  }
+
+  async updateMember(
+    listId: string,
+    memberUserId: string,
+    role: Exclude<SharedListRole, 'owner'>,
+  ): Promise<SharedListMember | null> {
+    const member = await this.request(
+      this.http.patch<SharedListMember>(
+        `${this.baseUrl}/${listId}/members/${memberUserId}`,
+        { role },
+      ),
+      'The member role could not be changed.',
+    );
+    if (member) {
+      this.updateMembers(listId, (members) =>
+        members.map((candidate) =>
+          candidate.user.id === member.user.id ? member : candidate,
+        ),
+      );
+    }
+    return member;
+  }
+
+  async removeMember(listId: string, memberUserId: string): Promise<boolean> {
+    try {
+      await firstValueFrom(
+        this.http.delete<void>(
+          `${this.baseUrl}/${listId}/members/${memberUserId}`,
+        ),
+      );
+      this.updateMembers(listId, (members) =>
+        members.filter((member) => member.user.id !== memberUserId),
+      );
+      return true;
+    } catch (error: unknown) {
+      return this.fail(error, 'The member could not be removed from this list.');
+    }
   }
 
   addItem(listId: string, mediaId: string): Promise<SharedListItem | null> {
@@ -180,6 +223,17 @@ export class SharedListsService {
       this.sync(next);
       return next;
     });
+  }
+
+  private updateMembers(
+    listId: string,
+    update: (members: SharedListMember[]) => SharedListMember[],
+  ): void {
+    this.activeListState.update((list) =>
+      !list || list.id !== listId
+        ? list
+        : { ...list, members: update(list.members) },
+    );
   }
 
   private sync(details: SharedListDetails): void {

@@ -45,7 +45,9 @@ export interface SharedListDetails extends SharedList {
 }
 
 export interface SharedListInvite {
+  id: string;
   acceptUrl: string;
+  target: PublicUserProfile;
   role: Exclude<SharedListRole, 'owner'>;
   expiresAt: string;
 }
