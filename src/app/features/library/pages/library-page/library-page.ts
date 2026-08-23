@@ -7,21 +7,44 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import {
+  AbstractControl,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+} from '@angular/forms';
 import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { CategoryManager } from '../../../categories/components/category-manager/category-manager';
 import { EntryCategoryPicker } from '../../../categories/components/entry-category-picker/entry-category-picker';
 import { CategoriesService } from '../../../categories/data-access/categories.service';
 import { PriorityService } from '../../../priority/data-access/priority.service';
+import { MediaType } from '../../../search/models/media';
+import {
+  MEDIA_COUNTRY_OPTIONS,
+  MEDIA_GENRE_OPTIONS,
+  MEDIA_SORT_OPTIONS,
+  MediaSort,
+} from '../../../../shared/media-filter-options';
 import { ProgressControls } from '../../components/progress-controls/progress-controls';
 import { LibraryService } from '../../data-access/library.service';
 import { LibraryEntry, WatchStatus } from '../../models/library';
+import {
+  DEFAULT_LIBRARY_FILTERS,
+  filterLibraryEntries,
+  hasActiveLibraryFilters,
+  LibraryAdvancedFilters,
+} from '../../utils/library-filters';
+
+type LibraryView = 'grid' | 'list';
 
 @Component({
   selector: 'app-library-page',
   imports: [
     RouterLink,
     RouterLinkActive,
+    ReactiveFormsModule,
     CategoryManager,
     EntryCategoryPicker,
     ProgressControls,
@@ -39,10 +62,29 @@ export class LibraryPage implements OnInit {
   protected readonly pendingEntryId = signal<string | null>(null);
   protected readonly selectedCategoryId = signal('all');
   protected readonly selectedPriorityLaneId = signal('all');
+  protected readonly view = signal<LibraryView>('grid');
+  protected readonly appliedFilters = signal<LibraryAdvancedFilters>(DEFAULT_LIBRARY_FILTERS);
+  protected readonly genreOptions = MEDIA_GENRE_OPTIONS;
+  protected readonly countryOptions = MEDIA_COUNTRY_OPTIONS;
+  protected readonly sortOptions = MEDIA_SORT_OPTIONS;
+  protected readonly filters = new FormGroup(
+    {
+      query: new FormControl('', { nonNullable: true }),
+      mediaType: new FormControl<MediaType | ''>('', { nonNullable: true }),
+      minRating: new FormControl<number | null>(null),
+      genreId: new FormControl<number | null>(null),
+      country: new FormControl('', { nonNullable: true }),
+      yearFrom: new FormControl<number | null>(null),
+      yearTo: new FormControl<number | null>(null),
+      sort: new FormControl<MediaSort>('recent', { nonNullable: true }),
+    },
+    { validators: yearRangeValidator },
+  );
+  protected readonly baseEntries = computed(() =>
+    this.library.entries().filter((entry) => entry.status === this.status),
+  );
   protected readonly entries = computed(() =>
-    this.library
-      .entries()
-      .filter((entry) => entry.status === this.status)
+    filterLibraryEntries(this.library.entries(), this.status, this.appliedFilters())
       .filter(
         (entry) =>
           this.selectedCategoryId() === 'all' ||
@@ -57,12 +99,14 @@ export class LibraryPage implements OnInit {
             : entry.priorityLaneId === this.selectedPriorityLaneId()),
       ),
   );
+  protected readonly hasFilters = computed(
+    () =>
+      hasActiveLibraryFilters(this.appliedFilters()) ||
+      this.selectedCategoryId() !== 'all' ||
+      this.selectedPriorityLaneId() !== 'all',
+  );
   protected readonly heading =
-    this.status === 'to_watch'
-      ? 'To watch'
-      : this.status === 'watching'
-        ? 'Watching'
-        : 'Watched';
+    this.status === 'to_watch' ? 'To watch' : this.status === 'watching' ? 'Watching' : 'Watched';
 
   constructor() {
     effect(() => {
@@ -70,9 +114,7 @@ export class LibraryPage implements OnInit {
 
       if (
         selectedCategoryId !== 'all' &&
-        !this.categories
-          .categories()
-          .some((category) => category.id === selectedCategoryId)
+        !this.categories.categories().some((category) => category.id === selectedCategoryId)
       ) {
         this.selectedCategoryId.set('all');
       }
@@ -82,9 +124,7 @@ export class LibraryPage implements OnInit {
       if (
         selectedPriorityLaneId !== 'all' &&
         selectedPriorityLaneId !== 'unassigned' &&
-        !this.priority
-          .lanes()
-          .some((lane) => lane.id === selectedPriorityLaneId)
+        !this.priority.lanes().some((lane) => lane.id === selectedPriorityLaneId)
       ) {
         this.selectedPriorityLaneId.set('all');
       }
@@ -137,6 +177,33 @@ export class LibraryPage implements OnInit {
       this.selectedPriorityLaneId.set(select.value);
     }
   }
+
+  protected applyFilters(): void {
+    this.filters.markAllAsTouched();
+
+    if (this.filters.invalid) {
+      return;
+    }
+
+    const value = this.filters.getRawValue();
+    this.appliedFilters.set({
+      query: value.query,
+      mediaType: value.mediaType,
+      minRating: value.minRating,
+      genreId: value.genreId,
+      country: value.country,
+      yearFrom: value.yearFrom,
+      yearTo: value.yearTo,
+      sort: value.sort,
+    });
+  }
+
+  protected clearFilters(): void {
+    this.filters.reset(DEFAULT_LIBRARY_FILTERS);
+    this.appliedFilters.set(DEFAULT_LIBRARY_FILTERS);
+    this.selectedCategoryId.set('all');
+    this.selectedPriorityLaneId.set('all');
+  }
 }
 
 function readWatchStatus(value: unknown): WatchStatus {
@@ -145,4 +212,11 @@ function readWatchStatus(value: unknown): WatchStatus {
 
 function isWatchStatus(value: unknown): value is WatchStatus {
   return value === 'to_watch' || value === 'watching' || value === 'watched';
+}
+
+function yearRangeValidator(control: AbstractControl): ValidationErrors | null {
+  const yearFrom = control.get('yearFrom')?.value as number | null;
+  const yearTo = control.get('yearTo')?.value as number | null;
+
+  return yearFrom !== null && yearTo !== null && yearFrom > yearTo ? { yearRange: true } : null;
 }

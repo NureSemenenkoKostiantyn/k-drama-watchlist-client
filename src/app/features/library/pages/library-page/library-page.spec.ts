@@ -29,9 +29,28 @@ describe('LibraryPage', () => {
     createdAt: '2026-07-23T20:00:00.000Z',
     updatedAt: '2026-07-23T20:00:00.000Z',
   };
+  const movieEntry: LibraryEntry = {
+    id: 'entry-2',
+    mediaId: 'media-2',
+    status: 'to_watch',
+    rating: 9,
+    categoryIds: [],
+    media: {
+      id: 'movie:496243',
+      tmdbId: 496243,
+      mediaType: 'movie',
+      title: 'Parasite',
+      originalTitle: '기생충',
+      releaseDate: '2019-05-30',
+      originCountry: ['KR'],
+      genreIds: [18, 53],
+    },
+    createdAt: '2026-07-24T20:00:00.000Z',
+    updatedAt: '2026-07-24T20:00:00.000Z',
+  };
 
   beforeEach(async () => {
-    const entries = signal([entry]);
+    const entries = signal([entry, movieEntry]);
     const categories = signal([]);
     const isLoading = signal(false);
     const error = signal<string | null>(null);
@@ -89,7 +108,43 @@ describe('LibraryPage', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(root.querySelector('h1')?.textContent).toContain('To watch');
-    expect(root.querySelector('.library-card h2')?.textContent).toContain('Goblin');
-    expect(root.querySelector('.library-card img')?.getAttribute('src')).toContain('goblin.jpg');
+    expect(root.textContent).toContain('Goblin');
+    expect(
+      Array.from(root.querySelectorAll('.library-card img')).some((image) =>
+        image.getAttribute('src')?.includes('goblin.jpg'),
+      ),
+    ).toBe(true);
+  });
+
+  it('applies title filters and switches between grid and list views', async () => {
+    const fixture = TestBed.createComponent(LibraryPage);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const root = fixture.nativeElement as HTMLElement;
+    const query = root.querySelector<HTMLInputElement>('input[formControlName="query"]');
+    const form = root.querySelector<HTMLFormElement>('.library-filters');
+
+    expect(query).not.toBeNull();
+    expect(form).not.toBeNull();
+
+    query!.value = '기생충';
+    query!.dispatchEvent(new Event('input'));
+    form!.dispatchEvent(new Event('submit'));
+    fixture.detectChanges();
+
+    const titles = Array.from(root.querySelectorAll('.library-card h2')).map((title) =>
+      title.textContent?.trim(),
+    );
+    expect(titles).toEqual(['Parasite']);
+    expect(root.querySelector('.library-results > span')?.textContent).toContain('1 result');
+
+    const listButton = Array.from(
+      root.querySelectorAll<HTMLButtonElement>('.library-results button'),
+    ).find((button) => button.textContent?.trim() === 'List');
+    listButton?.click();
+    fixture.detectChanges();
+
+    expect(root.querySelector('.library-grid')?.classList).toContain('library-grid--list');
   });
 });
