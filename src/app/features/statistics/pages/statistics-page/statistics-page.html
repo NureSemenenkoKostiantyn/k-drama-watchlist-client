@@ -1,0 +1,206 @@
+<section class="statistics" aria-labelledby="statistics-title">
+  <header class="statistics__header">
+    <div>
+      <p>Your viewing story</p>
+      <h1 id="statistics-title">Statistics</h1>
+      <span>Patterns calculated from your private library.</span>
+    </div>
+    <a routerLink="/library">Open library</a>
+  </header>
+
+  @if (error()) {
+    <div class="statistics__state statistics__state--error" role="alert">
+      <p>{{ error() }}</p>
+      <button type="button" (click)="retry()">Try again</button>
+    </div>
+  } @else if (loading() && !statistics()) {
+    <div class="statistics__state" role="status">Calculating your statistics&hellip;</div>
+  } @else if (statistics(); as current) {
+    @if (current.totals.library === 0) {
+      <div class="statistics__state statistics__state--empty">
+        <strong>Your story starts with the first title.</strong>
+        <p>Add something to your library and its statistics will appear here.</p>
+        <a routerLink="/search">Find a drama or movie</a>
+      </div>
+    } @else {
+      <div class="statistics__summary" aria-label="Library summary">
+        <article>
+          <span>In your library</span>
+          <strong>{{ current.totals.library }}</strong>
+          <small>{{ current.totals.tv }} series · {{ current.totals.movies }} movies</small>
+        </article>
+        <article>
+          <span>Completed</span>
+          <strong>{{ percentage(current.totals.watched, current.totals.library) }}%</strong>
+          <small>{{ current.totals.watched }} titles marked watched</small>
+        </article>
+        <article>
+          <span>Episodes tracked</span>
+          <strong>{{ current.totals.completedEpisodes }}</strong>
+          <small>Based on recorded series progress</small>
+        </article>
+        <article>
+          <span>Your average</span>
+          <strong>
+            {{
+              current.totals.averageRating === undefined
+                ? '—'
+                : (current.totals.averageRating | number: '1.1-2')
+            }}
+          </strong>
+          <small>{{ current.totals.rated }} rated titles</small>
+        </article>
+      </div>
+
+      <div class="statistics__grid">
+        <article class="statistics__panel">
+          <div class="statistics__panel-heading">
+            <div>
+              <p>Library flow</p>
+              <h2>Where everything stands</h2>
+            </div>
+            <span>{{ current.totals.library }} total</span>
+          </div>
+          <div class="statistics__bars">
+            <div>
+              <span>To watch</span>
+              <div>
+                <i [style.width.%]="percentage(current.totals.toWatch, current.totals.library)"></i>
+              </div>
+              <strong>{{ current.totals.toWatch }}</strong>
+            </div>
+            <div>
+              <span>Watching</span>
+              <div>
+                <i
+                  [style.width.%]="percentage(current.totals.watching, current.totals.library)"
+                ></i>
+              </div>
+              <strong>{{ current.totals.watching }}</strong>
+            </div>
+            <div>
+              <span>Watched</span>
+              <div>
+                <i [style.width.%]="percentage(current.totals.watched, current.totals.library)"></i>
+              </div>
+              <strong>{{ current.totals.watched }}</strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="statistics__panel statistics__panel--media">
+          <div class="statistics__panel-heading">
+            <div>
+              <p>Format mix</p>
+              <h2>Series or movie?</h2>
+            </div>
+          </div>
+          <div
+            class="statistics__format-bar"
+            role="img"
+            [attr.aria-label]="
+              current.totals.tv + ' series and ' + current.totals.movies + ' movies'
+            "
+          >
+            <i [style.width.%]="percentage(current.totals.tv, current.totals.library)"></i>
+          </div>
+          <div class="statistics__legend">
+            <span
+              ><i></i>Series <strong>{{ current.totals.tv }}</strong></span
+            >
+            <span
+              ><i></i>Movies <strong>{{ current.totals.movies }}</strong></span
+            >
+          </div>
+        </article>
+      </div>
+
+      <article class="statistics__panel statistics__panel--timeline">
+        <div class="statistics__panel-heading">
+          <div>
+            <p>Last 12 months</p>
+            <h2>Titles completed</h2>
+          </div>
+        </div>
+        <div class="statistics__timeline">
+          @for (bucket of current.completedByMonth; track bucket.month) {
+            <div [attr.aria-label]="monthLabel(bucket.month) + ': ' + bucket.count + ' completed'">
+              <span>{{ bucket.count }}</span>
+              <i [style.height.%]="barWidth(bucket.count, current.completedByMonth)"></i>
+              <small>{{ monthLabel(bucket.month) }}</small>
+            </div>
+          }
+        </div>
+      </article>
+
+      <div class="statistics__grid statistics__grid--rankings">
+        <article class="statistics__panel">
+          <div class="statistics__panel-heading">
+            <div>
+              <p>Your taste</p>
+              <h2>Top genres</h2>
+            </div>
+          </div>
+          @if (current.topGenres.length) {
+            <ol class="statistics__ranking">
+              @for (bucket of current.topGenres; track bucket.genreId) {
+                <li>
+                  <span>{{ genreLabel(bucket.genreId) }}</span>
+                  <div><i [style.width.%]="barWidth(bucket.count, current.topGenres)"></i></div>
+                  <strong>{{ bucket.count }}</strong>
+                </li>
+              }
+            </ol>
+          } @else {
+            <p class="statistics__missing">Genre data will appear as you add titles.</p>
+          }
+        </article>
+
+        <article class="statistics__panel">
+          <div class="statistics__panel-heading">
+            <div>
+              <p>Across the map</p>
+              <h2>Top countries</h2>
+            </div>
+          </div>
+          @if (current.topCountries.length) {
+            <ol class="statistics__ranking">
+              @for (bucket of current.topCountries; track bucket.countryCode) {
+                <li>
+                  <span>{{ countryLabel(bucket.countryCode) }}</span>
+                  <div><i [style.width.%]="barWidth(bucket.count, current.topCountries)"></i></div>
+                  <strong>{{ bucket.count }}</strong>
+                </li>
+              }
+            </ol>
+          } @else {
+            <p class="statistics__missing">Country data will appear as you add titles.</p>
+          }
+        </article>
+      </div>
+
+      <article class="statistics__panel">
+        <div class="statistics__panel-heading">
+          <div>
+            <p>Scoring habits</p>
+            <h2>Your rating distribution</h2>
+          </div>
+          <span>{{ current.totals.rated }} ratings</span>
+        </div>
+        @if (current.ratingDistribution.length) {
+          <div class="statistics__ratings">
+            @for (bucket of current.ratingDistribution; track bucket.rating) {
+              <div>
+                <span>{{ bucket.count }}</span>
+                <i [style.height.%]="barWidth(bucket.count, current.ratingDistribution)"></i>
+                <small>{{ bucket.rating | number: '1.0-1' }}</small>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="statistics__missing">Rate a title to start your distribution.</p>
+        }
+      </article>
+    }
+  }
+</section>

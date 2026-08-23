@@ -13,6 +13,15 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'statistics',
+    title: 'Your statistics · Drama Watch',
+    canActivate: [profileCompleteGuard],
+    loadComponent: () =>
+      import('./features/statistics/pages/statistics-page/statistics-page').then(
+        ({ StatisticsPage }) => StatisticsPage,
+      ),
+  },
+  {
     path: 'login',
     title: 'Log in · Drama Watch',
     canActivate: [anonymousOnlyGuard],

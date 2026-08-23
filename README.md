@@ -109,6 +109,12 @@ and normalized media details. The feed never receives private notes, episode pro
 playback preferences, or personal-library IDs; its empty state links to friend discovery and privacy
 settings.
 
+The protected `/statistics` route turns the signed-in user's private library into an accessible
+dashboard of lifecycle and movie/series totals, tracked episode progress, rating distribution, top
+genres and countries, and a 12-month completion timeline. It uses responsive CSS bars with text
+labels and adds no charting dependency. Watch time is intentionally omitted because the available
+runtime metadata cannot produce a trustworthy value for every series.
+
 A protected notification center at `/notifications` shows friend requests, accepted friendships,
 and received recommendations. The header bell exposes the unread count, while the feed supports
 individual and bulk read actions and links each notification to its relevant social screen.
