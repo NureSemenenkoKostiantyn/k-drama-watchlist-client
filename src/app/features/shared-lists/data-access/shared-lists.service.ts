@@ -11,6 +11,7 @@ import {
   SharedListItem,
   SharedListMember,
   SharedListRole,
+  SharedListVisibility,
   UpdateSharedListItemRequest,
 } from '../models/shared-list';
 
@@ -65,7 +66,14 @@ export class SharedListsService {
     }
   }
 
-  update(listId: string, input: { title?: string; description?: string | null }): Promise<SharedListDetails | null> {
+  update(
+    listId: string,
+    input: {
+      title?: string;
+      description?: string | null;
+      visibility?: SharedListVisibility;
+    },
+  ): Promise<SharedListDetails | null> {
     return this.request(
       this.http.patch<SharedListDetails>(`${this.baseUrl}/${listId}`, input),
       'The shared-list details could not be saved.',

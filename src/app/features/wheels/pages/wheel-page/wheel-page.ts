@@ -4,7 +4,7 @@ import {
   CdkDropList,
   moveItemInArray,
 } from '@angular/cdk/drag-drop';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -30,6 +30,7 @@ import {
   WheelRole,
   WheelSelectionMode,
   WheelSpin,
+  WheelVisibility,
 } from '../../models/wheel';
 
 const wheelColors = [
@@ -70,6 +71,7 @@ export class WheelPage implements OnInit, OnDestroy {
   private readonly formBuilder = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly document = inject(DOCUMENT);
   private readonly authentication = inject(AuthenticationService);
   private readonly friendsService = inject(FriendsService);
   private spinTimer: ReturnType<typeof setTimeout> | undefined;
@@ -84,6 +86,7 @@ export class WheelPage implements OnInit, OnDestroy {
   protected readonly winnerShareOpen = signal(false);
   protected readonly pendingDelete = signal(false);
   protected readonly pendingHistoryReset = signal(false);
+  protected readonly publicLinkCopied = signal(false);
   protected readonly friends = signal<Friendship[]>([]);
   protected readonly wheel = this.wheels.activeWheel;
   protected readonly isOwner = computed(
@@ -92,6 +95,12 @@ export class WheelPage implements OnInit, OnDestroy {
   protected readonly canEdit = computed(() => {
     const role = this.wheel()?.role;
     return role === 'owner' || role === 'editor';
+  });
+  protected readonly publicUrl = computed(() => {
+    const publicSlug = this.wheel()?.publicSlug;
+    return publicSlug
+      ? `${this.document.location.origin}/wheels/public/${publicSlug}`
+      : null;
   });
   protected readonly availableFriends = computed(() => {
     const memberIds = new Set(
@@ -143,6 +152,7 @@ export class WheelPage implements OnInit, OnDestroy {
     selectionMode: this.formBuilder.nonNullable.control<WheelSelectionMode>(
       'fully_random',
     ),
+    visibility: this.formBuilder.nonNullable.control<WheelVisibility>('private'),
   });
   protected readonly addItemForm = this.formBuilder.nonNullable.group({
     mediaId: ['', [Validators.required]],
@@ -192,8 +202,16 @@ export class WheelPage implements OnInit, OnDestroy {
       title,
       description: value.description.trim() || null,
       selectionMode: value.selectionMode,
+      visibility: value.visibility,
     });
     this.isSaving.set(false);
+  }
+
+  protected async copyPublicLink(): Promise<void> {
+    const url = this.publicUrl();
+    if (!url) return;
+    await navigator.clipboard.writeText(url);
+    this.publicLinkCopied.set(true);
   }
 
   protected async addItem(): Promise<void> {
@@ -507,6 +525,7 @@ export class WheelPage implements OnInit, OnDestroy {
         title: wheel.title,
         description: wheel.description ?? '',
         selectionMode: wheel.selectionMode,
+        visibility: wheel.visibility,
       });
 
       if (wheel.role === 'owner') {

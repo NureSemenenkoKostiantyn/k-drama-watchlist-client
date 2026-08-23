@@ -3,12 +3,14 @@ import { PublicUserProfile } from '../../users/models/public-user-profile';
 
 export type SharedListRole = 'owner' | 'editor' | 'commenter' | 'viewer';
 export type SharedListItemStatus = 'planned' | 'watching' | 'finished';
+export type SharedListVisibility = 'private' | 'unlisted' | 'public';
 
 export interface SharedList {
   id: string;
   title: string;
   description?: string;
-  visibility: 'private' | 'unlisted' | 'public';
+  visibility: SharedListVisibility;
+  publicSlug?: string;
   role: SharedListRole;
   itemCount: number;
   createdAt: string;
@@ -42,6 +44,22 @@ export interface SharedListItem {
 export interface SharedListDetails extends SharedList {
   members: SharedListMember[];
   items: SharedListItem[];
+}
+
+export interface PublicSharedListItem extends Omit<SharedListItem, 'id' | 'mediaId' | 'media'> {
+  media: Omit<MediaDetails, 'id'>;
+}
+
+export interface PublicSharedListDetails {
+  title: string;
+  description?: string;
+  visibility: Exclude<SharedListVisibility, 'private'>;
+  publicSlug: string;
+  itemCount: number;
+  members: SharedListMember[];
+  items: PublicSharedListItem[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface SharedListInvite {

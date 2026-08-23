@@ -72,6 +72,18 @@ describe('WheelsService', () => {
     );
   });
 
+  it('updates visibility and retains the server-issued public slug', async () => {
+    const shared = { ...wheel, visibility: 'unlisted' as const, publicSlug: 'abcdefghijklmnop' };
+    const promise = service.update(wheel.id, { visibility: 'unlisted' });
+    const request = http.expectOne(`/api/wheels/${wheel.id}`);
+    expect(request.request.method).toBe('PATCH');
+    expect(request.request.body).toEqual({ visibility: 'unlisted' });
+    request.flush(shared);
+
+    await expect(promise).resolves.toEqual(shared);
+    expect(service.activeWheel()?.publicSlug).toBe('abcdefghijklmnop');
+  });
+
   it('records the backend-selected winner in local wheel state', async () => {
     const loadPromise = service.loadWheel(wheel.id);
     http.expectOne(`/api/wheels/${wheel.id}`).flush(wheel);

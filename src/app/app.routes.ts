@@ -176,6 +176,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'wheels/public/:publicSlug',
+    title: 'Shared wheel · Drama Watch',
+    loadComponent: () =>
+      import('./features/wheels/pages/public-wheel-page/public-wheel-page').then(
+        ({ PublicWheelPage }) => PublicWheelPage,
+      ),
+  },
+  {
     path: 'wheels/:wheelId',
     title: 'Wheel · Drama Watch',
     canActivate: [profileCompleteGuard],
@@ -192,6 +200,14 @@ export const routes: Routes = [
       import('./features/shared-lists/pages/shared-lists-page/shared-lists-page').then(
         ({ SharedListsPage }) => SharedListsPage,
       ),
+  },
+  {
+    path: 'lists/public/:publicSlug',
+    title: 'Shared watchlist · Drama Watch',
+    loadComponent: () =>
+      import(
+        './features/shared-lists/pages/public-shared-list-page/public-shared-list-page'
+      ).then(({ PublicSharedListPage }) => PublicSharedListPage),
   },
   {
     path: 'lists/invitations/:inviteId',

@@ -21,7 +21,7 @@
         <a class="list-card" [routerLink]="['/lists', list.id]">
           <div class="list-card__mark" aria-hidden="true"><span></span><span></span><span></span></div>
           <div>
-            <p>{{ list.role === 'owner' ? 'Your list' : 'Shared · ' + list.role }}</p>
+            <p>{{ list.role === 'owner' ? 'Your ' + list.visibility + ' list' : 'Shared · ' + list.role }}</p>
             <h2>{{ list.title }}</h2>
             @if (list.description) { <span>{{ list.description }}</span> }
             <strong>{{ list.itemCount }} {{ list.itemCount === 1 ? 'title' : 'titles' }}</strong>

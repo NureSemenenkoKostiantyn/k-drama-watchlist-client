@@ -155,6 +155,31 @@
   opacity: 0.55;
 }
 
+.wheel-settings__visibility-help {
+  color: var(--color-text-muted);
+  line-height: 1.45;
+}
+
+.wheel-settings__public-link {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 0.0625rem solid var(--color-border);
+}
+
+.wheel-settings__public-link strong {
+  grid-column: 1 / -1;
+  font-size: 0.8rem;
+}
+
+.wheel-settings__public-link a {
+  grid-column: 1 / -1;
+  width: fit-content;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
 .wheel-add a,
 .wheel-add > span {
   color: var(--color-text-muted);
