@@ -51,7 +51,7 @@ export class FriendLibraryPage implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly users = inject(UsersService);
   private readonly publicLibrary = inject(PublicLibraryService);
-  private username: string | null = null;
+  private userId: string | null = null;
 
   protected readonly profile = signal<PublicUserProfile | null>(null);
   protected readonly library = signal<PublicLibraryResponse | null>(null);
@@ -85,19 +85,21 @@ export class FriendLibraryPage implements OnInit {
   );
 
   ngOnInit(): void {
-    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
-      const username = params.get('username');
+    this.route.paramMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const userId = params.get('userId');
 
-      if (!username) {
-        this.error.set('This library link is invalid.');
-        this.isLoading.set(false);
-        return;
-      }
+        if (!userId) {
+          this.error.set('This library link is invalid.');
+          this.isLoading.set(false);
+          return;
+        }
 
-      this.username = username;
-      void this.loadProfile(username);
-      void this.loadLibrary(1);
-    });
+        this.userId = userId;
+        void this.loadProfile(userId);
+        void this.loadLibrary(1);
+      });
   }
 
   protected applyFilters(): void {
@@ -166,16 +168,16 @@ export class FriendLibraryPage implements OnInit {
     );
   }
 
-  private async loadProfile(username: string): Promise<void> {
+  private async loadProfile(userId: string): Promise<void> {
     try {
-      this.profile.set(await this.users.getByUsername(username));
+      this.profile.set(await this.users.getById(userId));
     } catch {
       this.profile.set(null);
     }
   }
 
   private async loadLibrary(page: number): Promise<void> {
-    if (!this.username) {
+    if (!this.userId) {
       return;
     }
 
@@ -183,7 +185,10 @@ export class FriendLibraryPage implements OnInit {
     this.error.set(null);
 
     try {
-      const response = await this.publicLibrary.get(this.username, this.buildFilters(page));
+      const response = await this.publicLibrary.get(
+        this.userId,
+        this.buildFilters(page),
+      );
       this.library.set(response);
       this.profile.set(response.user);
     } catch (error: unknown) {

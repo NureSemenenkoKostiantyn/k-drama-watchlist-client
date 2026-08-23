@@ -244,7 +244,7 @@
               {{ member.user.name.slice(0, 1).toUpperCase() }}
             </span>
             <div>
-              <a [routerLink]="['/users', member.user.username]">
+              <a [routerLink]="['/users', member.user.id]">
                 {{ member.user.name }}
               </a>
               <span>@{{ member.user.displayUsername }}</span>

@@ -33,7 +33,7 @@
       <div class="profile-card__actions">
         <a routerLink="/friends">Find people</a>
         <a
-          [routerLink]="['/users', currentProfile.username, 'library']"
+          [routerLink]="['/users', currentProfile.id, 'library']"
         >
           {{ isOwnProfile(currentProfile) ? 'Preview shared library' : 'View library' }}
         </a>

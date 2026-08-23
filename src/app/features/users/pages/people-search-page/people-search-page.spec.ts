@@ -87,7 +87,7 @@ describe('PeopleSearchPage', () => {
       '.people-card__profile',
     );
     expect(result?.textContent).toContain('Dahyun Fan');
-    expect(result?.getAttribute('href')).toBe('/users/dahyun.fan');
+    expect(result?.getAttribute('href')).toBe('/users/user-1');
   });
 
   it('sends a request and renders its pending state', async () => {

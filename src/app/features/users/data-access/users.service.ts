@@ -9,10 +9,10 @@ import { PublicUserProfile } from '../models/public-user-profile';
 export class UsersService {
   private readonly http = inject(HttpClient);
 
-  getByUsername(username: string): Promise<PublicUserProfile> {
+  getById(userId: string): Promise<PublicUserProfile> {
     return firstValueFrom(
       this.http.get<PublicUserProfile>(
-        `${environment.apiBaseUrl}/users/${username}`,
+        `${environment.apiBaseUrl}/users/${userId}`,
       ),
     );
   }

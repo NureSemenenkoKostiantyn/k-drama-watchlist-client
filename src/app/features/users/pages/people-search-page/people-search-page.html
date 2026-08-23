@@ -39,7 +39,7 @@
             <article class="people-card">
               <a
                 class="people-card__profile"
-                [routerLink]="['/users', friendship.user.username]"
+                [routerLink]="['/users', friendship.user.id]"
               >
                 @if (friendship.user.image) {
                   <img
@@ -91,7 +91,7 @@
           <article class="people-card">
             <a
               class="people-card__profile"
-              [routerLink]="['/users', friendship.user.username]"
+              [routerLink]="['/users', friendship.user.id]"
             >
               @if (friendship.user.image) {
                 <img
@@ -111,7 +111,7 @@
               </span>
             </a>
             <div class="people-card__buttons">
-              <a [routerLink]="['/users', friendship.user.username]">
+              <a [routerLink]="['/users', friendship.user.id]">
                 Profile
               </a>
               <button
@@ -148,7 +148,7 @@
             <article class="people-card">
               <a
                 class="people-card__profile"
-                [routerLink]="['/users', friendship.user.username]"
+                [routerLink]="['/users', friendship.user.id]"
               >
                 @if (friendship.user.image) {
                   <img
@@ -228,7 +228,7 @@
           <article class="people-card">
             <a
               class="people-card__profile"
-              [routerLink]="['/users', profile.username]"
+              [routerLink]="['/users', profile.id]"
             >
               @if (profile.image) {
                 <img
