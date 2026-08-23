@@ -1,4 +1,5 @@
 import { MediaDetails } from '../../search/models/media';
+import { MediaType } from '../../search/models/media';
 import { PublicUserProfile } from '../../users/models/public-user-profile';
 
 export type SharedListRole = 'owner' | 'editor' | 'commenter' | 'viewer';
@@ -60,6 +61,32 @@ export interface PublicSharedListDetails {
   items: PublicSharedListItem[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface PublicSharedListPreviewMedia {
+  tmdbId: number;
+  mediaType: MediaType;
+  title: string;
+  posterPath?: string;
+  posterUrl?: string;
+}
+
+export interface PublicSharedListDiscoveryItem {
+  title: string;
+  description?: string;
+  publicSlug: string;
+  itemCount: number;
+  owner?: PublicUserProfile;
+  previewMedia: PublicSharedListPreviewMedia[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PublicSharedListDiscovery {
+  page: number;
+  totalPages: number;
+  totalResults: number;
+  items: PublicSharedListDiscoveryItem[];
 }
 
 export interface SharedListInvite {

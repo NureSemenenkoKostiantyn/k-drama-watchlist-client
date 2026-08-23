@@ -1,0 +1,64 @@
+<section class="public-discovery" aria-labelledby="public-discovery-title">
+  <header>
+    <div>
+      <p>Community picks</p>
+      <h1 id="public-discovery-title">Public watchlists</h1>
+      <span>Browse lists that their owners chose to share with everyone.</span>
+    </div>
+    <a routerLink="/lists">Your shared lists</a>
+  </header>
+
+  @if (error()) {
+    <div class="state state--error" role="alert">
+      <p>{{ error() }}</p>
+      <button type="button" (click)="load(requestedPage())">Try again</button>
+    </div>
+  } @else if (loading() && !result()) {
+    <div class="state" role="status">Loading public watchlists…</div>
+  } @else if (result(); as current) {
+    <div class="result-summary">
+      {{ current.totalResults }} {{ current.totalResults === 1 ? 'public list' : 'public lists' }}
+    </div>
+    <section class="public-list-grid" aria-label="Public watchlists" [attr.aria-busy]="loading()">
+      @for (list of current.items; track list.publicSlug) {
+        <a class="public-list-card" [routerLink]="['/lists/public', list.publicSlug]">
+          <div class="poster-stack" aria-hidden="true">
+            @for (media of list.previewMedia; track media.mediaType + ':' + media.tmdbId) {
+              <div class="poster-stack__poster">
+                @if (media.posterUrl) {
+                  <img [src]="media.posterUrl" alt="" />
+                } @else {
+                  <span>{{ media.title.slice(0, 1) }}</span>
+                }
+              </div>
+            } @empty {
+              <div class="poster-stack__empty"><span>DW</span></div>
+            }
+          </div>
+          <div class="public-list-card__body">
+            <p>
+              @if (list.owner) { By {{ list.owner.displayUsername }} } @else { Community list }
+            </p>
+            <h2>{{ list.title }}</h2>
+            @if (list.description) { <span>{{ list.description }}</span> }
+            <strong>{{ list.itemCount }} {{ list.itemCount === 1 ? 'title' : 'titles' }}</strong>
+          </div>
+        </a>
+      } @empty {
+        <div class="state">No public watchlists have been published yet.</div>
+      }
+    </section>
+
+    @if (current.totalPages > 1) {
+      <nav class="pagination" aria-label="Public watchlist pages">
+        <button type="button" (click)="load(current.page - 1)" [disabled]="loading() || current.page === 1">
+          Previous
+        </button>
+        <span>Page {{ current.page }} of {{ current.totalPages }}</span>
+        <button type="button" (click)="load(current.page + 1)" [disabled]="loading() || current.page === current.totalPages">
+          Next
+        </button>
+      </nav>
+    }
+  }
+</section>

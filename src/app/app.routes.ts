@@ -202,6 +202,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'lists/discover',
+    title: 'Discover public watchlists · Drama Watch',
+    loadComponent: () =>
+      import(
+        './features/shared-lists/pages/public-shared-list-discovery-page/public-shared-list-discovery-page'
+      ).then(({ PublicSharedListDiscoveryPage }) => PublicSharedListDiscoveryPage),
+  },
+  {
     path: 'lists/public/:publicSlug',
     title: 'Shared watchlist · Drama Watch',
     loadComponent: () =>

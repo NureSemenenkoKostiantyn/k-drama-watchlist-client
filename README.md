@@ -69,7 +69,9 @@ separate from editorial controls; `/lists/invites/:token` accepts secure links f
 Owners can also switch a list to unlisted or public and copy its revocable read-only URL. The
 anonymous `/lists/public/:publicSlug` page shows only public-safe list, member, media, note, status,
 and group-progress data; it does not load comments or expose internal list, item, or MongoDB media
-IDs. Public discovery is deferred, so public and unlisted currently share the same link behavior.
+IDs. `/lists/discover` provides a paginated community feed of recently active public lists with
+owner identity, item counts, and poster previews. Unlisted lists never appear in that feed and their
+direct-link pages are marked `noindex`; public list pages are indexable.
 
 Share cards are rendered entirely in the browser from personal media details or a server-selected
 wheel winner. Users can choose square, story, or landscape output and light, dark, or poster themes,

@@ -1,9 +1,12 @@
 :host { display: block; }
 .lists-page { display: grid; gap: 1.5rem; width: min(100%, 72rem); margin: 0 auto; padding: clamp(1.5rem, 4vw, 3rem); }
 p, h1, h2 { margin: 0; }
+header { display: flex; align-items: end; justify-content: space-between; gap: 1rem; }
 header p, .list-create p, .list-card p { color: var(--color-accent-strong); font-size: .72rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
 header h1 { margin-top: .35rem; font-size: clamp(2.4rem, 7vw, 5rem); letter-spacing: -.065em; }
 header span { display: block; max-width: 46rem; margin-top: .65rem; color: var(--color-text-muted); }
+header > a { flex: none; min-height: 2.75rem; padding: .75rem 1rem; border: .0625rem solid var(--color-border); border-radius: 999rem; font-size: .8rem; font-weight: 800; text-decoration: none; }
+header > a:hover { border-color: var(--color-accent); }
 .list-create { display: grid; grid-template-columns: minmax(10rem, .8fr) minmax(12rem, 1fr) minmax(16rem, 1.6fr) auto; gap: 1rem; align-items: end; padding: 1.25rem; border: .0625rem solid var(--color-border); border-radius: 1.25rem; background: linear-gradient(135deg, rgb(136 108 255 / 13%), transparent 48%), var(--color-surface); }
 .list-create h2 { margin-top: .25rem; font-size: 1.25rem; }
 label { display: grid; gap: .4rem; color: var(--color-text-muted); font-size: .75rem; font-weight: 750; }
@@ -19,4 +22,4 @@ button { min-height: 2.75rem; padding: 0 1rem; border: 0; border-radius: 999rem;
 .list-card strong { display: block; margin-top: .7rem; color: var(--color-text-muted); font-size: .75rem; }
 .state { padding: 1.2rem; border: .0625rem solid var(--color-border); border-radius: 1rem; color: var(--color-text-muted); background: rgb(255 255 255 / 3%); } .state--error { color: #ffd1dd; }
 @media (max-width: 58rem) { .list-create { grid-template-columns: 1fr 1fr; } .list-create div { grid-column: 1 / -1; } }
-@media (max-width: 42rem) { .list-create, .list-grid { grid-template-columns: 1fr; } .list-card { grid-template-columns: 4rem minmax(0, 1fr); } .list-card__mark { width: 4rem; } }
+@media (max-width: 42rem) { header { align-items: start; flex-direction: column; } .list-create, .list-grid { grid-template-columns: 1fr; } .list-card { grid-template-columns: 4rem minmax(0, 1fr); } .list-card__mark { width: 4rem; } }
