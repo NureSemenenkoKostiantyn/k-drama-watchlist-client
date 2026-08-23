@@ -1,50 +1,66 @@
 <section class="visibility-settings" aria-labelledby="library-visibility-title">
   <div>
     <p>Privacy</p>
-    <h2 id="library-visibility-title">Library visibility</h2>
-    <span>Choose who can browse your public-safe watchlist.</span>
+    <h2 id="library-visibility-title">Privacy settings</h2>
+    <span>Control who can browse your watchlist and see your library activity.</span>
   </div>
 
   @if (settings.isLoading()) {
     <p class="visibility-settings__status" role="status">Loading settings&hellip;</p>
   } @else {
     <form [formGroup]="form" (ngSubmit)="save()">
-      <label>
-        <input
-          type="radio"
-          value="private"
-          formControlName="visibility"
-        />
-        <span>
-          <strong>Private</strong>
-          <small>Only you can browse it.</small>
-        </span>
-      </label>
-      <label>
-        <input
-          type="radio"
-          value="friends"
-          formControlName="visibility"
-        />
-        <span>
-          <strong>Friends</strong>
-          <small>Only accepted friends can browse it.</small>
-        </span>
-      </label>
-      <label>
-        <input
-          type="radio"
-          value="public"
-          formControlName="visibility"
-        />
-        <span>
-          <strong>Public</strong>
-          <small>Anyone with your profile link can browse it.</small>
-        </span>
-      </label>
+      <fieldset>
+        <legend>Library visibility</legend>
+        <label>
+          <input type="radio" value="private" formControlName="libraryVisibility" />
+          <span>
+            <strong>Private</strong>
+            <small>Only you can browse it.</small>
+          </span>
+        </label>
+        <label>
+          <input type="radio" value="friends" formControlName="libraryVisibility" />
+          <span>
+            <strong>Friends</strong>
+            <small>Only accepted friends can browse it.</small>
+          </span>
+        </label>
+        <label>
+          <input type="radio" value="public" formControlName="libraryVisibility" />
+          <span>
+            <strong>Public</strong>
+            <small>Anyone with your profile link can browse it.</small>
+          </span>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Activity visibility</legend>
+        <label>
+          <input type="radio" value="private" formControlName="activityVisibility" />
+          <span>
+            <strong>Private</strong>
+            <small>Your library actions stay out of activity feeds.</small>
+          </span>
+        </label>
+        <label>
+          <input type="radio" value="friends" formControlName="activityVisibility" />
+          <span>
+            <strong>Friends</strong>
+            <small>Accepted friends can see title additions, status changes, and ratings.</small>
+          </span>
+        </label>
+        <label>
+          <input type="radio" value="public" formControlName="activityVisibility" />
+          <span>
+            <strong>Public</strong>
+            <small>Friends can see it now; public profile activity can use this later.</small>
+          </span>
+        </label>
+      </fieldset>
 
       <button type="submit" [disabled]="isSaving()">
-        {{ isSaving() ? 'Saving...' : 'Save visibility' }}
+        {{ isSaving() ? 'Saving...' : 'Save privacy settings' }}
       </button>
     </form>
   }

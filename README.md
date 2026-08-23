@@ -99,8 +99,15 @@ returned to the browser.
 Profiles now link to `/users/:userId/library`. The shared-library page supports status, type,
 minimum-rating, named genre and country selectors, inclusive release-year ranges, server-backed
 sorting, poster-grid and compact-list views, and pagination. Owners choose Private, Friends, or
-Public visibility from the reusable settings panel on `/profile`; the browser receives only the
-server's public-safe library projection.
+Public library visibility from the reusable privacy settings panel on `/profile`; the browser
+receives only the server's public-safe library projection. The same panel independently controls
+private-by-default activity visibility.
+
+The protected `/activity` route shows a newest-first, paginated feed of accepted friends' visible
+library additions, lifecycle changes, and ratings. Each entry links to the actor's public profile
+and normalized media details. The feed never receives private notes, episode progress, categories,
+playback preferences, or personal-library IDs; its empty state links to friend discovery and privacy
+settings.
 
 A protected notification center at `/notifications` shows friend requests, accepted friendships,
 and received recommendations. The header bell exposes the unread count, while the feed supports

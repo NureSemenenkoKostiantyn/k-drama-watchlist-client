@@ -4,6 +4,15 @@ import { anonymousOnlyGuard, onboardingGuard, profileCompleteGuard } from './cor
 
 export const routes: Routes = [
   {
+    path: 'activity',
+    title: 'Friends activity · Drama Watch',
+    canActivate: [profileCompleteGuard],
+    loadComponent: () =>
+      import('./features/activity/pages/activity-page/activity-page').then(
+        ({ ActivityPage }) => ActivityPage,
+      ),
+  },
+  {
     path: 'login',
     title: 'Log in · Drama Watch',
     canActivate: [anonymousOnlyGuard],
@@ -95,52 +104,52 @@ export const routes: Routes = [
     title: 'Friends · Drama Watch',
     canActivate: [profileCompleteGuard],
     loadComponent: () =>
-      import(
-        './features/users/pages/people-search-page/people-search-page'
-      ).then(({ PeopleSearchPage }) => PeopleSearchPage),
+      import('./features/users/pages/people-search-page/people-search-page').then(
+        ({ PeopleSearchPage }) => PeopleSearchPage,
+      ),
   },
   {
     path: 'suggestions',
     title: 'Suggestions · Drama Watch',
     canActivate: [profileCompleteGuard],
     loadComponent: () =>
-      import(
-        './features/suggestions/pages/suggestions-page/suggestions-page'
-      ).then(({ SuggestionsPage }) => SuggestionsPage),
+      import('./features/suggestions/pages/suggestions-page/suggestions-page').then(
+        ({ SuggestionsPage }) => SuggestionsPage,
+      ),
   },
   {
     path: 'notifications',
     title: 'Notifications - Drama Watch',
     canActivate: [profileCompleteGuard],
     loadComponent: () =>
-      import(
-        './features/notifications/pages/notifications-page/notifications-page'
-      ).then(({ NotificationsPage }) => NotificationsPage),
+      import('./features/notifications/pages/notifications-page/notifications-page').then(
+        ({ NotificationsPage }) => NotificationsPage,
+      ),
   },
   {
     path: 'profile',
     title: 'Your profile · Drama Watch',
     canActivate: [profileCompleteGuard],
     loadComponent: () =>
-      import(
-        './features/users/pages/public-profile-page/public-profile-page'
-      ).then(({ PublicProfilePage }) => PublicProfilePage),
+      import('./features/users/pages/public-profile-page/public-profile-page').then(
+        ({ PublicProfilePage }) => PublicProfilePage,
+      ),
   },
   {
     path: 'users/:userId/library',
     title: 'Shared library - Drama Watch',
     loadComponent: () =>
-      import(
-        './features/users/pages/friend-library-page/friend-library-page'
-      ).then(({ FriendLibraryPage }) => FriendLibraryPage),
+      import('./features/users/pages/friend-library-page/friend-library-page').then(
+        ({ FriendLibraryPage }) => FriendLibraryPage,
+      ),
   },
   {
     path: 'users/:userId',
     title: 'Profile · Drama Watch',
     loadComponent: () =>
-      import(
-        './features/users/pages/public-profile-page/public-profile-page'
-      ).then(({ PublicProfilePage }) => PublicProfilePage),
+      import('./features/users/pages/public-profile-page/public-profile-page').then(
+        ({ PublicProfilePage }) => PublicProfilePage,
+      ),
   },
   {
     path: 'verify-email',
@@ -188,9 +197,7 @@ export const routes: Routes = [
     title: 'Wheel · Drama Watch',
     canActivate: [profileCompleteGuard],
     loadComponent: () =>
-      import('./features/wheels/pages/wheel-page/wheel-page').then(
-        ({ WheelPage }) => WheelPage,
-      ),
+      import('./features/wheels/pages/wheel-page/wheel-page').then(({ WheelPage }) => WheelPage),
   },
   {
     path: 'lists',
@@ -205,35 +212,35 @@ export const routes: Routes = [
     path: 'lists/discover',
     title: 'Discover public watchlists · Drama Watch',
     loadComponent: () =>
-      import(
-        './features/shared-lists/pages/public-shared-list-discovery-page/public-shared-list-discovery-page'
-      ).then(({ PublicSharedListDiscoveryPage }) => PublicSharedListDiscoveryPage),
+      import('./features/shared-lists/pages/public-shared-list-discovery-page/public-shared-list-discovery-page').then(
+        ({ PublicSharedListDiscoveryPage }) => PublicSharedListDiscoveryPage,
+      ),
   },
   {
     path: 'lists/public/:publicSlug',
     title: 'Shared watchlist · Drama Watch',
     loadComponent: () =>
-      import(
-        './features/shared-lists/pages/public-shared-list-page/public-shared-list-page'
-      ).then(({ PublicSharedListPage }) => PublicSharedListPage),
+      import('./features/shared-lists/pages/public-shared-list-page/public-shared-list-page').then(
+        ({ PublicSharedListPage }) => PublicSharedListPage,
+      ),
   },
   {
     path: 'lists/invitations/:inviteId',
     title: 'Join shared list · Drama Watch',
     canActivate: [profileCompleteGuard],
     loadComponent: () =>
-      import(
-        './features/shared-lists/pages/shared-list-invite-page/shared-list-invite-page'
-      ).then(({ SharedListInvitePage }) => SharedListInvitePage),
+      import('./features/shared-lists/pages/shared-list-invite-page/shared-list-invite-page').then(
+        ({ SharedListInvitePage }) => SharedListInvitePage,
+      ),
   },
   {
     path: 'lists/invites/:token',
     title: 'Join shared list · Drama Watch',
     canActivate: [profileCompleteGuard],
     loadComponent: () =>
-      import(
-        './features/shared-lists/pages/shared-list-invite-page/shared-list-invite-page'
-      ).then(({ SharedListInvitePage }) => SharedListInvitePage),
+      import('./features/shared-lists/pages/shared-list-invite-page/shared-list-invite-page').then(
+        ({ SharedListInvitePage }) => SharedListInvitePage,
+      ),
   },
   {
     path: 'lists/:listId',
