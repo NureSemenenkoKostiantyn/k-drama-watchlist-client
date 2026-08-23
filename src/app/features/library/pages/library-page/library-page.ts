@@ -20,7 +20,7 @@ import { CategoryManager } from '../../../categories/components/category-manager
 import { EntryCategoryPicker } from '../../../categories/components/entry-category-picker/entry-category-picker';
 import { CategoriesService } from '../../../categories/data-access/categories.service';
 import { PriorityService } from '../../../priority/data-access/priority.service';
-import { MediaType } from '../../../search/models/media';
+import { MediaReleaseStatus, MediaType } from '../../../search/models/media';
 import {
   MEDIA_COUNTRY_OPTIONS,
   MEDIA_GENRE_OPTIONS,
@@ -67,10 +67,20 @@ export class LibraryPage implements OnInit {
   protected readonly genreOptions = MEDIA_GENRE_OPTIONS;
   protected readonly countryOptions = MEDIA_COUNTRY_OPTIONS;
   protected readonly sortOptions = MEDIA_SORT_OPTIONS;
+  protected readonly releaseStatusOptions: readonly {
+    value: MediaReleaseStatus;
+    label: string;
+  }[] = [
+    { value: 'airing', label: 'Airing / returning' },
+    { value: 'upcoming', label: 'Upcoming / in production' },
+    { value: 'ended', label: 'Ended / released' },
+    { value: 'unknown', label: 'Unknown' },
+  ];
   protected readonly filters = new FormGroup(
     {
       query: new FormControl('', { nonNullable: true }),
       mediaType: new FormControl<MediaType | ''>('', { nonNullable: true }),
+      releaseStatus: new FormControl<MediaReleaseStatus | ''>('', { nonNullable: true }),
       minRating: new FormControl<number | null>(null),
       genreId: new FormControl<number | null>(null),
       country: new FormControl('', { nonNullable: true }),
@@ -207,6 +217,7 @@ export class LibraryPage implements OnInit {
     this.appliedFilters.set({
       query: value.query,
       mediaType: value.mediaType,
+      releaseStatus: value.releaseStatus,
       minRating: value.minRating,
       genreId: value.genreId,
       country: value.country,

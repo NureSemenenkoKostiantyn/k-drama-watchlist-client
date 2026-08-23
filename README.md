@@ -30,7 +30,8 @@ it does not store or submit user IDs. TV entries provide episode increment/decre
 completion, manual correction, and one-step client undo. Media details also support half-point
 ratings, private descriptions, and optional audio and subtitle preferences. Each status page can
 search localized or original titles and filter by media type, minimum personal rating, named genre,
-country, and an inclusive release-year range. Filters compose with categories and priority lanes;
+country, normalized airing/release status, and an inclusive release-year range. Filters compose with
+categories and priority lanes;
 accepted suggestion sources and accessible shared-list memberships can also be selected. Results
 support release, rating, title, and recent-activity sorting plus grid and compact-list views.
 

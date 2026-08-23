@@ -50,6 +50,7 @@ describe('LibraryPage', () => {
       title: 'Parasite',
       originalTitle: '기생충',
       releaseDate: '2019-05-30',
+      releaseStatus: 'ended',
       originCountry: ['KR'],
       genreIds: [18, 53],
     },

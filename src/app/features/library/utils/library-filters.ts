@@ -1,10 +1,11 @@
-import { MediaType } from '../../search/models/media';
+import { MediaReleaseStatus, MediaType } from '../../search/models/media';
 import { MEDIA_SORT_OPTIONS, MediaSort } from '../../../shared/media-filter-options';
 import { LibraryEntry, WatchStatus } from '../models/library';
 
 export interface LibraryAdvancedFilters {
   query: string;
   mediaType: MediaType | '';
+  releaseStatus: MediaReleaseStatus | '';
   minRating: number | null;
   genreId: number | null;
   country: string;
@@ -18,6 +19,7 @@ export interface LibraryAdvancedFilters {
 export const DEFAULT_LIBRARY_FILTERS: LibraryAdvancedFilters = {
   query: '',
   mediaType: '',
+  releaseStatus: '',
   minRating: null,
   genreId: null,
   country: '',
@@ -43,6 +45,11 @@ export function filterLibraryEntries(
         entry.media.originalTitle.toLocaleLowerCase().includes(query),
     )
     .filter((entry) => !filters.mediaType || entry.media.mediaType === filters.mediaType)
+    .filter(
+      (entry) =>
+        !filters.releaseStatus ||
+        (entry.media.releaseStatus ?? 'unknown') === filters.releaseStatus,
+    )
     .filter(
       (entry) =>
         filters.minRating === null ||
@@ -72,6 +79,7 @@ export function hasActiveLibraryFilters(filters: LibraryAdvancedFilters): boolea
   return (
     filters.query.trim().length > 0 ||
     filters.mediaType !== '' ||
+    filters.releaseStatus !== '' ||
     filters.minRating !== null ||
     filters.genreId !== null ||
     filters.country !== '' ||

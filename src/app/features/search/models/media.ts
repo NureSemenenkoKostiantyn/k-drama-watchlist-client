@@ -1,5 +1,6 @@
 export type MediaType = 'movie' | 'tv';
 export type SearchMediaType = 'all' | MediaType;
+export type MediaReleaseStatus = 'airing' | 'upcoming' | 'ended' | 'unknown';
 
 export interface MediaSummary {
   id: string;
@@ -31,6 +32,7 @@ export interface MediaSeason {
 }
 
 export interface MediaDetails extends MediaSummary {
+  releaseStatus?: MediaReleaseStatus;
   runtimeMinutes?: number;
   totalEpisodes?: number;
   totalSeasons?: number;

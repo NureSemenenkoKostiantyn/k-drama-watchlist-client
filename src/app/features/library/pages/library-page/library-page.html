@@ -51,6 +51,15 @@
       </select>
     </label>
     <label>
+      <span>Airing status</span>
+      <select formControlName="releaseStatus">
+        <option value="">All statuses</option>
+        @for (releaseStatus of releaseStatusOptions; track releaseStatus.value) {
+          <option [value]="releaseStatus.value">{{ releaseStatus.label }}</option>
+        }
+      </select>
+    </label>
+    <label>
       <span>Genre</span>
       <select formControlName="genreId">
         <option [ngValue]="null">All genres</option>
