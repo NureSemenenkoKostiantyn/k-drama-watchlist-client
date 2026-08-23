@@ -4,11 +4,29 @@ import { firstValueFrom } from 'rxjs';
 
 import { readApiErrorMessage } from '../../../core/api/api-error';
 import { environment } from '../../../../environments/environment';
-import { PublicSharedListDetails } from '../models/shared-list';
+import {
+  PublicSharedListDetails,
+  PublicSharedListDiscovery,
+} from '../models/shared-list';
 
 @Injectable({ providedIn: 'root' })
 export class PublicSharedListsService {
   private readonly http = inject(HttpClient);
+
+  async discover(page = 1, limit = 12): Promise<PublicSharedListDiscovery> {
+    try {
+      return await firstValueFrom(
+        this.http.get<PublicSharedListDiscovery>(
+          `${environment.apiBaseUrl}/public/lists`,
+          { params: { page, limit } },
+        ),
+      );
+    } catch (error: unknown) {
+      throw new Error(
+        readApiErrorMessage(error, 'Public watchlists could not be loaded.'),
+      );
+    }
+  }
 
   async get(publicSlug: string): Promise<PublicSharedListDetails> {
     try {

@@ -9,6 +9,27 @@ import { PublicSharedListDetails } from '../models/shared-list';
 import { PublicSharedListsService } from './public-shared-lists.service';
 
 describe('PublicSharedListsService', () => {
+  it('loads a page of indexed public lists', async () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const service = TestBed.inject(PublicSharedListsService);
+    const http = TestBed.inject(HttpTestingController);
+
+    const promise = service.discover(2, 8);
+    const request = http.expectOne('/api/public/lists?page=2&limit=8');
+    expect(request.request.method).toBe('GET');
+    request.flush({
+      page: 2,
+      totalPages: 2,
+      totalResults: 9,
+      items: [],
+    });
+
+    await expect(promise).resolves.toMatchObject({ page: 2, totalResults: 9 });
+    http.verify();
+  });
+
   it('loads an anonymous public-safe list by slug', async () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
