@@ -16,27 +16,27 @@ import { PublicProfilePage } from './public-profile-page';
 describe('PublicProfilePage', () => {
   let fixture: ComponentFixture<PublicProfilePage>;
   const profile: PublicUserProfile = {
-    id: 'user-1',
+    id: '507f1f77bcf86cd799439011',
     username: 'dahyun.fan',
     displayUsername: 'Dahyun.Fan',
     name: 'Dahyun Fan',
     joinedAt: '2026-07-20T10:00:00.000Z',
   };
-  const getByUsername = vi.fn().mockResolvedValue(profile);
+  const getById = vi.fn().mockResolvedValue(profile);
 
   beforeEach(async () => {
-    getByUsername.mockClear();
+    getById.mockClear();
     await TestBed.configureTestingModule({
       imports: [PublicProfilePage],
       providers: [
         provideRouter([
-          { path: 'users/:username', component: PublicProfilePage },
+          { path: 'users/:userId', component: PublicProfilePage },
         ]),
         {
           provide: ActivatedRoute,
           useValue: {
             paramMap: of(
-              convertToParamMap({ username: 'dahyun.fan' }),
+              convertToParamMap({ userId: profile.id }),
             ),
           },
         },
@@ -53,7 +53,7 @@ describe('PublicProfilePage', () => {
         },
         {
           provide: UsersService,
-          useValue: { getByUsername },
+          useValue: { getById },
         },
       ],
     }).compileComponents();
@@ -62,11 +62,11 @@ describe('PublicProfilePage', () => {
     fixture.detectChanges();
   });
 
-  it('loads and renders the route username without private data', async () => {
+  it('loads and renders the route user ID without private data', async () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(getByUsername).toHaveBeenCalledWith('dahyun.fan');
+    expect(getById).toHaveBeenCalledWith(profile.id);
     const content = fixture.nativeElement.textContent as string;
     expect(content).toContain('Dahyun Fan');
     expect(content).toContain('@Dahyun.Fan');

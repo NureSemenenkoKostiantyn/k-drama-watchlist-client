@@ -26,7 +26,7 @@ describe('PublicLibraryService', () => {
   it('loads a filtered public-safe library page', async () => {
     const response = {
       user: {
-        id: 'user-2',
+        id: '507f1f77bcf86cd799439012',
         username: 'dahyun',
         displayUsername: 'Dahyun',
         name: 'Kim Dahyun',
@@ -39,7 +39,7 @@ describe('PublicLibraryService', () => {
       totalResults: 30,
       items: [],
     };
-    const result = service.get('dahyun', {
+    const result = service.get(response.user.id, {
       status: 'watched',
       mediaType: 'tv',
       minRating: 8,
@@ -53,7 +53,7 @@ describe('PublicLibraryService', () => {
     });
     const request = http.expectOne(
       (candidate) =>
-        candidate.url === '/api/users/dahyun/library' &&
+        candidate.url === `/api/users/${response.user.id}/library` &&
         candidate.params.get('status') === 'watched' &&
         candidate.params.get('mediaType') === 'tv' &&
         candidate.params.get('minRating') === '8' &&

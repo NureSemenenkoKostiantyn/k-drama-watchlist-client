@@ -2,7 +2,7 @@
   @if (profile(); as currentProfile) {
     <a
       class="friend-library__back"
-      [routerLink]="['/users', currentProfile.username]"
+      [routerLink]="['/users', currentProfile.id]"
     >
       &larr; Back to profile
     </a>

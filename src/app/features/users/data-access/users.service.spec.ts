@@ -12,7 +12,7 @@ describe('UsersService', () => {
   let service: UsersService;
   let http: HttpTestingController;
   const profile: PublicUserProfile = {
-    id: 'user-1',
+    id: '507f1f77bcf86cd799439011',
     username: 'dahyun.fan',
     displayUsername: 'Dahyun.Fan',
     name: 'Dahyun Fan',
@@ -31,9 +31,9 @@ describe('UsersService', () => {
     http.verify();
   });
 
-  it('loads a public profile by username', async () => {
-    const result = service.getByUsername('dahyun.fan');
-    const request = http.expectOne('/api/users/dahyun.fan');
+  it('loads a public profile by user ID', async () => {
+    const result = service.getById(profile.id);
+    const request = http.expectOne(`/api/users/${profile.id}`);
 
     expect(request.request.method).toBe('GET');
     request.flush(profile);

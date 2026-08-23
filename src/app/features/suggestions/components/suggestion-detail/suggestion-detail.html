@@ -42,7 +42,7 @@
 
       <p class="friend">
         {{ view() === 'sent' ? 'Sent to' : 'Suggested by' }}
-        <a [routerLink]="['/users', item.user.username]">
+        <a [routerLink]="['/users', item.user.id]">
           {{ item.user.name }}
           <span>&#64;{{ item.user.displayUsername }}</span>
         </a>

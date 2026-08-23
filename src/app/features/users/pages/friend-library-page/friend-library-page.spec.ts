@@ -14,7 +14,7 @@ import { FriendLibraryPage } from './friend-library-page';
 
 describe('FriendLibraryPage', () => {
   const profile = {
-    id: 'user-2',
+    id: '507f1f77bcf86cd799439012',
     username: 'dahyun',
     displayUsername: 'Dahyun',
     name: 'Kim Dahyun',
@@ -54,13 +54,13 @@ describe('FriendLibraryPage', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            paramMap: of(convertToParamMap({ username: 'dahyun' })),
+            paramMap: of(convertToParamMap({ userId: profile.id })),
           },
         },
         {
           provide: UsersService,
           useValue: {
-            getByUsername: vi.fn().mockResolvedValue(profile),
+            getById: vi.fn().mockResolvedValue(profile),
           },
         },
         {
@@ -79,7 +79,7 @@ describe('FriendLibraryPage', () => {
     const root = fixture.nativeElement as HTMLElement;
 
     expect(getLibrary).toHaveBeenCalledWith(
-      'dahyun',
+      profile.id,
       expect.objectContaining({ page: 1, limit: 24 }),
     );
     expect(root.textContent).toContain("Kim Dahyun's library");

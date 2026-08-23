@@ -40,17 +40,17 @@ export class PublicProfilePage implements OnInit {
     this.route.paramMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
-        const username =
-          params.get('username') ??
-          this.authentication.session()?.user.username;
+        const userId =
+          params.get('userId') ??
+          this.authentication.session()?.user.id;
 
-        if (!username) {
+        if (!userId) {
           this.isLoading.set(false);
           this.error.set('Finish username onboarding to view your profile.');
           return;
         }
 
-        void this.load(username);
+        void this.load(userId);
       });
   }
 
@@ -67,12 +67,12 @@ export class PublicProfilePage implements OnInit {
     return this.authentication.session()?.user.id === profile.id;
   }
 
-  private async load(username: string): Promise<void> {
+  private async load(userId: string): Promise<void> {
     this.isLoading.set(true);
     this.error.set(null);
 
     try {
-      this.profile.set(await this.users.getByUsername(username));
+      this.profile.set(await this.users.getById(userId));
     } catch (error: unknown) {
       this.profile.set(null);
       this.error.set(

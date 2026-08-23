@@ -14,7 +14,7 @@
           @for (comment of topLevel(); track comment.id) {
             <li>
               <article class="comment" [class.is-deleted]="comment.isDeleted">
-                <header><a [routerLink]="['/users', comment.author.username]">{{ comment.author.displayUsername }}</a><time [attr.datetime]="comment.createdAt">{{ comment.createdAt | date: 'short' }}</time>@if (comment.editedAt && !comment.isDeleted) { <small>edited</small> }</header>
+                <header><a [routerLink]="['/users', comment.author.id]">{{ comment.author.displayUsername }}</a><time [attr.datetime]="comment.createdAt">{{ comment.createdAt | date: 'short' }}</time>@if (comment.editedAt && !comment.isDeleted) { <small>edited</small> }</header>
                 @if (comment.isDeleted) {
                   <p class="deleted">Comment deleted</p>
                 } @else if (isHidden(comment)) {
@@ -30,7 +30,7 @@
               @if (replies(comment.id).length) {
                 <ol class="replies">
                   @for (reply of replies(comment.id); track reply.id) {
-                    <li><article class="comment" [class.is-deleted]="reply.isDeleted"><header><a [routerLink]="['/users', reply.author.username]">{{ reply.author.displayUsername }}</a><time [attr.datetime]="reply.createdAt">{{ reply.createdAt | date: 'short' }}</time>@if (reply.editedAt && !reply.isDeleted) { <small>edited</small> }</header>@if (reply.isDeleted) { <p class="deleted">Reply deleted</p> } @else if (isHidden(reply)) { <button class="spoiler" type="button" (click)="reveal(reply.id)">Spoiler hidden · reveal</button> } @else { <p>{{ reply.body }}</p> }@if (!reply.isDeleted) { <footer>@if (isOwn(reply)) { <button type="button" (click)="startEdit(reply)">Edit</button> }@if (canDelete(reply)) { <button type="button" (click)="delete(reply)">Delete</button> }</footer> }</article></li>
+                    <li><article class="comment" [class.is-deleted]="reply.isDeleted"><header><a [routerLink]="['/users', reply.author.id]">{{ reply.author.displayUsername }}</a><time [attr.datetime]="reply.createdAt">{{ reply.createdAt | date: 'short' }}</time>@if (reply.editedAt && !reply.isDeleted) { <small>edited</small> }</header>@if (reply.isDeleted) { <p class="deleted">Reply deleted</p> } @else if (isHidden(reply)) { <button class="spoiler" type="button" (click)="reveal(reply.id)">Spoiler hidden · reveal</button> } @else { <p>{{ reply.body }}</p> }@if (!reply.isDeleted) { <footer>@if (isOwn(reply)) { <button type="button" (click)="startEdit(reply)">Edit</button> }@if (canDelete(reply)) { <button type="button" (click)="delete(reply)">Delete</button> }</footer> }</article></li>
                   }
                 </ol>
               }
