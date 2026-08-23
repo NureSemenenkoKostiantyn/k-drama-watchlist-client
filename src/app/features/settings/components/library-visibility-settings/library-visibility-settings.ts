@@ -1,14 +1,8 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  OnInit,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 import { SettingsService } from '../../data-access/settings.service';
-import { LibraryVisibility } from '../../models/settings';
+import { ActivityVisibility, LibraryVisibility } from '../../models/settings';
 
 @Component({
   selector: 'app-library-visibility-settings',
@@ -20,7 +14,10 @@ import { LibraryVisibility } from '../../models/settings';
 export class LibraryVisibilitySettingsComponent implements OnInit {
   protected readonly settings = inject(SettingsService);
   protected readonly form = new FormGroup({
-    visibility: new FormControl<LibraryVisibility>('private', {
+    libraryVisibility: new FormControl<LibraryVisibility>('private', {
+      nonNullable: true,
+    }),
+    activityVisibility: new FormControl<ActivityVisibility>('private', {
       nonNullable: true,
     }),
   });
@@ -31,7 +28,10 @@ export class LibraryVisibilitySettingsComponent implements OnInit {
     const settings = await this.settings.load();
 
     if (settings) {
-      this.form.controls.visibility.setValue(settings.libraryVisibility);
+      this.form.setValue({
+        libraryVisibility: settings.libraryVisibility,
+        activityVisibility: settings.activityVisibility,
+      });
     }
   }
 
@@ -42,12 +42,10 @@ export class LibraryVisibilitySettingsComponent implements OnInit {
 
     this.isSaving.set(true);
     this.savedMessage.set(null);
-    const result = await this.settings.updateLibraryVisibility(
-      this.form.controls.visibility.value,
-    );
+    const result = await this.settings.updatePrivacy(this.form.getRawValue());
 
     if (result) {
-      this.savedMessage.set('Library visibility saved.');
+      this.savedMessage.set('Privacy settings saved.');
     }
 
     this.isSaving.set(false);

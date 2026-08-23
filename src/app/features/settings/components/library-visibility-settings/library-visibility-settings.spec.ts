@@ -7,12 +7,13 @@ import { SettingsService } from '../../data-access/settings.service';
 import { LibraryVisibilitySettingsComponent } from './library-visibility-settings';
 
 describe('LibraryVisibilitySettingsComponent', () => {
-  const updateLibraryVisibility = vi.fn().mockResolvedValue({
+  const updatePrivacy = vi.fn().mockResolvedValue({
     libraryVisibility: 'public',
+    activityVisibility: 'friends',
   });
 
   beforeEach(async () => {
-    updateLibraryVisibility.mockClear();
+    updatePrivacy.mockClear();
     await TestBed.configureTestingModule({
       imports: [LibraryVisibilitySettingsComponent],
       providers: [
@@ -23,8 +24,9 @@ describe('LibraryVisibilitySettingsComponent', () => {
             error: signal<string | null>(null).asReadonly(),
             load: vi.fn().mockResolvedValue({
               libraryVisibility: 'friends',
+              activityVisibility: 'private',
             }),
-            updateLibraryVisibility,
+            updatePrivacy,
           },
         },
       ],
@@ -32,19 +34,16 @@ describe('LibraryVisibilitySettingsComponent', () => {
   });
 
   it('loads and saves the owner visibility setting', async () => {
-    const fixture = TestBed.createComponent(
-      LibraryVisibilitySettingsComponent,
-    );
+    const fixture = TestBed.createComponent(LibraryVisibilitySettingsComponent);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
     const publicOption = fixture.debugElement.query(
-      By.css('input[value="public"]'),
+      By.css('input[formControlName="libraryVisibility"][value="public"]'),
     ).nativeElement as HTMLInputElement;
     publicOption.checked = true;
     publicOption.dispatchEvent(new Event('change', { bubbles: true }));
-    const form = fixture.debugElement.query(By.css('form'))
-      .nativeElement as HTMLFormElement;
+    const form = fixture.debugElement.query(By.css('form')).nativeElement as HTMLFormElement;
     const submitEvent = new Event('submit', {
       bubbles: true,
       cancelable: true,
@@ -54,9 +53,10 @@ describe('LibraryVisibilitySettingsComponent', () => {
     fixture.detectChanges();
 
     expect(submitEvent.defaultPrevented).toBe(true);
-    expect(updateLibraryVisibility).toHaveBeenCalledWith('public');
-    expect(fixture.nativeElement.textContent).toContain(
-      'Library visibility saved.',
-    );
+    expect(updatePrivacy).toHaveBeenCalledWith({
+      libraryVisibility: 'public',
+      activityVisibility: 'private',
+    });
+    expect(fixture.nativeElement.textContent).toContain('Privacy settings saved.');
   });
 });

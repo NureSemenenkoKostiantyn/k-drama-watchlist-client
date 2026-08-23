@@ -1,8 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import {
-  HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
 import { SettingsService } from './settings.service';
@@ -27,11 +24,14 @@ describe('SettingsService', () => {
     const loaded = service.load();
     http.expectOne('/api/settings').flush({
       libraryVisibility: 'private',
+      activityVisibility: 'private',
     });
     await expect(loaded).resolves.toEqual({
       libraryVisibility: 'private',
+      activityVisibility: 'private',
     });
     expect(service.libraryVisibility()).toBe('private');
+    expect(service.activityVisibility()).toBe('private');
 
     const updated = service.updateLibraryVisibility('friends');
     const request = http.expectOne('/api/settings');
@@ -39,10 +39,14 @@ describe('SettingsService', () => {
     expect(request.request.body).toEqual({
       libraryVisibility: 'friends',
     });
-    request.flush({ libraryVisibility: 'friends' });
+    request.flush({
+      libraryVisibility: 'friends',
+      activityVisibility: 'private',
+    });
 
     await expect(updated).resolves.toEqual({
       libraryVisibility: 'friends',
+      activityVisibility: 'private',
     });
     expect(service.libraryVisibility()).toBe('friends');
   });
@@ -52,13 +56,18 @@ describe('SettingsService', () => {
     const request = http.expectOne('/api/settings');
 
     service.clear();
-    request.flush({ libraryVisibility: 'public' });
+    request.flush({
+      libraryVisibility: 'public',
+      activityVisibility: 'friends',
+    });
 
     await expect(loaded).resolves.toEqual({
       libraryVisibility: 'public',
+      activityVisibility: 'friends',
     });
     expect(service.settings()).toBeNull();
     expect(service.libraryVisibility()).toBe('private');
+    expect(service.activityVisibility()).toBe('private');
     expect(service.isLoading()).toBe(false);
   });
 });
