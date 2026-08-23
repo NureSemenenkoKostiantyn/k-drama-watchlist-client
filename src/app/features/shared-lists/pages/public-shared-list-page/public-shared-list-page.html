@@ -1,0 +1,62 @@
+<section class="public-list" aria-labelledby="public-list-title">
+  <a class="brand" routerLink="/">Drama Watch</a>
+  @if (loading()) {
+    <div class="state" role="status">Loading shared list…</div>
+  } @else if (error()) {
+    <div class="state state--error" role="alert">
+      <h1 id="public-list-title">Shared list unavailable</h1>
+      <p>{{ error() }}</p>
+      <a routerLink="/">Return home</a>
+    </div>
+  } @else if (list(); as currentList) {
+    <header class="hero">
+      <div>
+        <p>{{ currentList.visibility === 'public' ? 'Public watchlist' : 'Shared by private link' }}</p>
+        <h1 id="public-list-title">{{ currentList.title }}</h1>
+        @if (currentList.description) { <span>{{ currentList.description }}</span> }
+      </div>
+      <div class="summary">
+        <strong>{{ currentList.itemCount }}</strong>
+        <span>{{ currentList.itemCount === 1 ? 'title' : 'titles' }}</span>
+      </div>
+    </header>
+
+    <section class="members" aria-labelledby="members-title">
+      <h2 id="members-title">Watching together</h2>
+      <div>
+        @for (member of currentList.members; track member.user.id) {
+          <span>{{ member.user.displayUsername }} · {{ member.role }}</span>
+        }
+      </div>
+    </section>
+
+    <section class="items" aria-label="Shared titles">
+      @for (item of currentList.items; track item.media.mediaType + ':' + item.media.tmdbId) {
+        <article>
+          <div class="poster">
+            @if (item.media.posterUrl) {
+              <img [src]="item.media.posterUrl" [alt]="item.media.title + ' poster'" />
+            } @else {
+              <span>No poster</span>
+            }
+          </div>
+          <div class="body">
+            <div class="position">{{ item.position + 1 }}</div>
+            <div class="title">
+              <h2>{{ item.media.title }}</h2>
+              <span>{{ item.media.mediaType === 'tv' ? 'TV series' : 'Movie' }}</span>
+            </div>
+            @if (item.groupStatus) { <strong>{{ item.groupStatus }}</strong> }
+            @if (item.groupProgress) {
+              <p>Season {{ item.groupProgress.currentSeason }}, episode {{ item.groupProgress.currentEpisode }}</p>
+            }
+            @if (item.note) { <blockquote>{{ item.note }}</blockquote> }
+            @if (item.addedBy) { <small>Added by {{ item.addedBy.displayUsername }}</small> }
+          </div>
+        </article>
+      } @empty {
+        <div class="state">This watchlist does not have any titles yet.</div>
+      }
+    </section>
+  }
+</section>

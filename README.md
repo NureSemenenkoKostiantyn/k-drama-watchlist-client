@@ -58,6 +58,10 @@ covered until explicitly revealed. Owners can change non-owner roles or remove m
 inline, confirmed access controls; ownership remains fixed. Shared-item activity notifications link
 members back to the changed list. Owner-only settings and explicit deletion confirmation stay
 separate from editorial controls; `/lists/invites/:token` accepts secure links for signed-in users.
+Owners can also switch a list to unlisted or public and copy its revocable read-only URL. The
+anonymous `/lists/public/:publicSlug` page shows only public-safe list, member, media, note, status,
+and group-progress data; it does not load comments or expose internal list, item, or MongoDB media
+IDs. Public discovery is deferred, so public and unlisted currently share the same link behavior.
 
 Share cards are rendered entirely in the browser from personal media details or a server-selected
 wheel winner. Users can choose square, story, or landscape output and light, dark, or poster themes,

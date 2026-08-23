@@ -38,6 +38,18 @@ describe('SharedListsService', () => {
     await expect(promise).resolves.toEqual(invitation);
   });
 
+  it('updates visibility and retains the server-issued public slug', async () => {
+    const shared = { ...list, visibility: 'unlisted' as const, publicSlug: 'abcdefghijklmnop' };
+    const promise = service.update(list.id, { visibility: 'unlisted' });
+    const request = http.expectOne(`/api/lists/${list.id}`);
+    expect(request.request.method).toBe('PATCH');
+    expect(request.request.body).toEqual({ visibility: 'unlisted' });
+    request.flush(shared);
+
+    await expect(promise).resolves.toEqual(shared);
+    expect(service.activeList()?.publicSlug).toBe('abcdefghijklmnop');
+  });
+
   it('replaces item order with the server-authoritative response', async () => {
     const load = service.loadList(list.id);
     http.expectOne(`/api/lists/${list.id}`).flush(list);

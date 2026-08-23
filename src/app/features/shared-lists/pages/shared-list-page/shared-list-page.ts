@@ -1,5 +1,5 @@
 import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -7,7 +7,12 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LibraryService } from '../../../library/data-access/library.service';
 import { SharedListComments } from '../../components/shared-list-comments/shared-list-comments';
 import { SharedListsService } from '../../data-access/shared-lists.service';
-import { SharedListItem, SharedListMember, SharedListRole } from '../../models/shared-list';
+import {
+  SharedListItem,
+  SharedListMember,
+  SharedListRole,
+  SharedListVisibility,
+} from '../../models/shared-list';
 
 @Component({
   selector: 'app-shared-list-page',
@@ -20,6 +25,7 @@ export class SharedListPage implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly document = inject(DOCUMENT);
   private readonly listId = this.route.snapshot.paramMap.get('listId') ?? '';
   protected readonly sharedLists = inject(SharedListsService);
   protected readonly library = inject(LibraryService);
@@ -30,8 +36,15 @@ export class SharedListPage implements OnInit {
   protected readonly pendingMemberRemovalId = signal<string | null>(null);
   protected readonly invite = signal<{ url: string; expiresAt: string; target: string } | null>(null);
   protected readonly copied = signal(false);
+  protected readonly publicLinkCopied = signal(false);
   protected readonly isOwner = computed(() => this.list()?.role === 'owner');
   protected readonly canEdit = computed(() => ['owner', 'editor'].includes(this.list()?.role ?? ''));
+  protected readonly publicUrl = computed(() => {
+    const publicSlug = this.list()?.publicSlug;
+    return publicSlug
+      ? `${this.document.location.origin}/lists/public/${publicSlug}`
+      : null;
+  });
   protected readonly availableEntries = computed(() => {
     const used = new Set(this.list()?.items.map((item) => item.mediaId) ?? []);
     return this.library.entries().filter((entry) => !used.has(entry.mediaId));
@@ -39,6 +52,7 @@ export class SharedListPage implements OnInit {
   protected readonly settingsForm = this.formBuilder.nonNullable.group({
     title: ['', [Validators.required, Validators.maxLength(100)]],
     description: ['', [Validators.maxLength(2000)]],
+    visibility: this.formBuilder.nonNullable.control<SharedListVisibility>('private'),
   });
   protected readonly addForm = this.formBuilder.nonNullable.group({ mediaId: ['', Validators.required] });
   protected readonly inviteForm = this.formBuilder.nonNullable.group({
@@ -61,6 +75,7 @@ export class SharedListPage implements OnInit {
     await this.sharedLists.update(this.listId, {
       title: value.title.trim(),
       description: value.description.trim() || null,
+      visibility: value.visibility,
     });
     this.isSaving.set(false);
   }
@@ -148,6 +163,13 @@ export class SharedListPage implements OnInit {
     this.copied.set(true);
   }
 
+  protected async copyPublicLink(): Promise<void> {
+    const url = this.publicUrl();
+    if (!url) return;
+    await navigator.clipboard.writeText(url);
+    this.publicLinkCopied.set(true);
+  }
+
   protected async deleteList(): Promise<void> {
     if (!this.pendingDelete()) {
       this.pendingDelete.set(true);
@@ -160,7 +182,11 @@ export class SharedListPage implements OnInit {
     const [loaded] = await Promise.all([this.sharedLists.loadList(this.listId), this.library.load()]);
     const list = this.list();
     if (loaded && list?.role === 'owner') {
-      this.settingsForm.setValue({ title: list.title, description: list.description ?? '' });
+      this.settingsForm.setValue({
+        title: list.title,
+        description: list.description ?? '',
+        visibility: list.visibility,
+      });
     }
   }
 }

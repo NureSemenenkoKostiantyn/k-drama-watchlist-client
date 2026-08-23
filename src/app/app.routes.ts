@@ -194,6 +194,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'lists/public/:publicSlug',
+    title: 'Shared watchlist · Drama Watch',
+    loadComponent: () =>
+      import(
+        './features/shared-lists/pages/public-shared-list-page/public-shared-list-page'
+      ).then(({ PublicSharedListPage }) => PublicSharedListPage),
+  },
+  {
     path: 'lists/invitations/:inviteId',
     title: 'Join shared list · Drama Watch',
     canActivate: [profileCompleteGuard],
