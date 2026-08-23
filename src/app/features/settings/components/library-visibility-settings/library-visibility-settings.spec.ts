@@ -8,7 +8,7 @@ import { LibraryVisibilitySettingsComponent } from './library-visibility-setting
 
 describe('LibraryVisibilitySettingsComponent', () => {
   const updateLibraryVisibility = vi.fn().mockResolvedValue({
-    libraryVisibility: 'friends',
+    libraryVisibility: 'public',
   });
 
   beforeEach(async () => {
@@ -38,13 +38,23 @@ describe('LibraryVisibilitySettingsComponent', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
-    fixture.debugElement
-      .query(By.css('form'))
-      .triggerEventHandler('ngSubmit');
+    const publicOption = fixture.debugElement.query(
+      By.css('input[value="public"]'),
+    ).nativeElement as HTMLInputElement;
+    publicOption.checked = true;
+    publicOption.dispatchEvent(new Event('change', { bubbles: true }));
+    const form = fixture.debugElement.query(By.css('form'))
+      .nativeElement as HTMLFormElement;
+    const submitEvent = new Event('submit', {
+      bubbles: true,
+      cancelable: true,
+    });
+    form.dispatchEvent(submitEvent);
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(updateLibraryVisibility).toHaveBeenCalledWith('friends');
+    expect(submitEvent.defaultPrevented).toBe(true);
+    expect(updateLibraryVisibility).toHaveBeenCalledWith('public');
     expect(fixture.nativeElement.textContent).toContain(
       'Library visibility saved.',
     );

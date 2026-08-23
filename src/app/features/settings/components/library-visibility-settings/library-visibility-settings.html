@@ -8,12 +8,12 @@
   @if (settings.isLoading()) {
     <p class="visibility-settings__status" role="status">Loading settings&hellip;</p>
   } @else {
-    <form (ngSubmit)="save()">
+    <form [formGroup]="form" (ngSubmit)="save()">
       <label>
         <input
           type="radio"
           value="private"
-          [formControl]="visibility"
+          formControlName="visibility"
         />
         <span>
           <strong>Private</strong>
@@ -24,7 +24,7 @@
         <input
           type="radio"
           value="friends"
-          [formControl]="visibility"
+          formControlName="visibility"
         />
         <span>
           <strong>Friends</strong>
@@ -35,7 +35,7 @@
         <input
           type="radio"
           value="public"
-          [formControl]="visibility"
+          formControlName="visibility"
         />
         <span>
           <strong>Public</strong>
