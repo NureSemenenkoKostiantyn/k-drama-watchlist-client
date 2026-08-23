@@ -73,7 +73,7 @@ image clipboard access is available, or download it as a fallback. Rating, progr
 fields are configurable. Private descriptions are excluded unless the user explicitly enables
 them for that card. Cards are never uploaded by this flow.
 
-Phase 2 begins with public profiles at `/users/:username`, the signed-in user's `/profile` shortcut,
+Phase 2 begins with public profiles at `/users/:userId`, the signed-in user's `/profile` shortcut,
 and a protected friendship hub at `/friends`. The hub separates incoming requests, accepted friends,
 and sent requests while also providing weighted name/username discovery, typo-tolerant similar
 results, and contextual request controls.
@@ -89,7 +89,7 @@ message. It also shows accepted friends who have the title in their library, inc
 lifecycle status, optional rating, and a friend-rating average. Private library details are not
 returned to the browser.
 
-Profiles now link to `/users/:username/library`. The shared-library page supports status, type,
+Profiles now link to `/users/:userId/library`. The shared-library page supports status, type,
 minimum-rating, named genre and country selectors, inclusive release-year ranges, server-backed
 sorting, poster-grid and compact-list views, and pagination. Owners choose Private, Friends, or
 Public visibility from the reusable settings panel on `/profile`; the browser receives only the

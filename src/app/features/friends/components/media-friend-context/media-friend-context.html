@@ -29,7 +29,7 @@
         <article class="friend-context__card">
           <a
             class="friend-context__profile"
-            [routerLink]="['/users', activity.user.username]"
+            [routerLink]="['/users', activity.user.id]"
           >
             @if (activity.user.image) {
               <img

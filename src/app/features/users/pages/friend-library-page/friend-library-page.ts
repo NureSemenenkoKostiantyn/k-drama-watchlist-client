@@ -51,7 +51,7 @@ export class FriendLibraryPage implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly users = inject(UsersService);
   private readonly publicLibrary = inject(PublicLibraryService);
-  private username: string | null = null;
+  private userId: string | null = null;
 
   protected readonly profile = signal<PublicUserProfile | null>(null);
   protected readonly library = signal<PublicLibraryResponse | null>(
@@ -133,16 +133,16 @@ export class FriendLibraryPage implements OnInit {
     this.route.paramMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
-        const username = params.get('username');
+        const userId = params.get('userId');
 
-        if (!username) {
+        if (!userId) {
           this.error.set('This library link is invalid.');
           this.isLoading.set(false);
           return;
         }
 
-        this.username = username;
-        void this.loadProfile(username);
+        this.userId = userId;
+        void this.loadProfile(userId);
         void this.loadLibrary(1);
       });
   }
@@ -224,16 +224,16 @@ export class FriendLibraryPage implements OnInit {
     );
   }
 
-  private async loadProfile(username: string): Promise<void> {
+  private async loadProfile(userId: string): Promise<void> {
     try {
-      this.profile.set(await this.users.getByUsername(username));
+      this.profile.set(await this.users.getById(userId));
     } catch {
       this.profile.set(null);
     }
   }
 
   private async loadLibrary(page: number): Promise<void> {
-    if (!this.username) {
+    if (!this.userId) {
       return;
     }
 
@@ -242,7 +242,7 @@ export class FriendLibraryPage implements OnInit {
 
     try {
       const response = await this.publicLibrary.get(
-        this.username,
+        this.userId,
         this.buildFilters(page),
       );
       this.library.set(response);

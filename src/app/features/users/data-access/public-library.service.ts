@@ -13,7 +13,7 @@ export class PublicLibraryService {
   private readonly http = inject(HttpClient);
 
   get(
-    username: string,
+    userId: string,
     filters: PublicLibraryFilters,
   ): Promise<PublicLibraryResponse> {
     let params = new HttpParams()
@@ -54,7 +54,7 @@ export class PublicLibraryService {
 
     return firstValueFrom(
       this.http.get<PublicLibraryResponse>(
-        `${environment.apiBaseUrl}/users/${username}/library`,
+        `${environment.apiBaseUrl}/users/${userId}/library`,
         { params },
       ),
     );
