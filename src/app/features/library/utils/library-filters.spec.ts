@@ -12,6 +12,7 @@ describe('library filters', () => {
         ...DEFAULT_LIBRARY_FILTERS,
         query: '기생충',
         mediaType: 'movie',
+        releaseStatus: 'ended',
         minRating: 8.5,
         genreId: 18,
         country: 'KR',
@@ -56,6 +57,21 @@ describe('library filters', () => {
       }).map((entry) => entry.media.title),
     ).toEqual(['Parasite']);
   });
+
+  it('filters normalized and legacy unknown release statuses', () => {
+    expect(
+      filterLibraryEntries(entries, 'watched', {
+        ...DEFAULT_LIBRARY_FILTERS,
+        releaseStatus: 'ended',
+      }).map((entry) => entry.media.title),
+    ).toEqual(['Parasite']);
+    expect(
+      filterLibraryEntries(entries, 'watched', {
+        ...DEFAULT_LIBRARY_FILTERS,
+        releaseStatus: 'unknown',
+      }).map((entry) => entry.media.title),
+    ).toEqual(['Unknown Release']);
+  });
 });
 
 const entries: LibraryEntry[] = [
@@ -80,6 +96,7 @@ const entries: LibraryEntry[] = [
       title: 'Parasite',
       originalTitle: '기생충',
       releaseDate: '2019-05-30',
+      releaseStatus: 'ended',
       originCountry: ['KR'],
       genreIds: [18, 53],
     },
@@ -99,6 +116,7 @@ const entries: LibraryEntry[] = [
       title: 'Decision to Leave',
       originalTitle: '헤어질 결심',
       releaseDate: '2022-06-29',
+      releaseStatus: 'upcoming',
       originCountry: ['KR'],
       genreIds: [18, 9648],
     },
