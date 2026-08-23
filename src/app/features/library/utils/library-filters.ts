@@ -10,6 +10,8 @@ export interface LibraryAdvancedFilters {
   country: string;
   yearFrom: number | null;
   yearTo: number | null;
+  suggestedByUserId: string;
+  sharedListId: string;
   sort: MediaSort;
 }
 
@@ -21,6 +23,8 @@ export const DEFAULT_LIBRARY_FILTERS: LibraryAdvancedFilters = {
   country: '',
   yearFrom: null,
   yearTo: null,
+  suggestedByUserId: '',
+  sharedListId: '',
   sort: MEDIA_SORT_OPTIONS[0].value,
 };
 
@@ -53,6 +57,14 @@ export function filterLibraryEntries(
         (filters.yearTo === null || (year !== null && year <= filters.yearTo))
       );
     })
+    .filter(
+      (entry) => !filters.suggestedByUserId || entry.suggestedBy?.id === filters.suggestedByUserId,
+    )
+    .filter(
+      (entry) =>
+        !filters.sharedListId ||
+        entry.sharedLists?.some((list) => list.id === filters.sharedListId) === true,
+    )
     .sort(comparator(filters.sort));
 }
 
@@ -65,6 +77,8 @@ export function hasActiveLibraryFilters(filters: LibraryAdvancedFilters): boolea
     filters.country !== '' ||
     filters.yearFrom !== null ||
     filters.yearTo !== null ||
+    filters.suggestedByUserId !== '' ||
+    filters.sharedListId !== '' ||
     filters.sort !== 'recent'
   );
 }

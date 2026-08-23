@@ -88,6 +88,24 @@
       <input type="number" formControlName="yearTo" min="1900" max="2100" placeholder="Any" />
     </label>
     <label>
+      <span>Suggested by</span>
+      <select formControlName="suggestedByUserId">
+        <option value="">Any friend</option>
+        @for (source of suggestionSources(); track source.value) {
+          <option [value]="source.value">@{{ source.label }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      <span>Shared list</span>
+      <select formControlName="sharedListId">
+        <option value="">Any shared list</option>
+        @for (list of sharedListOptions(); track list.value) {
+          <option [value]="list.value">{{ list.label }}</option>
+        }
+      </select>
+    </label>
+    <label>
       <span>Sort by</span>
       <select formControlName="sort">
         @for (sort of sortOptions; track sort.value) {

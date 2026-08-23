@@ -35,6 +35,14 @@ describe('LibraryPage', () => {
     status: 'to_watch',
     rating: 9,
     categoryIds: [],
+    suggestedBy: {
+      id: 'friend-1',
+      username: 'jiwoo',
+      displayUsername: 'Jiwoo',
+      name: 'Jiwoo Kim',
+      joinedAt: '2026-07-01T00:00:00.000Z',
+    },
+    sharedLists: [{ id: 'list-1', title: 'Weekend picks' }],
     media: {
       id: 'movie:496243',
       tmdbId: 496243,
@@ -146,5 +154,36 @@ describe('LibraryPage', () => {
     fixture.detectChanges();
 
     expect(root.querySelector('.library-grid')?.classList).toContain('library-grid--list');
+  });
+
+  it('offers and applies suggestion-source and shared-list filters', async () => {
+    const fixture = TestBed.createComponent(LibraryPage);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const root = fixture.nativeElement as HTMLElement;
+    const source = root.querySelector<HTMLSelectElement>(
+      'select[formControlName="suggestedByUserId"]',
+    );
+    const sharedList = root.querySelector<HTMLSelectElement>(
+      'select[formControlName="sharedListId"]',
+    );
+    const form = root.querySelector<HTMLFormElement>('.library-filters');
+
+    expect(source?.textContent).toContain('@Jiwoo');
+    expect(sharedList?.textContent).toContain('Weekend picks');
+
+    source!.value = 'friend-1';
+    source!.dispatchEvent(new Event('change'));
+    sharedList!.value = 'list-1';
+    sharedList!.dispatchEvent(new Event('change'));
+    form!.dispatchEvent(new Event('submit'));
+    fixture.detectChanges();
+
+    expect(
+      Array.from(root.querySelectorAll('.library-card h2')).map((title) =>
+        title.textContent?.trim(),
+      ),
+    ).toEqual(['Parasite']);
   });
 });

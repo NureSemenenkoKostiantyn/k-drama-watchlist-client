@@ -31,7 +31,8 @@ completion, manual correction, and one-step client undo. Media details also supp
 ratings, private descriptions, and optional audio and subtitle preferences. Each status page can
 search localized or original titles and filter by media type, minimum personal rating, named genre,
 country, and an inclusive release-year range. Filters compose with categories and priority lanes;
-results support release, rating, title, and recent-activity sorting plus grid and compact-list views.
+accepted suggestion sources and accessible shared-list memberships can also be selected. Results
+support release, rating, title, and recent-activity sorting plus grid and compact-list views.
 
 Custom categories can be created, renamed, and deleted from the library screen. Each personal entry
 can belong to multiple categories from either the library or media-details view, and status library

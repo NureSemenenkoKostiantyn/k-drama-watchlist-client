@@ -46,6 +46,16 @@ describe('library filters', () => {
       }),
     ).toBe(true);
   });
+
+  it('filters by suggestion source and shared-list membership', () => {
+    expect(
+      filterLibraryEntries(entries, 'watched', {
+        ...DEFAULT_LIBRARY_FILTERS,
+        suggestedByUserId: 'friend-1',
+        sharedListId: 'list-1',
+      }).map((entry) => entry.media.title),
+    ).toEqual(['Parasite']);
+  });
 });
 
 const entries: LibraryEntry[] = [
@@ -55,6 +65,14 @@ const entries: LibraryEntry[] = [
     status: 'watched',
     rating: 9,
     categoryIds: [],
+    suggestedBy: {
+      id: 'friend-1',
+      username: 'jiwoo',
+      displayUsername: 'Jiwoo',
+      name: 'Jiwoo Kim',
+      joinedAt: '2026-07-01T00:00:00.000Z',
+    },
+    sharedLists: [{ id: 'list-1', title: 'Weekend picks' }],
     media: {
       id: 'movie:496243',
       tmdbId: 496243,

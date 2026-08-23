@@ -76,12 +76,30 @@ export class LibraryPage implements OnInit {
       country: new FormControl('', { nonNullable: true }),
       yearFrom: new FormControl<number | null>(null),
       yearTo: new FormControl<number | null>(null),
+      suggestedByUserId: new FormControl('', { nonNullable: true }),
+      sharedListId: new FormControl('', { nonNullable: true }),
       sort: new FormControl<MediaSort>('recent', { nonNullable: true }),
     },
     { validators: yearRangeValidator },
   );
   protected readonly baseEntries = computed(() =>
     this.library.entries().filter((entry) => entry.status === this.status),
+  );
+  protected readonly suggestionSources = computed(() =>
+    uniqueOptions(
+      this.baseEntries().flatMap((entry) =>
+        entry.suggestedBy === undefined
+          ? []
+          : [{ value: entry.suggestedBy.id, label: entry.suggestedBy.displayUsername }],
+      ),
+    ),
+  );
+  protected readonly sharedListOptions = computed(() =>
+    uniqueOptions(
+      this.baseEntries().flatMap((entry) =>
+        (entry.sharedLists ?? []).map((list) => ({ value: list.id, label: list.title })),
+      ),
+    ),
   );
   protected readonly entries = computed(() =>
     filterLibraryEntries(this.library.entries(), this.status, this.appliedFilters())
@@ -194,6 +212,8 @@ export class LibraryPage implements OnInit {
       country: value.country,
       yearFrom: value.yearFrom,
       yearTo: value.yearTo,
+      suggestedByUserId: value.suggestedByUserId,
+      sharedListId: value.sharedListId,
       sort: value.sort,
     });
   }
@@ -219,4 +239,12 @@ function yearRangeValidator(control: AbstractControl): ValidationErrors | null {
   const yearTo = control.get('yearTo')?.value as number | null;
 
   return yearFrom !== null && yearTo !== null && yearFrom > yearTo ? { yearRange: true } : null;
+}
+
+function uniqueOptions(
+  options: { value: string; label: string }[],
+): { value: string; label: string }[] {
+  return [...new Map(options.map((option) => [option.value, option])).values()].sort(
+    (left, right) => left.label.localeCompare(right.label, undefined, { sensitivity: 'base' }),
+  );
 }
