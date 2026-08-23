@@ -38,6 +38,9 @@ describe('PublicSharedListPage indexing', () => {
     await fixture.whenStable();
 
     expect(TestBed.inject(Meta).getTag("name='robots'")?.content).toBe('index, follow');
+    expect(TestBed.inject(Meta).getTag("property='og:title'")?.content).toBe(
+      'Weekend dramas · Drama Watch',
+    );
     expect(TestBed.inject(Title).getTitle()).toBe('Weekend dramas · Drama Watch');
   });
 

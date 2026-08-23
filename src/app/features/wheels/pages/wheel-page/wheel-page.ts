@@ -99,7 +99,7 @@ export class WheelPage implements OnInit, OnDestroy {
   protected readonly publicUrl = computed(() => {
     const publicSlug = this.wheel()?.publicSlug;
     return publicSlug
-      ? `${this.document.location.origin}/wheels/public/${publicSlug}`
+      ? `${this.document.location.origin}/api/public/wheels/share/${encodeURIComponent(publicSlug)}`
       : null;
   });
   protected readonly availableFriends = computed(() => {

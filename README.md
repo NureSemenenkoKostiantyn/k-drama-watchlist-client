@@ -252,6 +252,12 @@ src/app/features/share-cards/data-access/
 src/app/features/share-cards/models/
 ```
 
+Public and unlisted shared-list and wheel copy actions use same-origin server share URLs under
+`/api/public/*/share/:publicSlug`. Social crawlers receive server-rendered Open Graph and Twitter
+metadata, while browsers are redirected to the canonical Angular public page. Those Angular pages
+also maintain matching title, description, image, canonical, and robots metadata during client-side
+navigation. Public resources are indexable and unlisted resources remain `noindex`.
+
 Anonymous users are redirected to `/login`. New accounts first continue to `/verify-email`; the
 verification link returns them to `/onboarding` to choose a unique username. Login can resend a
 verification message for an unverified account. `/forgot-password` always displays a neutral result
