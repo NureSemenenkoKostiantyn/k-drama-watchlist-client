@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -6,9 +7,9 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
+import { OpenGraphMetadataService } from '../../../../core/open-graph-metadata.service';
 import { PublicSharedListsService } from '../../data-access/public-shared-lists.service';
 import { PublicSharedListDetails } from '../../models/shared-list';
 
@@ -22,20 +23,19 @@ import { PublicSharedListDetails } from '../../models/shared-list';
 export class PublicSharedListPage implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly publicLists = inject(PublicSharedListsService);
-  private readonly meta = inject(Meta);
-  private readonly title = inject(Title);
+  private readonly document = inject(DOCUMENT);
+  private readonly openGraph = inject(OpenGraphMetadataService);
   protected readonly list = signal<PublicSharedListDetails | null>(null);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
 
   ngOnInit(): void {
-    this.meta.updateTag({ name: 'robots', content: 'noindex, nofollow' });
+    this.openGraph.prepare();
     void this.load();
   }
 
   ngOnDestroy(): void {
-    this.meta.removeTag("name='robots'");
-    this.meta.removeTag("name='description'");
+    this.openGraph.clear();
   }
 
   private async load(): Promise<void> {
@@ -48,16 +48,16 @@ export class PublicSharedListPage implements OnInit, OnDestroy {
     try {
       const list = await this.publicLists.get(publicSlug);
       this.list.set(list);
-      this.title.setTitle(`${list.title} · Drama Watch`);
-      this.meta.updateTag({
-        name: 'robots',
-        content: list.visibility === 'public' ? 'index, follow' : 'noindex, nofollow',
-      });
-      this.meta.updateTag({
-        name: 'description',
-        content:
+      const title = `${list.title} · Drama Watch`;
+      const imageUrl = preferredMediaImage(list.items.map((item) => item.media));
+      this.openGraph.set({
+        title,
+        description:
           list.description ??
-          `Browse ${list.itemCount} ${list.itemCount === 1 ? 'title' : 'titles'} on ${list.title}.`,
+          `Explore ${list.itemCount} ${list.itemCount === 1 ? 'title' : 'titles'} in ${list.title}, a shared Drama Watch list.`,
+        canonicalUrl: `${this.document.location.origin}/lists/public/${encodeURIComponent(publicSlug)}`,
+        ...(imageUrl ? { imageUrl, imageAlt: `Preview of ${list.title}` } : {}),
+        allowIndexing: list.visibility === 'public',
       });
     } catch (error: unknown) {
       this.error.set(
@@ -67,4 +67,13 @@ export class PublicSharedListPage implements OnInit, OnDestroy {
       this.loading.set(false);
     }
   }
+}
+
+function preferredMediaImage(
+  media: { backdropUrl?: string; posterUrl?: string }[],
+): string | undefined {
+  return (
+    media.find((item) => item.backdropUrl)?.backdropUrl ??
+    media.find((item) => item.posterUrl)?.posterUrl
+  );
 }

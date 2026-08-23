@@ -42,7 +42,7 @@ export class SharedListPage implements OnInit {
   protected readonly publicUrl = computed(() => {
     const publicSlug = this.list()?.publicSlug;
     return publicSlug
-      ? `${this.document.location.origin}/lists/public/${publicSlug}`
+      ? `${this.document.location.origin}/api/public/lists/share/${encodeURIComponent(publicSlug)}`
       : null;
   });
   protected readonly availableEntries = computed(() => {
