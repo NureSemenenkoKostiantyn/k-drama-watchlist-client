@@ -1,0 +1,80 @@
+<section class="public-wheel" aria-labelledby="public-wheel-title">
+  <a class="brand" routerLink="/">Drama Watch</a>
+  @if (loading()) {
+    <div class="state" role="status">Loading wheel…</div>
+  } @else if (error()) {
+    <div class="state state--error" role="alert">
+      <h1 id="public-wheel-title">Wheel unavailable</h1>
+      <p>{{ error() }}</p>
+      <a routerLink="/">Return home</a>
+    </div>
+  } @else if (wheel(); as currentWheel) {
+    <header class="hero">
+      <div>
+        <p>{{ currentWheel.visibility === 'public' ? 'Public wheel' : 'Shared by private link' }}</p>
+        <h1 id="public-wheel-title">{{ currentWheel.title }}</h1>
+        @if (currentWheel.description) { <span>{{ currentWheel.description }}</span> }
+      </div>
+      <div class="summary">
+        <strong>{{ currentWheel.enabledItemCount }}</strong>
+        <span>enabled of {{ currentWheel.itemCount }}</span>
+      </div>
+    </header>
+
+    <section class="machine" aria-labelledby="candidates-title">
+      <div class="disc" aria-hidden="true"><span>{{ enabledItems().length }}</span></div>
+      <div>
+        <p>Read-only preview</p>
+        <h2 id="candidates-title">Wheel candidates</h2>
+        <span>The owner or an editor selects and records the winner on the server before the wheel animates.</span>
+      </div>
+    </section>
+
+    <section class="candidates" aria-label="Wheel candidates">
+      @for (item of currentWheel.items; track item.media.mediaType + ':' + item.media.tmdbId) {
+        <article [class.candidate--disabled]="!item.isEnabled">
+          <div class="poster">
+            @if (item.media.posterUrl) {
+              <img [src]="item.media.posterUrl" [alt]="item.media.title + ' poster'" />
+            } @else {
+              <span>{{ item.media.title.slice(0, 1) }}</span>
+            }
+          </div>
+          <div>
+            <p>{{ item.isEnabled ? 'Enabled' : 'Disabled' }} · weight {{ item.weight }}</p>
+            <h2>{{ item.media.title }}</h2>
+            <span>Selected {{ item.selectionCount }} {{ item.selectionCount === 1 ? 'time' : 'times' }}</span>
+          </div>
+        </article>
+      } @empty {
+        <div class="state">This wheel does not have any candidates yet.</div>
+      }
+    </section>
+
+    <div class="lower-grid">
+      <section class="panel" aria-labelledby="people-title">
+        <p>Shared access</p>
+        <h2 id="people-title">People</h2>
+        <ul>
+          @for (member of currentWheel.members; track member.user.id) {
+            <li><span>{{ member.user.displayUsername }}</span><strong>{{ member.role }}</strong></li>
+          }
+        </ul>
+      </section>
+      <section class="panel" aria-labelledby="history-title">
+        <p>Previous results</p>
+        <h2 id="history-title">Spin history</h2>
+        <ol>
+          @for (spin of currentWheel.history; track spin.createdAt) {
+            <li>
+              <strong>{{ spin.selectedItem.title }}</strong>
+              <span>{{ spin.createdAt | date: 'medium' }} @if (spin.spunBy) { · by {{ spin.spunBy.displayUsername }} }</span>
+            </li>
+          } @empty {
+            <li>No winners yet.</li>
+          }
+        </ol>
+      </section>
+    </div>
+  }
+</section>

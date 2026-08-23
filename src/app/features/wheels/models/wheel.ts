@@ -12,6 +12,7 @@ export interface Wheel {
   title: string;
   description?: string;
   visibility: WheelVisibility;
+  publicSlug?: string;
   role: WheelRole;
   selectionMode: WheelSelectionMode;
   itemCount: number;
@@ -69,6 +70,35 @@ export interface UpdateWheelRequest {
   title?: string;
   description?: string | null;
   selectionMode?: WheelSelectionMode;
+  visibility?: WheelVisibility;
+}
+
+export interface PublicWheelItem extends Omit<WheelItem, 'id' | 'mediaId' | 'media'> {
+  media: Omit<MediaDetails, 'id'>;
+}
+
+export interface PublicWheelSpin {
+  selectedItem: {
+    title: string;
+    posterUrl?: string;
+  };
+  spunBy?: PublicUserProfile;
+  createdAt: string;
+}
+
+export interface PublicWheelDetails {
+  title: string;
+  description?: string;
+  visibility: Exclude<WheelVisibility, 'private'>;
+  publicSlug: string;
+  selectionMode: WheelSelectionMode;
+  itemCount: number;
+  enabledItemCount: number;
+  items: PublicWheelItem[];
+  members: WheelMember[];
+  history: PublicWheelSpin[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface UpdateWheelItemRequest {

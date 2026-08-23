@@ -13,7 +13,7 @@
         <p>
           {{
             currentWheel.role === 'owner'
-              ? 'Your private wheel'
+              ? 'Your ' + currentWheel.visibility + ' wheel'
               : currentWheel.role === 'editor'
                 ? 'Shared wheel · Editor'
                 : 'Shared wheel · Viewer'
@@ -124,9 +124,30 @@
               <option value="avoid_recent_winners">Avoid the last winner</option>
             </select>
           </label>
+          <label>
+            <span>Link visibility</span>
+            <select formControlName="visibility">
+              <option value="private">Private · members only</option>
+              <option value="unlisted">Unlisted · anyone with the link</option>
+              <option value="public">Public · anyone with the link</option>
+            </select>
+          </label>
+          <small class="wheel-settings__visibility-help">
+            Public discovery is planned later. Public and unlisted links are currently read-only.
+          </small>
           <button type="submit" [disabled]="isSaving() || isSpinning()">
             Save settings
           </button>
+          @if (publicUrl(); as url) {
+            <div class="wheel-settings__public-link">
+              <strong>Read-only sharing link</strong>
+              <input readonly [value]="url" aria-label="Public wheel link" />
+              <button type="button" (click)="copyPublicLink()">
+                {{ publicLinkCopied() ? 'Copied' : 'Copy link' }}
+              </button>
+              <a [href]="url" target="_blank" rel="noopener">Open public view</a>
+            </div>
+          }
         </form>
         }
 

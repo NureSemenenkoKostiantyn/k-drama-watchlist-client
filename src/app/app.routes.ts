@@ -176,6 +176,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'wheels/public/:publicSlug',
+    title: 'Shared wheel · Drama Watch',
+    loadComponent: () =>
+      import('./features/wheels/pages/public-wheel-page/public-wheel-page').then(
+        ({ PublicWheelPage }) => PublicWheelPage,
+      ),
+  },
+  {
     path: 'wheels/:wheelId',
     title: 'Wheel · Drama Watch',
     canActivate: [profileCompleteGuard],

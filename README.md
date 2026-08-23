@@ -46,6 +46,9 @@ reorder, disable, and weight candidates and spin the wheel; viewers receive a re
 attributed shared history. Only owners can change settings, members, history, or delete the wheel.
 The backend selects the winner first; Angular then animates to that exact result and respects
 reduced-motion preferences.
+Owners can switch a wheel to unlisted or public and copy its revocable read-only URL. The anonymous
+`/wheels/public/:publicSlug` page presents candidates, members, and attributed history without
+internal wheel, candidate, spin, or MongoDB media IDs, and it never exposes a spin action.
 
 The first collaborative shared-list slice is available at `/lists` and `/lists/:listId`. Owners can
 send targeted seven-day one-time invitations to an exact username with editor, commenter, or viewer
