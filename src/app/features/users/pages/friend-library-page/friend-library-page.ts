@@ -17,6 +17,11 @@ import {
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { readApiErrorMessage } from '../../../../core/api/api-error';
+import {
+  MEDIA_COUNTRY_OPTIONS,
+  MEDIA_GENRE_OPTIONS,
+  MEDIA_SORT_OPTIONS,
+} from '../../../../shared/media-filter-options';
 import { WatchStatus } from '../../../library/models/library';
 import { MediaSummary, MediaType } from '../../../search/models/media';
 import { PublicLibraryService } from '../../data-access/public-library.service';
@@ -29,11 +34,6 @@ import {
 import { PublicUserProfile } from '../../models/public-user-profile';
 
 type LibraryView = 'grid' | 'list';
-
-interface FilterOption<T> {
-  value: T;
-  label: string;
-}
 
 @Component({
   selector: 'app-friend-library-page',
@@ -54,80 +54,35 @@ export class FriendLibraryPage implements OnInit {
   private userId: string | null = null;
 
   protected readonly profile = signal<PublicUserProfile | null>(null);
-  protected readonly library = signal<PublicLibraryResponse | null>(
-    null,
-  );
+  protected readonly library = signal<PublicLibraryResponse | null>(null);
   protected readonly isLoading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly view = signal<LibraryView>('grid');
-  protected readonly genreOptions: readonly FilterOption<number>[] = [
-    { value: 28, label: 'Action' },
-    { value: 10759, label: 'Action & Adventure' },
-    { value: 12, label: 'Adventure' },
-    { value: 16, label: 'Animation' },
-    { value: 35, label: 'Comedy' },
-    { value: 80, label: 'Crime' },
-    { value: 99, label: 'Documentary' },
-    { value: 18, label: 'Drama' },
-    { value: 10751, label: 'Family' },
-    { value: 14, label: 'Fantasy' },
-    { value: 36, label: 'History' },
-    { value: 27, label: 'Horror' },
-    { value: 10762, label: 'Kids' },
-    { value: 10402, label: 'Music' },
-    { value: 9648, label: 'Mystery' },
-    { value: 10764, label: 'Reality' },
-    { value: 10749, label: 'Romance' },
-    { value: 878, label: 'Science Fiction' },
-    { value: 10765, label: 'Sci-Fi & Fantasy' },
-    { value: 10766, label: 'Soap' },
-    { value: 53, label: 'Thriller' },
-    { value: 10770, label: 'TV Movie' },
-    { value: 10752, label: 'War' },
-    { value: 10768, label: 'War & Politics' },
-    { value: 37, label: 'Western' },
-  ];
-  protected readonly countryOptions: readonly FilterOption<string>[] = [
-    { value: 'KR', label: 'South Korea' },
-    { value: 'JP', label: 'Japan' },
-    { value: 'CN', label: 'China' },
-    { value: 'TW', label: 'Taiwan' },
-    { value: 'TH', label: 'Thailand' },
-    { value: 'HK', label: 'Hong Kong' },
-    { value: 'PH', label: 'Philippines' },
-    { value: 'US', label: 'United States' },
-    { value: 'GB', label: 'United Kingdom' },
-    { value: 'CA', label: 'Canada' },
-    { value: 'AU', label: 'Australia' },
-    { value: 'FR', label: 'France' },
-    { value: 'DE', label: 'Germany' },
-    { value: 'ES', label: 'Spain' },
-    { value: 'IN', label: 'India' },
-  ];
-  protected readonly sortOptions: readonly FilterOption<PublicLibrarySort>[] = [
-    { value: 'recent', label: 'Recently updated' },
-    { value: 'title_asc', label: 'Title: A to Z' },
-    { value: 'title_desc', label: 'Title: Z to A' },
-    { value: 'rating_desc', label: 'Highest rated' },
-    { value: 'release_desc', label: 'Newest release' },
-    { value: 'release_asc', label: 'Oldest release' },
-  ];
-  protected readonly filters = new FormGroup({
-    status: new FormControl<WatchStatus | ''>('', {
-      nonNullable: true,
-    }),
-    mediaType: new FormControl<MediaType | ''>('', {
-      nonNullable: true,
-    }),
-    minRating: new FormControl<number | null>(null),
-    genreId: new FormControl<number | null>(null),
-    country: new FormControl('', { nonNullable: true }),
-    yearFrom: new FormControl<number | null>(null),
-    yearTo: new FormControl<number | null>(null),
-    sort: new FormControl<PublicLibrarySort>('recent', {
-      nonNullable: true,
-    }),
-  }, { validators: yearRangeValidator });
+  protected readonly genreOptions = MEDIA_GENRE_OPTIONS;
+  protected readonly countryOptions = MEDIA_COUNTRY_OPTIONS;
+  protected readonly sortOptions: readonly {
+    value: PublicLibrarySort;
+    label: string;
+  }[] = MEDIA_SORT_OPTIONS;
+  protected readonly filters = new FormGroup(
+    {
+      status: new FormControl<WatchStatus | ''>('', {
+        nonNullable: true,
+      }),
+      mediaType: new FormControl<MediaType | ''>('', {
+        nonNullable: true,
+      }),
+      minRating: new FormControl<number | null>(null),
+      genreId: new FormControl<number | null>(null),
+      country: new FormControl('', { nonNullable: true }),
+      yearFrom: new FormControl<number | null>(null),
+      yearTo: new FormControl<number | null>(null),
+      sort: new FormControl<PublicLibrarySort>('recent', {
+        nonNullable: true,
+      }),
+    },
+    { validators: yearRangeValidator },
+  );
 
   ngOnInit(): void {
     this.route.paramMap
@@ -174,12 +129,7 @@ export class FriendLibraryPage implements OnInit {
   protected goToPage(page: number): void {
     const library = this.library();
 
-    if (
-      !library ||
-      page < 1 ||
-      page > library.totalPages ||
-      page === library.page
-    ) {
+    if (!library || page < 1 || page > library.totalPages || page === library.page) {
       return;
     }
 
@@ -194,22 +144,16 @@ export class FriendLibraryPage implements OnInit {
     return status === 'watching' ? 'Watching' : 'Watched';
   }
 
-  protected visibilityLabel(
-    visibility: PublicLibraryResponse['visibility'],
-  ): string {
+  protected visibilityLabel(visibility: PublicLibraryResponse['visibility']): string {
     if (visibility === 'friends') {
       return 'Friends-only library';
     }
 
-    return visibility === 'public'
-      ? 'Public library'
-      : 'Private owner preview';
+    return visibility === 'public' ? 'Public library' : 'Private owner preview';
   }
 
   protected displayYear(media: MediaSummary): string | null {
-    return (
-      (media.firstAirDate ?? media.releaseDate)?.slice(0, 4) ?? null
-    );
+    return (media.firstAirDate ?? media.releaseDate)?.slice(0, 4) ?? null;
   }
 
   protected initials(profile: PublicUserProfile): string {
@@ -249,12 +193,7 @@ export class FriendLibraryPage implements OnInit {
       this.profile.set(response.user);
     } catch (error: unknown) {
       this.library.set(null);
-      this.error.set(
-        readApiErrorMessage(
-          error,
-          'This library is unavailable right now.',
-        ),
-      );
+      this.error.set(readApiErrorMessage(error, 'This library is unavailable right now.'));
     } finally {
       this.isLoading.set(false);
     }
@@ -268,38 +207,20 @@ export class FriendLibraryPage implements OnInit {
       page,
       limit: 24,
       ...(values.status ? { status: values.status } : {}),
-      ...(values.mediaType
-        ? { mediaType: values.mediaType }
-        : {}),
-      ...(values.minRating === null
-        ? {}
-        : { minRating: values.minRating }),
-      ...(values.genreId === null
-        ? {}
-        : { genreId: values.genreId }),
+      ...(values.mediaType ? { mediaType: values.mediaType } : {}),
+      ...(values.minRating === null ? {} : { minRating: values.minRating }),
+      ...(values.genreId === null ? {} : { genreId: values.genreId }),
       ...(country ? { country } : {}),
-      ...(values.yearFrom === null
-        ? {}
-        : { yearFrom: values.yearFrom }),
-      ...(values.yearTo === null
-        ? {}
-        : { yearTo: values.yearTo }),
+      ...(values.yearFrom === null ? {} : { yearFrom: values.yearFrom }),
+      ...(values.yearTo === null ? {} : { yearTo: values.yearTo }),
       sort: values.sort,
     };
   }
 }
 
-function yearRangeValidator(
-  control: AbstractControl,
-): ValidationErrors | null {
-  const yearFrom = control.get('yearFrom')?.value as
-    | number
-    | null
-    | undefined;
-  const yearTo = control.get('yearTo')?.value as
-    | number
-    | null
-    | undefined;
+function yearRangeValidator(control: AbstractControl): ValidationErrors | null {
+  const yearFrom = control.get('yearFrom')?.value as number | null | undefined;
+  const yearTo = control.get('yearTo')?.value as number | null | undefined;
 
   return yearFrom !== null &&
     yearFrom !== undefined &&

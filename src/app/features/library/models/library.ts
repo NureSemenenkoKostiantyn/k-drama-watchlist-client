@@ -1,4 +1,5 @@
 import { MediaDetails, MediaType } from '../../search/models/media';
+import { PublicUserProfile } from '../../users/models/public-user-profile';
 
 export type WatchStatus = 'to_watch' | 'watching' | 'watched';
 export type AudioType = 'original' | 'dubbed' | 'mixed' | 'unknown';
@@ -36,11 +37,18 @@ export interface LibraryEntry {
   rating?: number;
   description?: string;
   playbackPreference?: PlaybackPreference;
+  suggestedBy?: PublicUserProfile;
+  sharedLists?: LibrarySharedListReference[];
   startedAt?: string;
   completedAt?: string;
   lastProgressAt?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface LibrarySharedListReference {
+  id: string;
+  title: string;
 }
 
 export interface AddLibraryEntryRequest {
