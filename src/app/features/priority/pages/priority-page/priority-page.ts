@@ -20,6 +20,10 @@ import { RouterLink } from '@angular/router';
 
 import { LibraryService } from '../../../library/data-access/library.service';
 import { LibraryEntry } from '../../../library/models/library';
+import {
+  KeyboardReorderAction,
+  KeyboardReorderControls,
+} from '../../../../shared/components/keyboard-reorder-controls/keyboard-reorder-controls';
 import { PriorityService } from '../../data-access/priority.service';
 import { PriorityLane } from '../../models/priority';
 
@@ -52,18 +56,9 @@ const caseOpeningDurationMs = 5_200;
 
 @Component({
   selector: 'app-priority-page',
-  imports: [
-    CdkDrag,
-    CdkDropList,
-    ReactiveFormsModule,
-    RouterLink,
-  ],
+  imports: [CdkDrag, CdkDropList, KeyboardReorderControls, ReactiveFormsModule, RouterLink],
   templateUrl: './priority-page.html',
-  styleUrls: [
-    './priority-page.scss',
-    './priority-mobile.scss',
-    './case-opening.scss',
-  ],
+  styleUrls: ['./priority-page.scss', './priority-mobile.scss', './case-opening.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PriorityPage implements OnInit, OnDestroy {
@@ -78,17 +73,14 @@ export class PriorityPage implements OnInit, OnDestroy {
   protected readonly editingLaneId = signal<string | null>(null);
   protected readonly pendingDeleteLaneId = signal<string | null>(null);
   protected readonly randomPick = signal<string | null>(null);
-  protected readonly caseOpening = signal<CaseOpeningState | null>(
-    null,
-  );
+  protected readonly reorderAnnouncement = signal('');
+  protected readonly caseOpening = signal<CaseOpeningState | null>(null);
   protected readonly caseOpeningOffset = signal(0);
   protected readonly isCaseOpening = computed(() => {
     const opening = this.caseOpening();
     return opening !== null && opening.phase !== 'complete';
   });
-  protected readonly isInteractionLocked = computed(
-    () => this.isSaving() || this.isCaseOpening(),
-  );
+  protected readonly isInteractionLocked = computed(() => this.isSaving() || this.isCaseOpening());
   protected readonly createForm = this.formBuilder.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(100)]],
   });
@@ -104,25 +96,18 @@ export class PriorityPage implements OnInit, OnDestroy {
     effect(() => {
       const lanes = this.priority.lanes();
       const laneIds = new Set(lanes.map((lane) => lane.id));
-      const entries = this.library
-        .entries()
-        .filter((entry) => entry.status === 'to_watch');
+      const entries = this.library.entries().filter((entry) => entry.status === 'to_watch');
       this.laneViews.set(
         lanes.map((lane) => ({
           lane,
           items: entries
             .filter((entry) => entry.priorityLaneId === lane.id)
-            .sort(
-              (left, right) =>
-                (left.priorityPosition ?? 0) - (right.priorityPosition ?? 0),
-            ),
+            .sort((left, right) => (left.priorityPosition ?? 0) - (right.priorityPosition ?? 0)),
         })),
       );
       this.unassigned.set(
         entries.filter(
-          (entry) =>
-            entry.priorityLaneId === undefined ||
-            !laneIds.has(entry.priorityLaneId),
+          (entry) => entry.priorityLaneId === undefined || !laneIds.has(entry.priorityLaneId),
         ),
       );
     });
@@ -178,11 +163,7 @@ export class PriorityPage implements OnInit, OnDestroy {
   protected async renameLane(): Promise<void> {
     const laneId = this.editingLaneId();
 
-    if (
-      !laneId ||
-      this.renameForm.invalid ||
-      this.isInteractionLocked()
-    ) {
+    if (!laneId || this.renameForm.invalid || this.isInteractionLocked()) {
       return;
     }
 
@@ -216,8 +197,7 @@ export class PriorityPage implements OnInit, OnDestroy {
       return;
     }
 
-    const winner =
-      view.items[Math.floor(Math.random() * view.items.length)];
+    const winner = view.items[Math.floor(Math.random() * view.items.length)];
 
     if (!winner) {
       this.randomPick.set(`${view.lane.name} is empty.`);
@@ -227,26 +207,20 @@ export class PriorityPage implements OnInit, OnDestroy {
     this.clearCaseOpeningHandles();
     this.randomPick.set(null);
     this.caseOpeningOffset.set(-(caseOpeningCardWidth / 2));
-    const items = Array.from(
-      { length: caseOpeningItemCount },
-      (_, index): CaseOpeningReelItem => {
-        const entry =
-          index === caseOpeningWinnerIndex
-            ? winner
-            : (view.items[
-                Math.floor(Math.random() * view.items.length)
-              ] ?? winner);
-        return {
-          key: `${index}-${entry.id}`,
-          entry,
-          isWinner: index === caseOpeningWinnerIndex,
-        };
-      },
-    );
+    const items = Array.from({ length: caseOpeningItemCount }, (_, index): CaseOpeningReelItem => {
+      const entry =
+        index === caseOpeningWinnerIndex
+          ? winner
+          : (view.items[Math.floor(Math.random() * view.items.length)] ?? winner);
+      return {
+        key: `${index}-${entry.id}`,
+        entry,
+        isWinner: index === caseOpeningWinnerIndex,
+      };
+    });
     const landingJitter = Math.round((Math.random() - 0.5) * 48);
     const targetOffset = -(
-      caseOpeningWinnerIndex *
-        (caseOpeningCardWidth + caseOpeningGap) +
+      caseOpeningWinnerIndex * (caseOpeningCardWidth + caseOpeningGap) +
       caseOpeningCardWidth / 2 +
       landingJitter
     );
@@ -260,23 +234,16 @@ export class PriorityPage implements OnInit, OnDestroy {
 
     if (prefersReducedMotion()) {
       this.caseOpeningOffset.set(targetOffset);
-      this.randomPick.set(
-        `${view.lane.name}: ${winner.media.title}`,
-      );
+      this.randomPick.set(`${view.lane.name}: ${winner.media.title}`);
       return;
     }
 
     this.caseOpeningFrame = requestAnimationFrame(() => {
       this.caseOpeningFrame = requestAnimationFrame(() => {
         this.caseOpeningFrame = undefined;
-        this.caseOpening.update((opening) =>
-          opening ? { ...opening, phase: 'spinning' } : null,
-        );
+        this.caseOpening.update((opening) => (opening ? { ...opening, phase: 'spinning' } : null));
         this.caseOpeningOffset.set(targetOffset);
-        this.caseOpeningTimer = setTimeout(
-          () => this.finishCaseOpening(),
-          caseOpeningDurationMs,
-        );
+        this.caseOpeningTimer = setTimeout(() => this.finishCaseOpening(), caseOpeningDurationMs);
       });
     });
   }
@@ -291,9 +258,7 @@ export class PriorityPage implements OnInit, OnDestroy {
     this.clearCaseOpeningHandles();
     this.caseOpeningOffset.set(opening.targetOffset);
     this.caseOpening.set({ ...opening, phase: 'complete' });
-    this.randomPick.set(
-      `${opening.laneName}: ${opening.winner.media.title}`,
-    );
+    this.randomPick.set(`${opening.laneName}: ${opening.winner.media.title}`);
   }
 
   protected closeCaseOpening(): void {
@@ -302,13 +267,8 @@ export class PriorityPage implements OnInit, OnDestroy {
     this.caseOpeningOffset.set(0);
   }
 
-  protected async dropLane(
-    event: CdkDragDrop<PriorityLaneView[]>,
-  ): Promise<void> {
-    if (
-      event.previousIndex === event.currentIndex ||
-      this.isInteractionLocked()
-    ) {
+  protected async dropLane(event: CdkDragDrop<PriorityLaneView[]>): Promise<void> {
+    if (event.previousIndex === event.currentIndex || this.isInteractionLocked()) {
       return;
     }
 
@@ -316,9 +276,7 @@ export class PriorityPage implements OnInit, OnDestroy {
     moveItemInArray(views, event.previousIndex, event.currentIndex);
     this.laneViews.set(views);
     this.isSaving.set(true);
-    const saved = await this.priority.reorderLanes(
-      views.map((view) => view.lane.id),
-    );
+    const saved = await this.priority.reorderLanes(views.map((view) => view.lane.id));
     this.isSaving.set(false);
 
     if (!saved) {
@@ -326,19 +284,42 @@ export class PriorityPage implements OnInit, OnDestroy {
     }
   }
 
-  protected async dropItem(
-    event: CdkDragDrop<LibraryEntry[]>,
+  protected async moveLaneWithKeyboard(
+    view: PriorityLaneView,
+    action: KeyboardReorderAction,
   ): Promise<void> {
+    if ((action !== 'before' && action !== 'after') || this.isInteractionLocked()) {
+      return;
+    }
+
+    const views = [...this.laneViews()];
+    const currentIndex = views.findIndex((candidate) => candidate.lane.id === view.lane.id);
+    const targetIndex = currentIndex + (action === 'before' ? -1 : 1);
+
+    if (currentIndex === -1 || targetIndex < 0 || targetIndex >= views.length) {
+      return;
+    }
+
+    moveItemInArray(views, currentIndex, targetIndex);
+    this.laneViews.set(views);
+    this.isSaving.set(true);
+    const saved = await this.priority.reorderLanes(views.map((candidate) => candidate.lane.id));
+    this.isSaving.set(false);
+
+    if (saved) {
+      this.reorderAnnouncement.set(`${view.lane.name} moved to position ${targetIndex + 1}.`);
+    } else {
+      await this.priority.load();
+    }
+  }
+
+  protected async dropItem(event: CdkDragDrop<LibraryEntry[]>): Promise<void> {
     if (this.isInteractionLocked()) {
       return;
     }
 
     if (event.previousContainer === event.container) {
-      moveItemInArray(
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex,
-      );
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
       transferArrayItem(
         event.previousContainer.data,
@@ -348,16 +329,16 @@ export class PriorityPage implements OnInit, OnDestroy {
       );
     }
 
-    this.updateContainer(
-      event.previousContainer.id,
-      event.previousContainer.data,
-    );
+    this.updateContainer(event.previousContainer.id, event.previousContainer.data);
     this.updateContainer(event.container.id, event.container.data);
     const affectedLaneIds = [
       readLaneId(event.previousContainer.id),
       readLaneId(event.container.id),
     ].filter((laneId): laneId is string => laneId !== null);
     const uniqueLaneIds = [...new Set(affectedLaneIds)];
+    if (uniqueLaneIds.length === 0) {
+      return;
+    }
     const laneOrders = uniqueLaneIds.map((laneId) => ({
       laneId,
       itemIds: this.itemsForLane(laneId).map((entry) => entry.id),
@@ -372,13 +353,89 @@ export class PriorityPage implements OnInit, OnDestroy {
     }
 
     for (const laneOrder of laneOrders) {
-      this.library.applyPriorityOrder(
-        laneOrder.laneId,
-        laneOrder.itemIds,
-      );
+      this.library.applyPriorityOrder(laneOrder.laneId, laneOrder.itemIds);
     }
 
     this.isSaving.set(false);
+  }
+
+  protected async moveItemWithKeyboard(
+    entry: LibraryEntry,
+    containerId: string,
+    action: KeyboardReorderAction,
+  ): Promise<void> {
+    if (this.isInteractionLocked()) {
+      return;
+    }
+
+    const containerIds = [
+      'unassigned-priority-items',
+      ...this.laneViews().map((view) => laneDropListId(view.lane.id)),
+    ];
+    const containerIndex = containerIds.indexOf(containerId);
+    const sourceItems = [...this.itemsForContainer(containerId)];
+    const currentIndex = sourceItems.findIndex((candidate) => candidate.id === entry.id);
+
+    if (containerIndex === -1 || currentIndex === -1) {
+      return;
+    }
+
+    let targetContainerId = containerId;
+    let targetIndex = currentIndex;
+
+    if (action === 'before' || action === 'after') {
+      targetIndex += action === 'before' ? -1 : 1;
+      if (targetIndex < 0 || targetIndex >= sourceItems.length) {
+        return;
+      }
+      moveItemInArray(sourceItems, currentIndex, targetIndex);
+      this.updateContainer(containerId, sourceItems);
+    } else {
+      const targetContainerIndex = containerIndex + (action === 'previous-group' ? -1 : 1);
+      targetContainerId = containerIds[targetContainerIndex] ?? '';
+
+      if (!targetContainerId) {
+        return;
+      }
+
+      const targetItems = [...this.itemsForContainer(targetContainerId)];
+      const [movedEntry] = sourceItems.splice(currentIndex, 1);
+      targetIndex = Math.min(currentIndex, targetItems.length);
+      targetItems.splice(targetIndex, 0, movedEntry);
+      this.updateContainer(containerId, sourceItems);
+      this.updateContainer(targetContainerId, targetItems);
+    }
+
+    const affectedLaneIds = [readLaneId(containerId), readLaneId(targetContainerId)].filter(
+      (laneId): laneId is string => laneId !== null,
+    );
+    const laneOrders = [...new Set(affectedLaneIds)].map((laneId) => ({
+      laneId,
+      itemIds: this.itemsForLane(laneId).map((candidate) => candidate.id),
+    }));
+
+    if (laneOrders.length === 0) {
+      return;
+    }
+
+    this.isSaving.set(true);
+    const saved = await this.priority.reorderItems(laneOrders);
+
+    if (!saved) {
+      await this.initialize();
+      this.isSaving.set(false);
+      return;
+    }
+
+    for (const laneOrder of laneOrders) {
+      this.library.applyPriorityOrder(laneOrder.laneId, laneOrder.itemIds);
+    }
+
+    this.isSaving.set(false);
+    const targetName = this.containerName(targetContainerId);
+    this.reorderAnnouncement.set(
+      `${entry.media.title} moved to ${targetName}, position ${targetIndex + 1}.`,
+    );
   }
 
   protected laneListId(laneId: string): string {
@@ -398,16 +455,24 @@ export class PriorityPage implements OnInit, OnDestroy {
     }
 
     this.laneViews.update((views) =>
-      views.map((view) =>
-        view.lane.id === laneId ? { ...view, items: [...items] } : view,
-      ),
+      views.map((view) => (view.lane.id === laneId ? { ...view, items: [...items] } : view)),
     );
   }
 
   private itemsForLane(laneId: string): LibraryEntry[] {
-    return (
-      this.laneViews().find((view) => view.lane.id === laneId)?.items ?? []
-    );
+    return this.laneViews().find((view) => view.lane.id === laneId)?.items ?? [];
+  }
+
+  private itemsForContainer(containerId: string): LibraryEntry[] {
+    const laneId = readLaneId(containerId);
+    return laneId === null ? this.unassigned() : this.itemsForLane(laneId);
+  }
+
+  private containerName(containerId: string): string {
+    const laneId = readLaneId(containerId);
+    return laneId === null
+      ? 'Unassigned'
+      : (this.laneViews().find((view) => view.lane.id === laneId)?.lane.name ?? 'priority lane');
   }
 
   private clearCaseOpeningHandles(): void {

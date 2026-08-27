@@ -11,6 +11,7 @@ import {
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { OpenGraphMetadataService } from '../../../../core/open-graph-metadata.service';
+import { buildCollectionStructuredData } from '../../../../core/seo-structured-data';
 import { PublicWheelsService } from '../../data-access/public-wheels.service';
 import { PublicWheelDetails } from '../../models/wheel';
 
@@ -54,14 +55,23 @@ export class PublicWheelPage implements OnInit, OnDestroy {
       this.wheel.set(wheel);
       const title = `${wheel.title} · Drama Watch`;
       const imageUrl = preferredMediaImage(wheel.items.map((item) => item.media));
+      const description =
+        wheel.description ??
+        `Explore ${wheel.itemCount} ${wheel.itemCount === 1 ? 'candidate' : 'candidates'} on ${wheel.title}, a Drama Watch wheel.`;
+      const canonicalUrl = `${this.document.location.origin}/wheels/public/${encodeURIComponent(publicSlug)}`;
       this.openGraph.set({
         title,
-        description:
-          wheel.description ??
-          `Explore ${wheel.itemCount} ${wheel.itemCount === 1 ? 'candidate' : 'candidates'} on ${wheel.title}, a Drama Watch wheel.`,
-        canonicalUrl: `${this.document.location.origin}/wheels/public/${encodeURIComponent(publicSlug)}`,
+        description,
+        canonicalUrl,
         ...(imageUrl ? { imageUrl, imageAlt: `Preview of ${wheel.title}` } : {}),
         allowIndexing: wheel.visibility === 'public',
+        structuredData: buildCollectionStructuredData({
+          name: wheel.title,
+          description,
+          canonicalUrl,
+          itemCount: wheel.itemCount,
+          items: wheel.items.map((item) => item.media),
+        }),
       });
     } catch (error: unknown) {
       this.error.set(error instanceof Error ? error.message : 'This wheel is unavailable.');

@@ -1,10 +1,21 @@
 import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DatePipe, DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { LibraryService } from '../../../library/data-access/library.service';
+import {
+  KeyboardReorderAction,
+  KeyboardReorderControls,
+} from '../../../../shared/components/keyboard-reorder-controls/keyboard-reorder-controls';
 import { SharedListComments } from '../../components/shared-list-comments/shared-list-comments';
 import { SharedListsService } from '../../data-access/shared-lists.service';
 import {
@@ -16,7 +27,15 @@ import {
 
 @Component({
   selector: 'app-shared-list-page',
-  imports: [CdkDrag, CdkDropList, DatePipe, ReactiveFormsModule, RouterLink, SharedListComments],
+  imports: [
+    CdkDrag,
+    CdkDropList,
+    DatePipe,
+    KeyboardReorderControls,
+    ReactiveFormsModule,
+    RouterLink,
+    SharedListComments,
+  ],
   templateUrl: './shared-list-page.html',
   styleUrls: ['./shared-list-page.scss', './shared-list-items.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,11 +53,16 @@ export class SharedListPage implements OnInit {
   protected readonly pendingDelete = signal(false);
   protected readonly activeMemberId = signal<string | null>(null);
   protected readonly pendingMemberRemovalId = signal<string | null>(null);
-  protected readonly invite = signal<{ url: string; expiresAt: string; target: string } | null>(null);
+  protected readonly invite = signal<{ url: string; expiresAt: string; target: string } | null>(
+    null,
+  );
   protected readonly copied = signal(false);
   protected readonly publicLinkCopied = signal(false);
+  protected readonly reorderAnnouncement = signal('');
   protected readonly isOwner = computed(() => this.list()?.role === 'owner');
-  protected readonly canEdit = computed(() => ['owner', 'editor'].includes(this.list()?.role ?? ''));
+  protected readonly canEdit = computed(() =>
+    ['owner', 'editor'].includes(this.list()?.role ?? ''),
+  );
   protected readonly publicUrl = computed(() => {
     const publicSlug = this.list()?.publicSlug;
     return publicSlug
@@ -54,9 +78,19 @@ export class SharedListPage implements OnInit {
     description: ['', [Validators.maxLength(2000)]],
     visibility: this.formBuilder.nonNullable.control<SharedListVisibility>('private'),
   });
-  protected readonly addForm = this.formBuilder.nonNullable.group({ mediaId: ['', Validators.required] });
+  protected readonly addForm = this.formBuilder.nonNullable.group({
+    mediaId: ['', Validators.required],
+  });
   protected readonly inviteForm = this.formBuilder.nonNullable.group({
-    username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(30), Validators.pattern(/^[a-zA-Z0-9_.]+$/)]],
+    username: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(3),
+        Validators.maxLength(30),
+        Validators.pattern(/^[a-zA-Z0-9_.]+$/),
+      ],
+    ],
     role: this.formBuilder.nonNullable.control<Exclude<SharedListRole, 'owner'>>('viewer'),
   });
 
@@ -89,7 +123,8 @@ export class SharedListPage implements OnInit {
   }
 
   protected async updateStatus(item: SharedListItem, event: Event): Promise<void> {
-    const groupStatus = (event.target as HTMLSelectElement).value as 'planned' | 'watching' | 'finished';
+    const groupStatus = (event.target as HTMLSelectElement).value as
+      'planned' | 'watching' | 'finished';
     await this.sharedLists.updateItem(this.listId, item.id, { groupStatus });
   }
 
@@ -98,7 +133,11 @@ export class SharedListPage implements OnInit {
     await this.sharedLists.updateItem(this.listId, item.id, { note: note || null });
   }
 
-  protected async updateProgress(item: SharedListItem, season: string, episode: string): Promise<void> {
+  protected async updateProgress(
+    item: SharedListItem,
+    season: string,
+    episode: string,
+  ): Promise<void> {
     await this.sharedLists.updateItem(this.listId, item.id, {
       groupProgress: {
         currentSeason: Math.max(0, Number(season) || 0),
@@ -112,10 +151,44 @@ export class SharedListPage implements OnInit {
   }
 
   protected async drop(event: CdkDragDrop<SharedListItem[]>): Promise<void> {
-    if (!this.canEdit() || event.previousIndex === event.currentIndex) return;
+    if (!this.canEdit() || this.isSaving() || event.previousIndex === event.currentIndex) return;
     const ids = [...(this.list()?.items.map((item) => item.id) ?? [])];
     moveItemInArray(ids, event.previousIndex, event.currentIndex);
-    if (!(await this.sharedLists.reorder(this.listId, ids))) await this.sharedLists.loadList(this.listId);
+    this.isSaving.set(true);
+    const saved = await this.sharedLists.reorder(this.listId, ids);
+    this.isSaving.set(false);
+    if (!saved) await this.sharedLists.loadList(this.listId);
+  }
+
+  protected async moveItemWithKeyboard(
+    item: SharedListItem,
+    action: KeyboardReorderAction,
+  ): Promise<void> {
+    if ((action !== 'before' && action !== 'after') || !this.canEdit() || this.isSaving()) {
+      return;
+    }
+
+    const items = [...(this.list()?.items ?? [])];
+    const currentIndex = items.findIndex((candidate) => candidate.id === item.id);
+    const targetIndex = currentIndex + (action === 'before' ? -1 : 1);
+
+    if (currentIndex === -1 || targetIndex < 0 || targetIndex >= items.length) {
+      return;
+    }
+
+    moveItemInArray(items, currentIndex, targetIndex);
+    this.isSaving.set(true);
+    const saved = await this.sharedLists.reorder(
+      this.listId,
+      items.map((candidate) => candidate.id),
+    );
+    this.isSaving.set(false);
+
+    if (saved) {
+      this.reorderAnnouncement.set(`${item.media.title} moved to position ${targetIndex + 1}.`);
+    } else {
+      await this.sharedLists.loadList(this.listId);
+    }
   }
 
   protected async createInvite(): Promise<void> {
@@ -179,7 +252,10 @@ export class SharedListPage implements OnInit {
   }
 
   private async load(): Promise<void> {
-    const [loaded] = await Promise.all([this.sharedLists.loadList(this.listId), this.library.load()]);
+    const [loaded] = await Promise.all([
+      this.sharedLists.loadList(this.listId),
+      this.library.load(),
+    ]);
     const list = this.list();
     if (loaded && list?.role === 'owner') {
       this.settingsForm.setValue({

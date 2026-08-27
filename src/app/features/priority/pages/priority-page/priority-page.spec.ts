@@ -30,6 +30,8 @@ describe('PriorityPage', () => {
   it('renders default lanes and unassigned to-watch entries', async () => {
     const deleteLane = vi.fn().mockResolvedValue(true);
     const clearPriorityLane = vi.fn();
+    const reorderItems = vi.fn().mockResolvedValue(true);
+    const applyPriorityOrder = vi.fn();
     const entriesState = signal([entry]);
 
     await TestBed.configureTestingModule({
@@ -56,7 +58,7 @@ describe('PriorityPage', () => {
             update: vi.fn(),
             delete: deleteLane,
             reorderLanes: vi.fn(),
-            reorderItems: vi.fn(),
+            reorderItems,
           },
         },
         {
@@ -65,7 +67,7 @@ describe('PriorityPage', () => {
             entries: entriesState.asReadonly(),
             isLoading: signal(false).asReadonly(),
             load: vi.fn().mockResolvedValue(true),
-            applyPriorityOrder: vi.fn(),
+            applyPriorityOrder,
             clearPriorityLane,
           },
         },
@@ -77,17 +79,19 @@ describe('PriorityPage', () => {
     fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
 
-    expect(root.querySelector('.priority-lane h2')?.textContent).toContain(
-      'Must watch',
-    );
+    expect(root.querySelector('.priority-lane h2')?.textContent).toContain('Must watch');
     expect(root.querySelector('.unassigned')?.textContent).toContain('Goblin');
     expect(root.querySelector('.priority-item__handle')).toBeNull();
     expect(root.querySelector('.priority-lane__drag')).toBeNull();
     expect(root.querySelector('.priority-lane.cdk-drag')).not.toBeNull();
-    expect(
-      root.querySelector('button[aria-label="Pick a random title"] svg'),
-    ).not.toBeNull();
+    expect(root.querySelector('button[aria-label="Pick a random title"] svg')).not.toBeNull();
     expect(root.textContent).not.toContain('Collapse');
+
+    findButtonByLabel(root, 'Move Goblin to next lane').click();
+    await fixture.whenStable();
+
+    expect(reorderItems).toHaveBeenCalledWith([{ laneId: 'lane-1', itemIds: ['entry-1'] }]);
+    expect(applyPriorityOrder).toHaveBeenCalledWith('lane-1', ['entry-1']);
 
     const deleteButton = findButtonByLabel(root, 'Delete lane');
     deleteButton.click();
@@ -118,29 +122,19 @@ describe('PriorityPage', () => {
     fixture.detectChanges();
 
     expect(root.querySelector('.case-opening')).not.toBeNull();
-    expect(root.querySelectorAll('.case-opening__card')).toHaveLength(
-      42,
-    );
+    expect(root.querySelectorAll('.case-opening__card')).toHaveLength(42);
     expect(root.querySelector('.case-opening__marker')).not.toBeNull();
 
-    const skipButton =
-      root.querySelector<HTMLButtonElement>('.case-opening__skip');
+    const skipButton = root.querySelector<HTMLButtonElement>('.case-opening__skip');
     skipButton?.click();
     fixture.detectChanges();
 
-    expect(root.querySelector('.case-opening__status')?.textContent).toContain(
-      'Goblin',
-    );
+    expect(root.querySelector('.case-opening__status')?.textContent).toContain('Goblin');
   });
 });
 
-function findButtonByLabel(
-  root: HTMLElement,
-  label: string,
-): HTMLButtonElement {
-  const button = root.querySelector<HTMLButtonElement>(
-    `button[aria-label="${label}"]`,
-  );
+function findButtonByLabel(root: HTMLElement, label: string): HTMLButtonElement {
+  const button = root.querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`);
 
   if (!button) {
     throw new Error(`Expected a "${label}" button.`);

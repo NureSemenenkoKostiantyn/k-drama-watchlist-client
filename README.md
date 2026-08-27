@@ -103,6 +103,12 @@ Public library visibility from the reusable privacy settings panel on `/profile`
 receives only the server's public-safe library projection. The same panel independently controls
 private-by-default activity visibility.
 
+The owner's profile also provides a local JSON data export. The versioned archive includes the
+account profile, privacy settings, categories, priority lanes, and full personal library. Private
+notes and playback preferences are included, while authentication secrets and other users' email
+addresses are never returned. The browser downloads the response directly without uploading or
+persisting another copy.
+
 The protected `/activity` route shows a newest-first, paginated feed of accepted friends' visible
 library additions, lifecycle changes, and ratings. Each entry links to the actor's public profile
 and normalized media details. The feed never receives private notes, episode progress, categories,
@@ -257,6 +263,22 @@ Public and unlisted shared-list and wheel copy actions use same-origin server sh
 metadata, while browsers are redirected to the canonical Angular public page. Those Angular pages
 also maintain matching title, description, image, canonical, and robots metadata during client-side
 navigation. Public resources are indexable and unlisted resources remain `noindex`.
+Firebase Hosting also publishes `robots.txt`, which advertises the backend-generated public sitemap
+at `/api/public/seo/sitemap.xml` and blocks authenticated, invitation, authentication, and general
+API routes from crawling. Public discovery, shared-list, and wheel pages publish schema.org
+`CollectionPage`/`ItemList` JSON-LD through the shared metadata service. Only `public` resources are
+included in the sitemap; unlisted resources retain direct-link access without search indexing.
+
+The application shell includes a keyboard-visible skip link and moves focus to the new page heading
+after route navigation while announcing the page change to assistive technology. Modal share-card
+creation traps focus, closes with Escape, and restores focus to its trigger. Global styles preserve
+clear focus indicators, honour reduced-motion preferences, and use the operating system highlight
+colour for focus in forced-colours mode.
+
+Every drag-reorder surface also exposes labelled arrow controls. Keyboard users can reorder priority
+lanes, move priority titles within or between lanes, and reorder wheel or shared-list titles through
+the same persisted operations used by pointer dragging. Successful moves are announced through
+polite live regions, and unavailable boundary moves remain visibly disabled.
 
 Anonymous users are redirected to `/login`. New accounts first continue to `/verify-email`; the
 verification link returns them to `/onboarding` to choose a unique username. Login can resend a

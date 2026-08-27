@@ -25,8 +25,7 @@
         }
       </div>
       <strong>
-        {{ currentWheel.enabledItemCount }} enabled ·
-        {{ currentWheel.itemCount }} total
+        {{ currentWheel.enabledItemCount }} enabled · {{ currentWheel.itemCount }} total
       </strong>
     </header>
 
@@ -61,10 +60,7 @@
           class="wheel-stage__spin"
           type="button"
           [disabled]="
-            currentWheel.enabledItemCount === 0 ||
-            !canEdit() ||
-            isSpinning() ||
-            isSaving()
+            currentWheel.enabledItemCount === 0 || !canEdit() || isSpinning() || isSaving()
           "
           (click)="spin()"
         >
@@ -91,101 +87,93 @@
               <strong>×{{ item.weight }}</strong>
             </li>
           } @empty {
-            <li class="wheel-legend__empty">
-              Add and enable titles to make this wheel spin.
-            </li>
+            <li class="wheel-legend__empty">Add and enable titles to make this wheel spin.</li>
           }
         </ol>
       </section>
 
       <aside class="wheel-controls" aria-label="Wheel settings and titles">
         @if (isOwner()) {
-        <form
-          class="wheel-settings"
-          [formGroup]="settingsForm"
-          (ngSubmit)="saveSettings()"
-        >
-          <div>
-            <p>Wheel settings</p>
-            <h2>Details</h2>
-          </div>
-          <label>
-            <span>Name</span>
-            <input formControlName="title" maxlength="100" />
-          </label>
-          <label>
-            <span>Description</span>
-            <textarea formControlName="description" maxlength="1000" rows="3"></textarea>
-          </label>
-          <label>
-            <span>Selection style</span>
-            <select formControlName="selectionMode">
-              <option value="fully_random">Fully random</option>
-              <option value="avoid_recent_winners">Avoid the last winner</option>
-            </select>
-          </label>
-          <label>
-            <span>Link visibility</span>
-            <select formControlName="visibility">
-              <option value="private">Private · members only</option>
-              <option value="unlisted">Unlisted · anyone with the link</option>
-              <option value="public">Public · anyone with the link</option>
-            </select>
-          </label>
-          <small class="wheel-settings__visibility-help">
-            Public discovery is planned later. Public and unlisted links are currently read-only.
-          </small>
-          <button type="submit" [disabled]="isSaving() || isSpinning()">
-            Save settings
-          </button>
-          @if (publicUrl(); as url) {
-            <div class="wheel-settings__public-link">
-              <strong>Read-only sharing link</strong>
-              <input readonly [value]="url" aria-label="Public wheel link" />
-              <button type="button" (click)="copyPublicLink()">
-                {{ publicLinkCopied() ? 'Copied' : 'Copy link' }}
-              </button>
-              <a [href]="url" target="_blank" rel="noopener">Open public view</a>
+          <form class="wheel-settings" [formGroup]="settingsForm" (ngSubmit)="saveSettings()">
+            <div>
+              <p>Wheel settings</p>
+              <h2>Details</h2>
             </div>
-          }
-        </form>
+            <label>
+              <span>Name</span>
+              <input formControlName="title" maxlength="100" />
+            </label>
+            <label>
+              <span>Description</span>
+              <textarea formControlName="description" maxlength="1000" rows="3"></textarea>
+            </label>
+            <label>
+              <span>Selection style</span>
+              <select formControlName="selectionMode">
+                <option value="fully_random">Fully random</option>
+                <option value="avoid_recent_winners">Avoid the last winner</option>
+              </select>
+            </label>
+            <label>
+              <span>Link visibility</span>
+              <select formControlName="visibility">
+                <option value="private">Private · members only</option>
+                <option value="unlisted">Unlisted · anyone with the link</option>
+                <option value="public">Public · anyone with the link</option>
+              </select>
+            </label>
+            <small class="wheel-settings__visibility-help">
+              Public discovery is planned later. Public and unlisted links are currently read-only.
+            </small>
+            <button type="submit" [disabled]="isSaving() || isSpinning()">Save settings</button>
+            @if (publicUrl(); as url) {
+              <div class="wheel-settings__public-link">
+                <strong>Read-only sharing link</strong>
+                <input readonly [value]="url" aria-label="Public wheel link" />
+                <button type="button" (click)="copyPublicLink()">
+                  {{ publicLinkCopied() ? 'Copied' : 'Copy link' }}
+                </button>
+                <a [href]="url" target="_blank" rel="noopener">Open public view</a>
+              </div>
+            }
+          </form>
         }
 
         @if (canEdit()) {
-        <form
-          class="wheel-add"
-          [formGroup]="addItemForm"
-          (ngSubmit)="addItem()"
-        >
-          <div>
-            <p>Add from library</p>
-            <h2>New candidate</h2>
-          </div>
-          <label>
-            <span>Title</span>
-            <select formControlName="mediaId">
-              <option value="">Choose a title</option>
-              @for (entry of availableEntries(); track entry.id) {
-                <option [value]="entry.mediaId">
-                  {{ entry.media.title }} ·
-                  {{ entry.status === 'to_watch' ? 'To watch' : entry.status === 'watching' ? 'Watching' : 'Watched' }}
-                </option>
-              }
-            </select>
-          </label>
-          <label>
-            <span>Weight</span>
-            <input formControlName="weight" type="number" min="1" max="100" />
-          </label>
-          <button type="submit" [disabled]="isSaving() || isSpinning()">
-            Add title
-          </button>
-          @if (library.entries().length === 0) {
-            <a routerLink="/search">Search for titles to add to your library</a>
-          } @else if (availableEntries().length === 0) {
-            <span>Every library title is already on this wheel.</span>
-          }
-        </form>
+          <form class="wheel-add" [formGroup]="addItemForm" (ngSubmit)="addItem()">
+            <div>
+              <p>Add from library</p>
+              <h2>New candidate</h2>
+            </div>
+            <label>
+              <span>Title</span>
+              <select formControlName="mediaId">
+                <option value="">Choose a title</option>
+                @for (entry of availableEntries(); track entry.id) {
+                  <option [value]="entry.mediaId">
+                    {{ entry.media.title }} ·
+                    {{
+                      entry.status === 'to_watch'
+                        ? 'To watch'
+                        : entry.status === 'watching'
+                          ? 'Watching'
+                          : 'Watched'
+                    }}
+                  </option>
+                }
+              </select>
+            </label>
+            <label>
+              <span>Weight</span>
+              <input formControlName="weight" type="number" min="1" max="100" />
+            </label>
+            <button type="submit" [disabled]="isSaving() || isSpinning()">Add title</button>
+            @if (library.entries().length === 0) {
+              <a routerLink="/search">Search for titles to add to your library</a>
+            } @else if (availableEntries().length === 0) {
+              <span>Every library title is already on this wheel.</span>
+            }
+          </form>
         }
       </aside>
     </div>
@@ -203,11 +191,7 @@
       </header>
 
       @if (isOwner()) {
-        <form
-          class="wheel-members__add"
-          [formGroup]="memberForm"
-          (ngSubmit)="addMember()"
-        >
+        <form class="wheel-members__add" [formGroup]="memberForm" (ngSubmit)="addMember()">
           <label>
             <span>Friend</span>
             <select formControlName="username">
@@ -226,9 +210,7 @@
               <option value="editor">Editor</option>
             </select>
           </label>
-          <button type="submit" [disabled]="isSaving() || memberForm.invalid">
-            Share wheel
-          </button>
+          <button type="submit" [disabled]="isSaving() || memberForm.invalid">Share wheel</button>
           @if (friends().length === 0) {
             <a routerLink="/friends">Add a friend before sharing a wheel</a>
           } @else if (availableFriends().length === 0) {
@@ -281,8 +263,11 @@
           <p>Candidate controls</p>
           <h2 id="wheel-items-title">Titles</h2>
         </div>
-        <span>{{ canEdit() ? 'Drag to reorder' : 'View only' }}</span>
+        <span>{{ canEdit() ? 'Drag or use arrow controls to reorder' : 'View only' }}</span>
       </header>
+      <p class="visually-hidden" aria-live="polite" aria-atomic="true">
+        {{ reorderAnnouncement() }}
+      </p>
 
       <div
         class="wheel-items__list"
@@ -294,10 +279,19 @@
           <article
             class="wheel-item"
             [class.wheel-item--disabled]="!item.isEnabled"
+            [class.wheel-item--read-only]="!canEdit()"
             cdkDrag
             [cdkDragDisabled]="!canEdit() || isSaving() || isSpinning()"
           >
-            <span class="wheel-item__grip" aria-hidden="true">⠿</span>
+            @if (canEdit()) {
+              <app-keyboard-reorder-controls
+                [itemLabel]="item.media.title"
+                [disabled]="isSaving() || isSpinning()"
+                [canMoveBefore]="$index > 0"
+                [canMoveAfter]="$index < currentWheel.items.length - 1"
+                (moveRequested)="moveItemWithKeyboard(item, $event)"
+              />
+            }
             @if (item.media.posterUrl) {
               <img [src]="item.media.posterUrl" [alt]="item.media.title + ' poster'" />
             } @else {
@@ -307,11 +301,7 @@
             }
             <div class="wheel-item__title">
               <a
-                [routerLink]="[
-                  '/media',
-                  item.media.mediaType,
-                  item.media.tmdbId
-                ]"
+                [routerLink]="['/media', item.media.mediaType, item.media.tmdbId]"
                 (pointerdown)="$event.stopPropagation()"
               >
                 {{ item.media.title }}
@@ -322,10 +312,7 @@
               </span>
             </div>
             @if (canEdit()) {
-              <label
-                class="wheel-item__weight"
-                (pointerdown)="$event.stopPropagation()"
-              >
+              <label class="wheel-item__weight" (pointerdown)="$event.stopPropagation()">
                 <span>Weight</span>
                 <input
                   type="number"
@@ -391,9 +378,7 @@
               >
                 Clear
               </button>
-              <button type="button" (click)="pendingHistoryReset.set(false)">
-                Cancel
-              </button>
+              <button type="button" (click)="pendingHistoryReset.set(false)">Cancel</button>
             </div>
           } @else {
             <button
@@ -431,34 +416,30 @@
     </section>
 
     @if (isOwner()) {
-    <section class="wheel-danger" aria-labelledby="wheel-danger-title">
-      <div>
-        <p>Danger zone</p>
-        <h2 id="wheel-danger-title">Delete wheel</h2>
-        <span>This removes its candidates and spin history.</span>
-      </div>
-      @if (pendingDelete()) {
-        <div class="wheel-danger__confirm">
-          <strong>Delete “{{ currentWheel.title }}”?</strong>
+      <section class="wheel-danger" aria-labelledby="wheel-danger-title">
+        <div>
+          <p>Danger zone</p>
+          <h2 id="wheel-danger-title">Delete wheel</h2>
+          <span>This removes its candidates and spin history.</span>
+        </div>
+        @if (pendingDelete()) {
+          <div class="wheel-danger__confirm">
+            <strong>Delete “{{ currentWheel.title }}”?</strong>
+            <button type="button" [disabled]="isSaving() || isSpinning()" (click)="deleteWheel()">
+              Delete permanently
+            </button>
+            <button type="button" (click)="pendingDelete.set(false)">Cancel</button>
+          </div>
+        } @else {
           <button
             type="button"
             [disabled]="isSaving() || isSpinning()"
-            (click)="deleteWheel()"
+            (click)="pendingDelete.set(true)"
           >
-            Delete permanently
+            Delete wheel
           </button>
-          <button type="button" (click)="pendingDelete.set(false)">Cancel</button>
-        </div>
-      } @else {
-        <button
-          type="button"
-          [disabled]="isSaving() || isSpinning()"
-          (click)="pendingDelete.set(true)"
-        >
-          Delete wheel
-        </button>
-      }
-    </section>
+        }
+      </section>
     }
   } @else {
     <div class="wheel-page__state">
@@ -490,11 +471,7 @@
         >
           Start watching
         </button>
-        <button
-          class="wheel-winner__share"
-          type="button"
-          (click)="winnerShareOpen.set(true)"
-        >
+        <button class="wheel-winner__share" type="button" (click)="openWinnerShare()">
           Create winner card
         </button>
       </div>
@@ -507,6 +484,9 @@
       role="dialog"
       aria-modal="true"
       aria-label="Create wheel winner card"
+      cdkTrapFocus
+      [cdkTrapFocusAutoCapture]="true"
+      (keydown.escape)="closeWinnerShare()"
     >
       <div class="wheel-share-overlay__content">
         <button

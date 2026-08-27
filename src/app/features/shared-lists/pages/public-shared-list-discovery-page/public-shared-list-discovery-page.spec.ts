@@ -53,6 +53,8 @@ describe('PublicSharedListDiscoveryPage', () => {
     fixture.detectChanges();
   });
 
+  afterEach(() => fixture.destroy());
+
   it('renders public list cards with owner and preview media', () => {
     const page = fixture.nativeElement as HTMLElement;
     expect(discover).toHaveBeenCalledWith(1);
@@ -64,5 +66,10 @@ describe('PublicSharedListDiscoveryPage', () => {
     expect(page.querySelector('.poster-stack img')?.getAttribute('src')).toBe(
       'https://image.tmdb.org/goblin.jpg',
     );
+    expect(
+      document.head.querySelector<HTMLScriptElement>(
+        'script[data-drama-watch-structured-data="true"]',
+      )?.textContent,
+    ).toContain('/lists/public/weekend-dramas');
   });
 });

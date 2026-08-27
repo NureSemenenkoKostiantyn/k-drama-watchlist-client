@@ -1,0 +1,49 @@
+<div
+  class="keyboard-reorder"
+  role="group"
+  [attr.aria-label]="'Reorder ' + itemLabel()"
+  (pointerdown)="$event.stopPropagation()"
+>
+  @if (showGroupMoves()) {
+    <button
+      type="button"
+      title="Move to previous {{ groupLabel() }}"
+      [attr.aria-label]="'Move ' + itemLabel() + ' to previous ' + groupLabel()"
+      [disabled]="disabled() || !canMoveToPreviousGroup()"
+      (click)="requestMove('previous-group', $event)"
+    >
+      <span aria-hidden="true">←</span>
+    </button>
+  }
+  @if (showPositionMoves()) {
+    <button
+      type="button"
+      title="Move earlier"
+      [attr.aria-label]="'Move ' + itemLabel() + ' earlier'"
+      [disabled]="disabled() || !canMoveBefore()"
+      (click)="requestMove('before', $event)"
+    >
+      <span aria-hidden="true">{{ orientation() === 'horizontal' ? '←' : '↑' }}</span>
+    </button>
+    <button
+      type="button"
+      title="Move later"
+      [attr.aria-label]="'Move ' + itemLabel() + ' later'"
+      [disabled]="disabled() || !canMoveAfter()"
+      (click)="requestMove('after', $event)"
+    >
+      <span aria-hidden="true">{{ orientation() === 'horizontal' ? '→' : '↓' }}</span>
+    </button>
+  }
+  @if (showGroupMoves()) {
+    <button
+      type="button"
+      title="Move to next {{ groupLabel() }}"
+      [attr.aria-label]="'Move ' + itemLabel() + ' to next ' + groupLabel()"
+      [disabled]="disabled() || !canMoveToNextGroup()"
+      (click)="requestMove('next-group', $event)"
+    >
+      <span aria-hidden="true">→</span>
+    </button>
+  }
+</div>

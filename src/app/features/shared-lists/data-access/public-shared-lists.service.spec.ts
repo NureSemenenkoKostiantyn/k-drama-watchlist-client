@@ -27,6 +27,10 @@ describe('PublicSharedListsService', () => {
     });
 
     await expect(promise).resolves.toMatchObject({ page: 2, totalResults: 9 });
+
+    const cached = service.discover(2, 8);
+    http.expectNone('/api/public/lists?page=2&limit=8');
+    await expect(cached).resolves.toMatchObject({ page: 2, totalResults: 9 });
     http.verify();
   });
 

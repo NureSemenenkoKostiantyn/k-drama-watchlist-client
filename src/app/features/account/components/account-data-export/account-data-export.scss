@@ -1,0 +1,67 @@
+:host {
+  display: block;
+  width: min(100%, 42rem);
+}
+
+.data-export {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1.25rem, 5vw, 2rem);
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 1.5rem;
+  background: var(--color-surface);
+}
+
+.data-export p,
+.data-export h2,
+.data-export span {
+  margin: 0;
+}
+
+.data-export > div > p {
+  color: var(--color-accent-strong);
+  font-size: 0.6875rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.data-export h2 {
+  margin-top: 0.35rem;
+  font-size: 1.75rem;
+  letter-spacing: -0.04em;
+}
+
+.data-export span {
+  display: block;
+  margin-top: 0.4rem;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.data-export button {
+  min-height: 2.75rem;
+  justify-self: start;
+  padding: 0 1rem;
+  border: 0;
+  border-radius: 999rem;
+  color: #100d18;
+  background: var(--color-accent);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.data-export button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.data-export__status {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.data-export__status--error {
+  color: #ffd1dd;
+}
