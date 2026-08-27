@@ -75,6 +75,23 @@ describe('App', () => {
     expect(compiled.querySelector('.app-shell__brand')?.textContent).toContain('Drama Watch');
   });
 
+  it('provides a skip target and a polite route announcement', async () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    expect(compiled.querySelector('.skip-link')?.getAttribute('href')).toBe(
+      '#main-content',
+    );
+    expect(compiled.querySelector('#main-content')?.getAttribute('tabindex')).toBe(
+      '-1',
+    );
+    expect(
+      compiled.querySelector('[aria-live="polite"]')?.getAttribute('aria-atomic'),
+    ).toBe('true');
+  });
+
   it('renders the five Phase 1 mobile destinations for an authenticated user', async () => {
     authenticated.set(true);
     session.set({

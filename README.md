@@ -263,6 +263,12 @@ API routes from crawling. Public discovery, shared-list, and wheel pages publish
 `CollectionPage`/`ItemList` JSON-LD through the shared metadata service. Only `public` resources are
 included in the sitemap; unlisted resources retain direct-link access without search indexing.
 
+The application shell includes a keyboard-visible skip link and moves focus to the new page heading
+after route navigation while announcing the page change to assistive technology. Modal share-card
+creation traps focus, closes with Escape, and restores focus to its trigger. Global styles preserve
+clear focus indicators, honour reduced-motion preferences, and use the operating system highlight
+colour for focus in forced-colours mode.
+
 Anonymous users are redirected to `/login`. New accounts first continue to `/verify-email`; the
 verification link returns them to `/onboarding` to choose a unique username. Login can resend a
 verification message for an unverified account. `/forgot-password` always displays a neutral result

@@ -4,7 +4,9 @@ import {
   computed,
   effect,
   inject,
+  signal,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import {
   Router,
   RouterLink,
@@ -39,6 +41,8 @@ export class App {
       ? 'Notifications'
       : `Notifications, ${count} unread`;
   });
+  protected readonly routeAnnouncement = signal('');
+  private readonly document = inject(DOCUMENT);
   private readonly router = inject(Router);
 
   constructor() {
@@ -49,6 +53,34 @@ export class App {
         this.notifications.clear();
         this.settings.clear();
       }
+    });
+  }
+
+  protected handleRouteActivation(): void {
+    queueMicrotask(() => {
+      const main = this.document.getElementById('main-content');
+      const heading = main?.querySelector<HTMLElement>('h1');
+      const focusTarget = heading ?? main;
+
+      if (!focusTarget) {
+        return;
+      }
+
+      const hadTabIndex = focusTarget.hasAttribute('tabindex');
+      if (!hadTabIndex) {
+        focusTarget.setAttribute('tabindex', '-1');
+        focusTarget.addEventListener(
+          'blur',
+          () => focusTarget.removeAttribute('tabindex'),
+          { once: true },
+        );
+      }
+
+      focusTarget.focus();
+      const pageName = heading?.textContent?.trim();
+      this.routeAnnouncement.set(
+        pageName ? `${pageName} page loaded` : 'Page loaded',
+      );
     });
   }
 

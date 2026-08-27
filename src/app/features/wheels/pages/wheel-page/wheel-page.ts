@@ -4,6 +4,7 @@ import {
   CdkDropList,
   moveItemInArray,
 } from '@angular/cdk/drag-drop';
+import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { DatePipe, DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -51,6 +52,7 @@ const fullRotations = 6;
   imports: [
     CdkDrag,
     CdkDropList,
+    CdkTrapFocus,
     DatePipe,
     ReactiveFormsModule,
     RouterLink,
@@ -75,6 +77,7 @@ export class WheelPage implements OnInit, OnDestroy {
   private readonly authentication = inject(AuthenticationService);
   private readonly friendsService = inject(FriendsService);
   private spinTimer: ReturnType<typeof setTimeout> | undefined;
+  private winnerShareTrigger: HTMLElement | null = null;
   private readonly wheelId = this.route.snapshot.paramMap.get('wheelId') ?? '';
   protected readonly library = inject(LibraryService);
   protected readonly wheels = inject(WheelsService);
@@ -384,6 +387,16 @@ export class WheelPage implements OnInit, OnDestroy {
 
   protected closeWinnerShare(): void {
     this.winnerShareOpen.set(false);
+    queueMicrotask(() => this.winnerShareTrigger?.focus());
+  }
+
+  protected openWinnerShare(): void {
+    const activeElement = this.document.activeElement;
+    this.winnerShareTrigger =
+      activeElement && 'focus' in activeElement
+        ? (activeElement as HTMLElement)
+        : null;
+    this.winnerShareOpen.set(true);
   }
 
   protected async startWinner(): Promise<void> {

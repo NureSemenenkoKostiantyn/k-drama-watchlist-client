@@ -493,7 +493,7 @@
         <button
           class="wheel-winner__share"
           type="button"
-          (click)="winnerShareOpen.set(true)"
+          (click)="openWinnerShare()"
         >
           Create winner card
         </button>
@@ -507,6 +507,9 @@
       role="dialog"
       aria-modal="true"
       aria-label="Create wheel winner card"
+      cdkTrapFocus
+      [cdkTrapFocusAutoCapture]="true"
+      (keydown.escape)="closeWinnerShare()"
     >
       <div class="wheel-share-overlay__content">
         <button

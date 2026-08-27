@@ -82,8 +82,12 @@
   </div>
 </header>
 
-<main id="main-content" class="app-shell__content">
-  <router-outlet />
+<p class="visually-hidden" aria-live="polite" aria-atomic="true">
+  {{ routeAnnouncement() }}
+</p>
+
+<main id="main-content" class="app-shell__content" tabindex="-1">
+  <router-outlet (activate)="handleRouteActivation()" />
 </main>
 
 @if (authentication.isAuthenticated()) {
