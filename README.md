@@ -103,6 +103,12 @@ Public library visibility from the reusable privacy settings panel on `/profile`
 receives only the server's public-safe library projection. The same panel independently controls
 private-by-default activity visibility.
 
+The owner's profile also provides a local JSON data export. The versioned archive includes the
+account profile, privacy settings, categories, priority lanes, and full personal library. Private
+notes and playback preferences are included, while authentication secrets and other users' email
+addresses are never returned. The browser downloads the response directly without uploading or
+persisting another copy.
+
 The protected `/activity` route shows a newest-first, paginated feed of accepted friends' visible
 library additions, lifecycle changes, and ratings. Each entry links to the actor's public profile
 and normalized media details. The feed never receives private notes, episode progress, categories,

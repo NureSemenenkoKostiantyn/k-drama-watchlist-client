@@ -12,6 +12,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { readApiErrorMessage } from '../../../../core/api/api-error';
 import { AuthenticationService } from '../../../../core/auth/authentication.service';
+import { AccountDataExportComponent } from '../../../account/components/account-data-export/account-data-export';
 import { LibraryVisibilitySettingsComponent } from '../../../settings/components/library-visibility-settings/library-visibility-settings';
 import { UsersService } from '../../data-access/users.service';
 import { PublicUserProfile } from '../../models/public-user-profile';
@@ -21,6 +22,7 @@ import { PublicUserProfile } from '../../models/public-user-profile';
   imports: [
     DatePipe,
     RouterLink,
+    AccountDataExportComponent,
     LibraryVisibilitySettingsComponent,
   ],
   templateUrl: './public-profile-page.html',

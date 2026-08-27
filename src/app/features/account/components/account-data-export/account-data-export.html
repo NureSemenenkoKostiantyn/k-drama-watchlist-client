@@ -1,0 +1,28 @@
+<section class="data-export" aria-labelledby="data-export-title">
+  <div>
+    <p>Your information</p>
+    <h2 id="data-export-title">Download your data</h2>
+    <span>
+      Export your profile, privacy settings, categories, priority lanes, and complete personal
+      library as a JSON file. Private notes and preferences are included, so store it securely.
+    </span>
+  </div>
+
+  <button
+    type="button"
+    [disabled]="accountExport.isExporting()"
+    (click)="download()"
+  >
+    {{ accountExport.isExporting() ? 'Preparing export…' : 'Download JSON export' }}
+  </button>
+
+  @if (accountExport.error()) {
+    <p class="data-export__status data-export__status--error" role="alert">
+      {{ accountExport.error() }}
+    </p>
+  } @else if (accountExport.notice()) {
+    <p class="data-export__status" role="status">
+      {{ accountExport.notice() }}
+    </p>
+  }
+</section>
