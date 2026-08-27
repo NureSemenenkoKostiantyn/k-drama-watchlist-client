@@ -257,6 +257,11 @@ Public and unlisted shared-list and wheel copy actions use same-origin server sh
 metadata, while browsers are redirected to the canonical Angular public page. Those Angular pages
 also maintain matching title, description, image, canonical, and robots metadata during client-side
 navigation. Public resources are indexable and unlisted resources remain `noindex`.
+Firebase Hosting also publishes `robots.txt`, which advertises the backend-generated public sitemap
+at `/api/public/seo/sitemap.xml` and blocks authenticated, invitation, authentication, and general
+API routes from crawling. Public discovery, shared-list, and wheel pages publish schema.org
+`CollectionPage`/`ItemList` JSON-LD through the shared metadata service. Only `public` resources are
+included in the sitemap; unlisted resources retain direct-link access without search indexing.
 
 Anonymous users are redirected to `/login`. New accounts first continue to `/verify-email`; the
 verification link returns them to `/onboarding` to choose a unique username. Login can resend a

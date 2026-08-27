@@ -9,6 +9,7 @@ export interface OpenGraphPageMetadata {
   imageUrl?: string;
   imageAlt?: string;
   allowIndexing: boolean;
+  structuredData?: Record<string, unknown>;
 }
 
 const managedMetaSelectors = [
@@ -26,6 +27,8 @@ const managedMetaSelectors = [
   "name='twitter:description'",
   "name='twitter:image'",
 ] as const;
+const structuredDataSelector =
+  'script[data-drama-watch-structured-data="true"]';
 
 @Injectable({ providedIn: 'root' })
 export class OpenGraphMetadataService {
@@ -71,6 +74,7 @@ export class OpenGraphMetadataService {
     }
 
     this.setCanonicalLink(metadata.canonicalUrl);
+    this.setStructuredData(metadata.structuredData);
   }
 
   clear(): void {
@@ -78,6 +82,7 @@ export class OpenGraphMetadataService {
       this.meta.removeTag(selector);
     }
     this.document.head.querySelector('link[data-drama-watch-canonical="true"]')?.remove();
+    this.document.head.querySelector(structuredDataSelector)?.remove();
   }
 
   private setCanonicalLink(url: string): void {
@@ -91,6 +96,22 @@ export class OpenGraphMetadataService {
       this.document.head.append(link);
     }
     link.href = url;
+  }
+
+  private setStructuredData(data: Record<string, unknown> | undefined): void {
+    const existing = this.document.head.querySelector<HTMLScriptElement>(
+      structuredDataSelector,
+    );
+    if (!data) {
+      existing?.remove();
+      return;
+    }
+
+    const script = existing ?? this.document.createElement('script');
+    script.type = 'application/ld+json';
+    script.dataset['dramaWatchStructuredData'] = 'true';
+    script.textContent = JSON.stringify(data).replace(/</g, '\\u003c');
+    if (!existing) this.document.head.append(script);
   }
 }
 

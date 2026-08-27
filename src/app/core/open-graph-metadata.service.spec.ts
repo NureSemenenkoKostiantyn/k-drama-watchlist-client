@@ -26,6 +26,11 @@ describe('OpenGraphMetadataService', () => {
       imageUrl: 'https://image.tmdb.org/backdrop.jpg',
       imageAlt: 'Weekend dramas preview',
       allowIndexing: true,
+      structuredData: {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: 'Weekend </script> dramas',
+      },
     });
 
     expect(TestBed.inject(Title).getTitle()).toBe('Weekend dramas · Drama Watch');
@@ -35,6 +40,12 @@ describe('OpenGraphMetadataService', () => {
     expect(
       document.head.querySelector<HTMLLinkElement>('link[data-drama-watch-canonical="true"]')?.href,
     ).toBe('https://dahyun.best/lists/public/weekend');
+    const structuredData = document.head.querySelector<HTMLScriptElement>(
+      'script[data-drama-watch-structured-data="true"]',
+    );
+    expect(structuredData?.type).toBe('application/ld+json');
+    expect(structuredData?.textContent).toContain('"@type":"CollectionPage"');
+    expect(structuredData?.textContent).toContain('Weekend \\u003c/script> dramas');
   });
 
   it('marks unlisted pages noindex and removes stale image metadata', () => {

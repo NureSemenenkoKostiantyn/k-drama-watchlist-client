@@ -10,6 +10,7 @@ import {
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { OpenGraphMetadataService } from '../../../../core/open-graph-metadata.service';
+import { buildCollectionStructuredData } from '../../../../core/seo-structured-data';
 import { PublicSharedListsService } from '../../data-access/public-shared-lists.service';
 import { PublicSharedListDetails } from '../../models/shared-list';
 
@@ -50,14 +51,23 @@ export class PublicSharedListPage implements OnInit, OnDestroy {
       this.list.set(list);
       const title = `${list.title} · Drama Watch`;
       const imageUrl = preferredMediaImage(list.items.map((item) => item.media));
+      const description =
+        list.description ??
+        `Explore ${list.itemCount} ${list.itemCount === 1 ? 'title' : 'titles'} in ${list.title}, a shared Drama Watch list.`;
+      const canonicalUrl = `${this.document.location.origin}/lists/public/${encodeURIComponent(publicSlug)}`;
       this.openGraph.set({
         title,
-        description:
-          list.description ??
-          `Explore ${list.itemCount} ${list.itemCount === 1 ? 'title' : 'titles'} in ${list.title}, a shared Drama Watch list.`,
-        canonicalUrl: `${this.document.location.origin}/lists/public/${encodeURIComponent(publicSlug)}`,
+        description,
+        canonicalUrl,
         ...(imageUrl ? { imageUrl, imageAlt: `Preview of ${list.title}` } : {}),
         allowIndexing: list.visibility === 'public',
+        structuredData: buildCollectionStructuredData({
+          name: list.title,
+          description,
+          canonicalUrl,
+          itemCount: list.itemCount,
+          items: list.items.map((item) => item.media),
+        }),
       });
     } catch (error: unknown) {
       this.error.set(
