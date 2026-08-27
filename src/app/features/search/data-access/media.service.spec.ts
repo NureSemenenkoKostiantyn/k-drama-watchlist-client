@@ -1,6 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { firstValueFrom } from 'rxjs';
 
 import { MediaService } from './media.service';
 
@@ -49,8 +50,8 @@ describe('MediaService', () => {
     });
   });
 
-  it('loads media details through the backend', () => {
-    service.getDetails('movie', 496243).subscribe();
+  it('loads and caches shared media details through the backend', async () => {
+    const first = firstValueFrom(service.getDetails('movie', 496243));
 
     const request = http.expectOne('/api/media/movie/496243');
     expect(request.request.method).toBe('GET');
@@ -63,5 +64,11 @@ describe('MediaService', () => {
       originCountry: ['KR'],
       genreIds: [35],
     });
+    await expect(first).resolves.toMatchObject({ title: 'Parasite' });
+
+    const cached = firstValueFrom(service.getDetails('movie', 496243));
+
+    http.expectNone('/api/media/movie/496243');
+    await expect(cached).resolves.toMatchObject({ title: 'Parasite' });
   });
 });

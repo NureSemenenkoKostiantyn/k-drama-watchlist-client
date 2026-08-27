@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { readApiErrorMessage } from '../../../core/api/api-error';
+import { TimedRequestCache } from '../../../core/cache/timed-request-cache';
 import { environment } from '../../../../environments/environment';
 import {
   PublicSharedListDetails,
@@ -12,13 +13,19 @@ import {
 @Injectable({ providedIn: 'root' })
 export class PublicSharedListsService {
   private readonly http = inject(HttpClient);
+  private readonly discoveryCache = new TimedRequestCache<PublicSharedListDiscovery>(
+    60_000,
+    10,
+  );
 
   async discover(page = 1, limit = 12): Promise<PublicSharedListDiscovery> {
     try {
-      return await firstValueFrom(
-        this.http.get<PublicSharedListDiscovery>(
-          `${environment.apiBaseUrl}/public/lists`,
-          { params: { page, limit } },
+      return await this.discoveryCache.get(`${page}:${limit}`, () =>
+        firstValueFrom(
+          this.http.get<PublicSharedListDiscovery>(
+            `${environment.apiBaseUrl}/public/lists`,
+            { params: { page, limit } },
+          ),
         ),
       );
     } catch (error: unknown) {
