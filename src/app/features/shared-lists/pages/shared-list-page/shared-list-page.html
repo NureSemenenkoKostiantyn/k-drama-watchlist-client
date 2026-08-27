@@ -1,50 +1,162 @@
 <section class="list-page" aria-labelledby="list-title">
   <a class="back" routerLink="/lists">← All shared lists</a>
-  @if (sharedLists.error()) { <p class="state state--error" role="alert">{{ sharedLists.error() }}</p> }
+  @if (sharedLists.error()) {
+    <p class="state state--error" role="alert">{{ sharedLists.error() }}</p>
+  }
   @if (sharedLists.isLoading() && !list()) {
     <div class="state" role="status">Loading shared list…</div>
   } @else if (list(); as currentList) {
     <header class="hero">
       <div>
-        <p>{{ currentList.role === 'owner' ? 'Your ' + currentList.visibility + ' list' : 'Shared list · ' + currentList.role }}</p>
+        <p>
+          {{
+            currentList.role === 'owner'
+              ? 'Your ' + currentList.visibility + ' list'
+              : 'Shared list · ' + currentList.role
+          }}
+        </p>
         <h1 id="list-title">{{ currentList.title }}</h1>
-        @if (currentList.description) { <span>{{ currentList.description }}</span> }
+        @if (currentList.description) {
+          <span>{{ currentList.description }}</span>
+        }
       </div>
-      <strong>{{ currentList.itemCount }} {{ currentList.itemCount === 1 ? 'title' : 'titles' }}</strong>
+      <strong
+        >{{ currentList.itemCount }} {{ currentList.itemCount === 1 ? 'title' : 'titles' }}</strong
+      >
     </header>
 
     <div class="workspace">
       <main>
-        <div class="section-heading"><div><p>Group queue</p><h2>Titles</h2></div><span>Drag to reorder</span></div>
-        <div class="items" cdkDropList [cdkDropListData]="currentList.items" [cdkDropListDisabled]="!canEdit()" (cdkDropListDropped)="drop($event)">
+        <div class="section-heading">
+          <div>
+            <p>Group queue</p>
+            <h2>Titles</h2>
+          </div>
+          <span>Drag or use arrow controls to reorder</span>
+        </div>
+        <p class="visually-hidden" aria-live="polite" aria-atomic="true">
+          {{ reorderAnnouncement() }}
+        </p>
+        <div
+          class="items"
+          cdkDropList
+          [cdkDropListData]="currentList.items"
+          [cdkDropListDisabled]="!canEdit() || isSaving()"
+          (cdkDropListDropped)="drop($event)"
+        >
           @for (item of currentList.items; track item.id) {
-            <article class="media-item" cdkDrag [cdkDragDisabled]="!canEdit()">
+            <article class="media-item" cdkDrag [cdkDragDisabled]="!canEdit() || isSaving()">
               <div class="poster">
-                @if (item.media.posterUrl) { <img [src]="item.media.posterUrl" [alt]="item.media.title + ' poster'" /> }
-                @else { <span>No poster</span> }
+                @if (item.media.posterUrl) {
+                  <img [src]="item.media.posterUrl" [alt]="item.media.title + ' poster'" />
+                } @else {
+                  <span>No poster</span>
+                }
               </div>
               <div class="media-item__body">
                 <div class="media-item__title">
                   <span>{{ item.position + 1 }}</span>
-                  <div><a [routerLink]="['/media', item.media.mediaType, item.media.tmdbId]">{{ item.media.title }}</a><small>Added by {{ item.addedBy?.displayUsername ?? item.addedBy?.username ?? 'a member' }}</small></div>
+                  <div>
+                    <a [routerLink]="['/media', item.media.mediaType, item.media.tmdbId]">{{
+                      item.media.title
+                    }}</a
+                    ><small
+                      >Added by
+                      {{
+                        item.addedBy?.displayUsername ?? item.addedBy?.username ?? 'a member'
+                      }}</small
+                    >
+                  </div>
+                  @if (canEdit()) {
+                    <app-keyboard-reorder-controls
+                      [itemLabel]="item.media.title"
+                      [disabled]="isSaving()"
+                      [canMoveBefore]="$index > 0"
+                      [canMoveAfter]="$index < currentList.items.length - 1"
+                      (moveRequested)="moveItemWithKeyboard(item, $event)"
+                    />
+                  }
                 </div>
-                <label><span>Group status</span><select [value]="item.groupStatus ?? 'planned'" [disabled]="!canEdit()" (change)="updateStatus(item, $event)"><option value="planned">Planned</option><option value="watching">Watching</option><option value="finished">Finished</option></select></label>
-                <div class="progress"><label><span>Season</span><input #season type="number" min="0" [value]="item.groupProgress?.currentSeason ?? 0" [disabled]="!canEdit()" /></label><label><span>Episode</span><input #episode type="number" min="0" [value]="item.groupProgress?.currentEpisode ?? 0" [disabled]="!canEdit()" /></label>@if (canEdit()) { <button type="button" (click)="updateProgress(item, season.value, episode.value)">Save progress</button> }</div>
-                <label class="note"><span>Shared note</span><textarea rows="2" maxlength="2000" [value]="item.note ?? ''" [readOnly]="!canEdit()" (change)="updateNote(item, $event)" placeholder="Add context for the group"></textarea></label>
-                @if (canEdit()) { <button class="remove" type="button" (click)="removeItem(item.id)">Remove title</button> }
-                <app-shared-list-comments [listId]="currentList.id" [itemId]="item.id" [role]="currentList.role" />
+                <label
+                  ><span>Group status</span
+                  ><select
+                    [value]="item.groupStatus ?? 'planned'"
+                    [disabled]="!canEdit()"
+                    (change)="updateStatus(item, $event)"
+                  >
+                    <option value="planned">Planned</option>
+                    <option value="watching">Watching</option>
+                    <option value="finished">Finished</option>
+                  </select></label
+                >
+                <div class="progress">
+                  <label
+                    ><span>Season</span
+                    ><input
+                      #season
+                      type="number"
+                      min="0"
+                      [value]="item.groupProgress?.currentSeason ?? 0"
+                      [disabled]="!canEdit()" /></label
+                  ><label
+                    ><span>Episode</span
+                    ><input
+                      #episode
+                      type="number"
+                      min="0"
+                      [value]="item.groupProgress?.currentEpisode ?? 0"
+                      [disabled]="!canEdit()"
+                  /></label>
+                  @if (canEdit()) {
+                    <button
+                      type="button"
+                      (click)="updateProgress(item, season.value, episode.value)"
+                    >
+                      Save progress
+                    </button>
+                  }
+                </div>
+                <label class="note"
+                  ><span>Shared note</span
+                  ><textarea
+                    rows="2"
+                    maxlength="2000"
+                    [value]="item.note ?? ''"
+                    [readOnly]="!canEdit()"
+                    (change)="updateNote(item, $event)"
+                    placeholder="Add context for the group"
+                  ></textarea>
+                </label>
+                @if (canEdit()) {
+                  <button class="remove" type="button" (click)="removeItem(item.id)">
+                    Remove title
+                  </button>
+                }
+                <app-shared-list-comments
+                  [listId]="currentList.id"
+                  [itemId]="item.id"
+                  [role]="currentList.role"
+                />
               </div>
             </article>
-          } @empty { <div class="state">Editors can add titles from their personal library.</div> }
+          } @empty {
+            <div class="state">Editors can add titles from their personal library.</div>
+          }
         </div>
       </main>
 
       <aside>
         @if (isOwner()) {
           <form class="panel" [formGroup]="settingsForm" (ngSubmit)="saveSettings()">
-            <div><p>Owner controls</p><h2>List details</h2></div>
+            <div>
+              <p>Owner controls</p>
+              <h2>List details</h2>
+            </div>
             <label><span>Name</span><input formControlName="title" maxlength="100" /></label>
-            <label><span>Description</span><textarea formControlName="description" maxlength="2000" rows="3"></textarea></label>
+            <label
+              ><span>Description</span
+              ><textarea formControlName="description" maxlength="2000" rows="3"></textarea>
+            </label>
             <label>
               <span>Link visibility</span>
               <select formControlName="visibility">
@@ -53,24 +165,83 @@
                 <option value="public">Public · anyone with the link</option>
               </select>
             </label>
-            <small class="visibility-help">Public discovery is planned later. For now, public and unlisted links have the same read-only access.</small>
+            <small class="visibility-help"
+              >Public discovery is planned later. For now, public and unlisted links have the same
+              read-only access.</small
+            >
             <button type="submit" [disabled]="isSaving()">Save details</button>
             @if (publicUrl(); as url) {
               <div class="public-link">
                 <strong>Read-only sharing link</strong>
                 <input readonly [value]="url" aria-label="Public shared-list link" />
-                <button type="button" (click)="copyPublicLink()">{{ publicLinkCopied() ? 'Copied' : 'Copy link' }}</button>
+                <button type="button" (click)="copyPublicLink()">
+                  {{ publicLinkCopied() ? 'Copied' : 'Copy link' }}
+                </button>
                 <a [href]="url" target="_blank" rel="noopener">Open public view</a>
               </div>
             }
           </form>
-          <form class="panel" [formGroup]="inviteForm" (ngSubmit)="createInvite()"><div><p>Secure access</p><h2>Invite a person</h2></div><label><span>Exact username</span><input formControlName="username" maxlength="30" autocomplete="off" placeholder="username" /></label><label><span>Role</span><select formControlName="role"><option value="editor">Editor · manage titles</option><option value="commenter">Commenter · join discussions</option><option value="viewer">Viewer · read only</option></select></label><button type="submit" [disabled]="inviteForm.invalid">Send invitation</button>@if (invite(); as link) { <div class="invite"><strong>Invitation sent to {{ link.target }}</strong><input readonly [value]="link.url" aria-label="Invitation link" /><button type="button" (click)="copyInvite()">{{ copied() ? 'Copied' : 'Copy link' }}</button><small>Only {{ link.target }} can accept · expires {{ link.expiresAt | date: 'medium' }}</small></div> }</form>
+          <form class="panel" [formGroup]="inviteForm" (ngSubmit)="createInvite()">
+            <div>
+              <p>Secure access</p>
+              <h2>Invite a person</h2>
+            </div>
+            <label
+              ><span>Exact username</span
+              ><input
+                formControlName="username"
+                maxlength="30"
+                autocomplete="off"
+                placeholder="username" /></label
+            ><label
+              ><span>Role</span
+              ><select formControlName="role">
+                <option value="editor">Editor · manage titles</option>
+                <option value="commenter">Commenter · join discussions</option>
+                <option value="viewer">Viewer · read only</option>
+              </select></label
+            ><button type="submit" [disabled]="inviteForm.invalid">Send invitation</button>
+            @if (invite(); as link) {
+              <div class="invite">
+                <strong>Invitation sent to {{ link.target }}</strong
+                ><input readonly [value]="link.url" aria-label="Invitation link" /><button
+                  type="button"
+                  (click)="copyInvite()"
+                >
+                  {{ copied() ? 'Copied' : 'Copy link' }}</button
+                ><small
+                  >Only {{ link.target }} can accept · expires
+                  {{ link.expiresAt | date: 'medium' }}</small
+                >
+              </div>
+            }
+          </form>
         }
         @if (canEdit()) {
-          <form class="panel" [formGroup]="addForm" (ngSubmit)="addItem()"><div><p>From your library</p><h2>Add a title</h2></div><label><span>Title</span><select formControlName="mediaId"><option value="">Choose a title</option>@for (entry of availableEntries(); track entry.id) { <option [value]="entry.mediaId">{{ entry.media.title }}</option> }</select></label><button type="submit" [disabled]="isSaving() || addForm.invalid">Add title</button>@if (!library.entries().length) { <a routerLink="/search">Add something to your library first</a> }</form>
+          <form class="panel" [formGroup]="addForm" (ngSubmit)="addItem()">
+            <div>
+              <p>From your library</p>
+              <h2>Add a title</h2>
+            </div>
+            <label
+              ><span>Title</span
+              ><select formControlName="mediaId">
+                <option value="">Choose a title</option>
+                @for (entry of availableEntries(); track entry.id) {
+                  <option [value]="entry.mediaId">{{ entry.media.title }}</option>
+                }
+              </select></label
+            ><button type="submit" [disabled]="isSaving() || addForm.invalid">Add title</button>
+            @if (!library.entries().length) {
+              <a routerLink="/search">Add something to your library first</a>
+            }
+          </form>
         }
         <section class="panel members">
-          <div><p>Access</p><h2>Members</h2></div>
+          <div>
+            <p>Access</p>
+            <h2>Members</h2>
+          </div>
           <ul>
             @for (member of currentList.members; track member.user.id) {
               <li>
@@ -92,7 +263,9 @@
                       [disabled]="activeMemberId() !== null"
                       (click)="removeMember(member)"
                     >
-                      {{ pendingMemberRemovalId() === member.user.id ? 'Confirm removal' : 'Remove' }}
+                      {{
+                        pendingMemberRemovalId() === member.user.id ? 'Confirm removal' : 'Remove'
+                      }}
                     </button>
                     @if (pendingMemberRemovalId() === member.user.id) {
                       <button
@@ -112,8 +285,25 @@
             }
           </ul>
         </section>
-        @if (isOwner()) { <section class="danger"><h2>Delete list</h2><p>This removes the list, its titles, and unused invitations.</p><button type="button" (click)="deleteList()">{{ pendingDelete() ? 'Confirm permanent deletion' : 'Delete list' }}</button>@if (pendingDelete()) { <button class="cancel" type="button" (click)="pendingDelete.set(false)">Cancel</button> }</section> }
+        @if (isOwner()) {
+          <section class="danger">
+            <h2>Delete list</h2>
+            <p>This removes the list, its titles, and unused invitations.</p>
+            <button type="button" (click)="deleteList()">
+              {{ pendingDelete() ? 'Confirm permanent deletion' : 'Delete list' }}
+            </button>
+            @if (pendingDelete()) {
+              <button class="cancel" type="button" (click)="pendingDelete.set(false)">
+                Cancel
+              </button>
+            }
+          </section>
+        }
       </aside>
     </div>
-  } @else { <div class="state">This list could not be found. <a routerLink="/lists">Return to shared lists.</a></div> }
+  } @else {
+    <div class="state">
+      This list could not be found. <a routerLink="/lists">Return to shared lists.</a>
+    </div>
+  }
 </section>

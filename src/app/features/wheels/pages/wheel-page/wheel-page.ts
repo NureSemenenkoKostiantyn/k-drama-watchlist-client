@@ -1,9 +1,4 @@
-import {
-  CdkDrag,
-  CdkDragDrop,
-  CdkDropList,
-  moveItemInArray,
-} from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { DatePipe, DOCUMENT } from '@angular/common';
 import {
@@ -19,6 +14,10 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { AuthenticationService } from '../../../../core/auth/authentication.service';
+import {
+  KeyboardReorderAction,
+  KeyboardReorderControls,
+} from '../../../../shared/components/keyboard-reorder-controls/keyboard-reorder-controls';
 import { FriendsService } from '../../../friends/data-access/friends.service';
 import { Friendship } from '../../../friends/models/friendship';
 import { LibraryService } from '../../../library/data-access/library.service';
@@ -54,6 +53,7 @@ const fullRotations = 6;
     CdkDropList,
     CdkTrapFocus,
     DatePipe,
+    KeyboardReorderControls,
     ReactiveFormsModule,
     RouterLink,
     ShareCardCreator,
@@ -90,11 +90,10 @@ export class WheelPage implements OnInit, OnDestroy {
   protected readonly pendingDelete = signal(false);
   protected readonly pendingHistoryReset = signal(false);
   protected readonly publicLinkCopied = signal(false);
+  protected readonly reorderAnnouncement = signal('');
   protected readonly friends = signal<Friendship[]>([]);
   protected readonly wheel = this.wheels.activeWheel;
-  protected readonly isOwner = computed(
-    () => this.wheel()?.role === 'owner',
-  );
+  protected readonly isOwner = computed(() => this.wheel()?.role === 'owner');
   protected readonly canEdit = computed(() => {
     const role = this.wheel()?.role;
     return role === 'owner' || role === 'editor';
@@ -106,27 +105,17 @@ export class WheelPage implements OnInit, OnDestroy {
       : null;
   });
   protected readonly availableFriends = computed(() => {
-    const memberIds = new Set(
-      this.wheel()?.members.map((member) => member.user.id) ?? [],
-    );
-    return this.friends().filter(
-      (friendship) => !memberIds.has(friendship.user.id),
-    );
+    const memberIds = new Set(this.wheel()?.members.map((member) => member.user.id) ?? []);
+    return this.friends().filter((friendship) => !memberIds.has(friendship.user.id));
   });
-  protected readonly enabledItems = computed(() =>
-    this.wheel()?.items.filter((item) => item.isEnabled) ?? [],
+  protected readonly enabledItems = computed(
+    () => this.wheel()?.items.filter((item) => item.isEnabled) ?? [],
   );
   protected readonly availableEntries = computed(() => {
-    const mediaIds = new Set(
-      this.wheel()?.items.map((item) => item.mediaId) ?? [],
-    );
-    return this.library
-      .entries()
-      .filter((entry) => !mediaIds.has(entry.mediaId));
+    const mediaIds = new Set(this.wheel()?.items.map((item) => item.mediaId) ?? []);
+    return this.library.entries().filter((entry) => !mediaIds.has(entry.mediaId));
   });
-  protected readonly wheelBackground = computed(() =>
-    buildWheelBackground(this.enabledItems()),
-  );
+  protected readonly wheelBackground = computed(() => buildWheelBackground(this.enabledItems()));
   protected readonly winnerShareSource = computed<ShareCardSource | null>(() => {
     const spin = this.winner();
     const wheel = this.wheel();
@@ -135,9 +124,7 @@ export class WheelPage implements OnInit, OnDestroy {
       return null;
     }
 
-    const item = wheel.items.find(
-      (candidate) => candidate.id === spin.selectedItem.wheelItemId,
-    );
+    const item = wheel.items.find((candidate) => candidate.id === spin.selectedItem.wheelItemId);
     const user = this.authentication.session()?.user;
 
     return {
@@ -152,9 +139,7 @@ export class WheelPage implements OnInit, OnDestroy {
   protected readonly settingsForm = this.formBuilder.nonNullable.group({
     title: ['', [Validators.required, Validators.maxLength(100)]],
     description: ['', [Validators.maxLength(1000)]],
-    selectionMode: this.formBuilder.nonNullable.control<WheelSelectionMode>(
-      'fully_random',
-    ),
+    selectionMode: this.formBuilder.nonNullable.control<WheelSelectionMode>('fully_random'),
     visibility: this.formBuilder.nonNullable.control<WheelVisibility>('private'),
   });
   protected readonly addItemForm = this.formBuilder.nonNullable.group({
@@ -163,9 +148,7 @@ export class WheelPage implements OnInit, OnDestroy {
   });
   protected readonly memberForm = this.formBuilder.nonNullable.group({
     username: ['', [Validators.required]],
-    role: this.formBuilder.nonNullable.control<
-      Exclude<WheelRole, 'owner'>
-    >('viewer'),
+    role: this.formBuilder.nonNullable.control<Exclude<WheelRole, 'owner'>>('viewer'),
   });
 
   ngOnInit(): void {
@@ -183,12 +166,7 @@ export class WheelPage implements OnInit, OnDestroy {
   }
 
   protected async saveSettings(): Promise<void> {
-    if (
-      !this.isOwner() ||
-      this.settingsForm.invalid ||
-      this.isSaving() ||
-      this.isSpinning()
-    ) {
+    if (!this.isOwner() || this.settingsForm.invalid || this.isSaving() || this.isSpinning()) {
       this.settingsForm.markAllAsTouched();
       return;
     }
@@ -218,23 +196,14 @@ export class WheelPage implements OnInit, OnDestroy {
   }
 
   protected async addItem(): Promise<void> {
-    if (
-      !this.canEdit() ||
-      this.addItemForm.invalid ||
-      this.isSaving() ||
-      this.isSpinning()
-    ) {
+    if (!this.canEdit() || this.addItemForm.invalid || this.isSaving() || this.isSpinning()) {
       this.addItemForm.markAllAsTouched();
       return;
     }
 
     const value = this.addItemForm.getRawValue();
     this.isSaving.set(true);
-    const item = await this.wheels.addItem(
-      this.wheelId,
-      value.mediaId,
-      value.weight,
-    );
+    const item = await this.wheels.addItem(this.wheelId, value.mediaId, value.weight);
     this.isSaving.set(false);
 
     if (item) {
@@ -317,6 +286,42 @@ export class WheelPage implements OnInit, OnDestroy {
     }
   }
 
+  protected async moveItemWithKeyboard(
+    item: WheelItem,
+    action: KeyboardReorderAction,
+  ): Promise<void> {
+    if (
+      (action !== 'before' && action !== 'after') ||
+      !this.canEdit() ||
+      this.isSaving() ||
+      this.isSpinning()
+    ) {
+      return;
+    }
+
+    const items = [...(this.wheel()?.items ?? [])];
+    const currentIndex = items.findIndex((candidate) => candidate.id === item.id);
+    const targetIndex = currentIndex + (action === 'before' ? -1 : 1);
+
+    if (currentIndex === -1 || targetIndex < 0 || targetIndex >= items.length) {
+      return;
+    }
+
+    moveItemInArray(items, currentIndex, targetIndex);
+    this.isSaving.set(true);
+    const saved = await this.wheels.reorderItems(
+      this.wheelId,
+      items.map((candidate) => candidate.id),
+    );
+    this.isSaving.set(false);
+
+    if (saved) {
+      this.reorderAnnouncement.set(`${item.media.title} moved to position ${targetIndex + 1}.`);
+    } else {
+      await this.wheels.loadWheel(this.wheelId);
+    }
+  }
+
   protected async spin(): Promise<void> {
     if (
       !this.canEdit() ||
@@ -340,9 +345,7 @@ export class WheelPage implements OnInit, OnDestroy {
     }
 
     const items = this.enabledItems();
-    const selectedIndex = items.findIndex(
-      (item) => item.id === spin.selectedItem.wheelItemId,
-    );
+    const selectedIndex = items.findIndex((item) => item.id === spin.selectedItem.wheelItemId);
 
     if (selectedIndex === -1) {
       this.isSpinning.set(false);
@@ -351,13 +354,7 @@ export class WheelPage implements OnInit, OnDestroy {
     }
 
     this.pendingSpin.set(spin);
-    this.wheelRotation.set(
-      nextWheelRotation(
-        this.wheelRotation(),
-        selectedIndex,
-        items.length,
-      ),
-    );
+    this.wheelRotation.set(nextWheelRotation(this.wheelRotation(), selectedIndex, items.length));
 
     if (prefersReducedMotion()) {
       this.finishSpin();
@@ -393,17 +390,14 @@ export class WheelPage implements OnInit, OnDestroy {
   protected openWinnerShare(): void {
     const activeElement = this.document.activeElement;
     this.winnerShareTrigger =
-      activeElement && 'focus' in activeElement
-        ? (activeElement as HTMLElement)
-        : null;
+      activeElement && 'focus' in activeElement ? (activeElement as HTMLElement) : null;
     this.winnerShareOpen.set(true);
   }
 
   protected async startWinner(): Promise<void> {
     const spin = this.winner();
     const item = this.wheel()?.items.find(
-      (candidate) =>
-        candidate.id === spin?.selectedItem.wheelItemId,
+      (candidate) => candidate.id === spin?.selectedItem.wheelItemId,
     );
 
     if (!item || this.isSaving()) {
@@ -411,11 +405,7 @@ export class WheelPage implements OnInit, OnDestroy {
     }
 
     this.isSaving.set(true);
-    const entry = await this.library.setStatus(
-      item.media.mediaType,
-      item.media.tmdbId,
-      'watching',
-    );
+    const entry = await this.library.setStatus(item.media.mediaType, item.media.tmdbId, 'watching');
     this.isSaving.set(false);
 
     if (entry) {
@@ -459,21 +449,13 @@ export class WheelPage implements OnInit, OnDestroy {
   }
 
   protected async addMember(): Promise<void> {
-    if (
-      !this.isOwner() ||
-      this.memberForm.invalid ||
-      this.isSaving() ||
-      this.isSpinning()
-    ) {
+    if (!this.isOwner() || this.memberForm.invalid || this.isSaving() || this.isSpinning()) {
       this.memberForm.markAllAsTouched();
       return;
     }
 
     this.isSaving.set(true);
-    const member = await this.wheels.addMember(
-      this.wheelId,
-      this.memberForm.getRawValue(),
-    );
+    const member = await this.wheels.addMember(this.wheelId, this.memberForm.getRawValue());
     this.isSaving.set(false);
 
     if (member) {
@@ -481,10 +463,7 @@ export class WheelPage implements OnInit, OnDestroy {
     }
   }
 
-  protected async updateMemberRole(
-    member: WheelMember,
-    event: Event,
-  ): Promise<void> {
+  protected async updateMemberRole(member: WheelMember, event: Event): Promise<void> {
     const select = event.target;
 
     if (
@@ -498,11 +477,7 @@ export class WheelPage implements OnInit, OnDestroy {
     }
 
     this.isSaving.set(true);
-    const updated = await this.wheels.updateMember(
-      this.wheelId,
-      member.user.id,
-      select.value,
-    );
+    const updated = await this.wheels.updateMember(this.wheelId, member.user.id, select.value);
     this.isSaving.set(false);
 
     if (!updated) {
@@ -511,12 +486,7 @@ export class WheelPage implements OnInit, OnDestroy {
   }
 
   protected async removeMember(member: WheelMember): Promise<void> {
-    if (
-      !this.isOwner() ||
-      member.role === 'owner' ||
-      this.isSaving() ||
-      this.isSpinning()
-    ) {
+    if (!this.isOwner() || member.role === 'owner' || this.isSaving() || this.isSpinning()) {
       return;
     }
 

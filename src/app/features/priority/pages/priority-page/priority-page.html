@@ -21,6 +21,9 @@
   @if (randomPick()) {
     <p class="priority-page__pick" role="status">{{ randomPick() }}</p>
   }
+  <p class="visually-hidden" aria-live="polite" aria-atomic="true">
+    {{ reorderAnnouncement() }}
+  </p>
   @if (caseOpening(); as opening) {
     <section
       class="case-opening"
@@ -45,11 +48,7 @@
             </svg>
           </button>
         } @else {
-          <button
-            class="case-opening__skip"
-            type="button"
-            (click)="finishCaseOpening()"
-          >
+          <button class="case-opening__skip" type="button" (click)="finishCaseOpening()">
             Skip animation
           </button>
         }
@@ -60,16 +59,12 @@
         <div
           class="case-opening__track"
           [class.case-opening__track--spinning]="opening.phase === 'spinning'"
-          [style.transform]="
-            'translate3d(' + caseOpeningOffset() + 'px, 0, 0)'
-          "
+          [style.transform]="'translate3d(' + caseOpeningOffset() + 'px, 0, 0)'"
         >
           @for (item of opening.items; track item.key) {
             <article
               class="case-opening__card"
-              [class.case-opening__card--winner]="
-                opening.phase === 'complete' && item.isWinner
-              "
+              [class.case-opening__card--winner]="opening.phase === 'complete' && item.isWinner"
             >
               @if (item.entry.media.posterUrl) {
                 <img [src]="item.entry.media.posterUrl" alt="" />
@@ -111,14 +106,19 @@
         (cdkDropListDropped)="dropItem($event)"
       >
         @for (entry of unassigned(); track entry.id) {
-          <article
-            class="priority-item"
-            cdkDrag
-            [cdkDragDisabled]="isCaseOpening()"
-          >
+          <article class="priority-item" cdkDrag [cdkDragDisabled]="isInteractionLocked()">
             <a [routerLink]="['/media', entry.media.mediaType, entry.media.tmdbId]">
               {{ entry.media.title }}
             </a>
+            <app-keyboard-reorder-controls
+              [itemLabel]="entry.media.title"
+              groupLabel="lane"
+              [disabled]="isInteractionLocked()"
+              [showPositionMoves]="false"
+              [showGroupMoves]="true"
+              [canMoveToNextGroup]="laneViews().length > 0"
+              (moveRequested)="moveItemWithKeyboard(entry, 'unassigned-priority-items', $event)"
+            />
           </article>
         } @empty {
           <p class="priority-items__empty">Drag a title here to remove its priority.</p>
@@ -133,12 +133,8 @@
       [cdkDropListData]="laneViews()"
       (cdkDropListDropped)="dropLane($event)"
     >
-      @for (view of laneViews(); track view.lane.id) {
-        <section
-          class="priority-lane"
-          cdkDrag
-          [cdkDragDisabled]="isCaseOpening()"
-        >
+      @for (view of laneViews(); track view.lane.id; let laneIndex = $index) {
+        <section class="priority-lane" cdkDrag [cdkDragDisabled]="isInteractionLocked()">
           <header>
             @if (editingLaneId() === view.lane.id) {
               <form
@@ -175,10 +171,15 @@
                 <h2>{{ view.lane.name }}</h2>
                 <span>{{ view.items.length }} titles</span>
               </div>
-              <div
-                class="priority-lane__actions"
-                (pointerdown)="$event.stopPropagation()"
-              >
+              <div class="priority-lane__actions" (pointerdown)="$event.stopPropagation()">
+                <app-keyboard-reorder-controls
+                  [itemLabel]="view.lane.name + ' lane'"
+                  orientation="horizontal"
+                  [disabled]="isInteractionLocked()"
+                  [canMoveBefore]="laneIndex > 0"
+                  [canMoveAfter]="laneIndex < laneViews().length - 1"
+                  (moveRequested)="moveLaneWithKeyboard(view, $event)"
+                />
                 @if (pendingDeleteLaneId() === view.lane.id) {
                   <div
                     class="priority-lane__delete-confirmation"
@@ -262,11 +263,11 @@
             [cdkDropListConnectedTo]="itemDropListIds()"
             (cdkDropListDropped)="dropItem($event)"
           >
-            @for (entry of view.items; track entry.id) {
+            @for (entry of view.items; track entry.id; let itemIndex = $index) {
               <article
                 class="priority-item"
                 cdkDrag
-                [cdkDragDisabled]="isCaseOpening()"
+                [cdkDragDisabled]="isInteractionLocked()"
                 (pointerdown)="$event.stopPropagation()"
               >
                 @if (entry.media.posterUrl) {
@@ -278,6 +279,17 @@
                   </a>
                   <span>{{ entry.media.mediaType === 'tv' ? 'TV series' : 'Movie' }}</span>
                 </div>
+                <app-keyboard-reorder-controls
+                  [itemLabel]="entry.media.title"
+                  groupLabel="lane"
+                  [disabled]="isInteractionLocked()"
+                  [showGroupMoves]="true"
+                  [canMoveBefore]="itemIndex > 0"
+                  [canMoveAfter]="itemIndex < view.items.length - 1"
+                  [canMoveToPreviousGroup]="true"
+                  [canMoveToNextGroup]="laneIndex < laneViews().length - 1"
+                  (moveRequested)="moveItemWithKeyboard(entry, laneListId(view.lane.id), $event)"
+                />
               </article>
             } @empty {
               <p class="priority-items__empty">Drop to-watch titles here.</p>

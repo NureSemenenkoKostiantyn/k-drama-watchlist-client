@@ -66,9 +66,9 @@
   opacity: 0.58;
 }
 
-.wheel-item__grip {
-  color: var(--color-text-muted);
-  font-size: 1.2rem;
+.wheel-item--read-only {
+  grid-template-columns: 2.8rem minmax(8rem, 1fr) auto;
+  cursor: default;
 }
 
 .wheel-item img,
@@ -195,6 +195,10 @@
   .wheel-item img,
   .wheel-item__poster {
     width: 2.5rem;
+  }
+
+  .wheel-item--read-only {
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
   }
 
   .wheel-item__weight {

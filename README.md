@@ -269,6 +269,11 @@ creation traps focus, closes with Escape, and restores focus to its trigger. Glo
 clear focus indicators, honour reduced-motion preferences, and use the operating system highlight
 colour for focus in forced-colours mode.
 
+Every drag-reorder surface also exposes labelled arrow controls. Keyboard users can reorder priority
+lanes, move priority titles within or between lanes, and reorder wheel or shared-list titles through
+the same persisted operations used by pointer dragging. Successful moves are announced through
+polite live regions, and unavailable boundary moves remain visibly disabled.
+
 Anonymous users are redirected to `/login`. New accounts first continue to `/verify-email`; the
 verification link returns them to `/onboarding` to choose a unique username. Login can resend a
 verification message for an unverified account. `/forgot-password` always displays a neutral result
