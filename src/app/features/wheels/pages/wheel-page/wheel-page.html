@@ -263,7 +263,15 @@
           <p>Candidate controls</p>
           <h2 id="wheel-items-title">Titles</h2>
         </div>
-        <span>{{ canEdit() ? 'Drag or use arrow controls to reorder' : 'View only' }}</span>
+        <span>
+          @if (!canEdit()) {
+            View only
+          } @else if (isMobileWheelLayout()) {
+            Use arrow controls to reorder
+          } @else {
+            Drag or use arrow controls to reorder
+          }
+        </span>
       </header>
       <p class="visually-hidden" aria-live="polite" aria-atomic="true">
         {{ reorderAnnouncement() }}
@@ -272,6 +280,7 @@
       <div
         class="wheel-items__list"
         cdkDropList
+        [cdkDropListDisabled]="isWheelItemDragDisabled()"
         [cdkDropListData]="currentWheel.items"
         (cdkDropListDropped)="dropItem($event)"
       >
@@ -281,11 +290,12 @@
             [class.wheel-item--disabled]="!item.isEnabled"
             [class.wheel-item--read-only]="!canEdit()"
             cdkDrag
-            [cdkDragDisabled]="!canEdit() || isSaving() || isSpinning()"
+            [cdkDragDisabled]="isWheelItemDragDisabled()"
           >
             @if (canEdit()) {
               <app-keyboard-reorder-controls
                 [itemLabel]="item.media.title"
+                [touchFriendly]="isMobileWheelLayout()"
                 [disabled]="isSaving() || isSpinning()"
                 [canMoveBefore]="$index > 0"
                 [canMoveAfter]="$index < currentWheel.items.length - 1"

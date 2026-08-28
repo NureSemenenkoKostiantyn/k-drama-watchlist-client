@@ -1,5 +1,6 @@
 import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { DatePipe, DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -10,8 +11,10 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { map } from 'rxjs';
 
 import { AuthenticationService } from '../../../../core/auth/authentication.service';
 import {
@@ -45,6 +48,7 @@ const wheelColors = [
 ] as const;
 const spinDurationMs = 4_800;
 const fullRotations = 6;
+const mobileWheelBreakpoint = '(max-width: 48rem)';
 
 @Component({
   selector: 'app-wheel-page',
@@ -66,10 +70,12 @@ const fullRotations = 6;
     './wheel-history.scss',
     './wheel-members.scss',
     './wheel-share.scss',
+    './wheel-mobile.scss',
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WheelPage implements OnInit, OnDestroy {
+  private readonly breakpointObserver = inject(BreakpointObserver);
   private readonly formBuilder = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -83,6 +89,12 @@ export class WheelPage implements OnInit, OnDestroy {
   protected readonly wheels = inject(WheelsService);
   protected readonly isSaving = signal(false);
   protected readonly isSpinning = signal(false);
+  protected readonly isMobileWheelLayout = toSignal(
+    this.breakpointObserver
+      .observe(mobileWheelBreakpoint)
+      .pipe(map((breakpointState) => breakpointState.matches)),
+    { initialValue: false },
+  );
   protected readonly wheelRotation = signal(0);
   protected readonly pendingSpin = signal<WheelSpin | null>(null);
   protected readonly winner = signal<WheelSpin | null>(null);
@@ -98,6 +110,14 @@ export class WheelPage implements OnInit, OnDestroy {
     const role = this.wheel()?.role;
     return role === 'owner' || role === 'editor';
   });
+  protected readonly isWheelItemDragDisabled = computed(() =>
+    shouldDisableWheelItemDrag(
+      this.isMobileWheelLayout(),
+      this.canEdit(),
+      this.isSaving(),
+      this.isSpinning(),
+    ),
+  );
   protected readonly publicUrl = computed(() => {
     const publicSlug = this.wheel()?.publicSlug;
     return publicSlug
@@ -544,6 +564,15 @@ export function nextWheelRotation(
   const targetModulo = positiveModulo(-winnerCenter, 360);
   const alignmentDelta = positiveModulo(targetModulo - currentModulo, 360);
   return currentRotation + fullRotations * 360 + alignmentDelta;
+}
+
+export function shouldDisableWheelItemDrag(
+  isMobile: boolean,
+  canEdit: boolean,
+  isSaving: boolean,
+  isSpinning: boolean,
+): boolean {
+  return isMobile || !canEdit || isSaving || isSpinning;
 }
 
 function buildWheelBackground(items: WheelItem[]): string {
