@@ -235,7 +235,6 @@
     grid-auto-flow: column;
     max-height: none;
     overflow-x: auto;
-    overscroll-behavior-inline: contain;
     border-right: 0;
     border-bottom: 0.0625rem solid var(--color-border);
     scroll-snap-type: inline mandatory;
@@ -250,18 +249,12 @@
 
 @media (max-width: 34rem) {
   .suggestions {
-    padding-top: 1.5rem;
     padding-bottom: 7rem;
-  }
-
-  .suggestions__header h1 {
-    font-size: clamp(2.5rem, 15vw, 3.5rem);
   }
 
   .tabs {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    overflow-x: auto;
   }
 
   .tabs button {
@@ -277,11 +270,6 @@
 
   .list {
     grid-auto-columns: minmax(16rem, 88%);
-  }
-
-  .item-copy strong,
-  .item-copy > span:last-child {
-    overflow-wrap: anywhere;
   }
 
   .detail-empty {

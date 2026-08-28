@@ -175,17 +175,11 @@ blockquote span {
     overflow-wrap: anywhere;
   }
 
-  .friend a,
-  blockquote {
-    overflow-wrap: anywhere;
-  }
-
   .actions {
     display: grid;
   }
 
   .actions :is(button, a) {
     width: 100%;
-    min-height: 2.75rem;
   }
 }
