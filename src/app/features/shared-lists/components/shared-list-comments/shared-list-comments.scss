@@ -1,25 +1,189 @@
-:host { display: block; grid-column: 1 / -1; }
-.comments { border-top: .0625rem solid var(--color-border); }
-.comments__toggle { display: flex; justify-content: space-between; width: 100%; padding: .7rem 0 0; border: 0; color: var(--color-text-muted); background: transparent; cursor: pointer; }
-.comments__toggle span { font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-.comments__toggle strong { color: var(--color-accent-strong); font-size: .75rem; }
-.comments__body { display: grid; gap: .8rem; padding-top: .8rem; }
-.thread, .replies { display: grid; gap: .65rem; margin: 0; padding: 0; list-style: none; }
-.replies { margin: .55rem 0 0 1.2rem; padding-left: .8rem; border-left: .125rem solid rgb(255 113 154 / 25%); }
-.comment { display: grid; gap: .45rem; padding: .7rem; border-radius: .75rem; background: rgb(255 255 255 / 3%); }
-.comment header { display: flex; gap: .55rem; align-items: baseline; min-width: 0; }
-.comment header a { overflow: hidden; color: var(--color-accent-strong); font-weight: 800; text-overflow: ellipsis; }
-.comment time, .comment header small { color: var(--color-text-muted); font-size: .68rem; }
-.comment p { margin: 0; overflow-wrap: anywhere; line-height: 1.45; white-space: pre-wrap; }
-.comment footer { display: flex; gap: .7rem; }
-.comment footer button, .compose-heading button { min-height: auto; padding: 0; border: 0; color: var(--color-text-muted); background: transparent; font-size: .7rem; font-weight: 750; cursor: pointer; }
-.comment .deleted { color: var(--color-text-muted); font-style: italic; }
-.spoiler { min-height: 2.4rem; border: .0625rem dashed rgb(255 113 154 / 45%); border-radius: .6rem; color: #ffd1dd; background: rgb(255 113 154 / 8%); cursor: pointer; }
-form { display: grid; gap: .55rem; padding: .75rem; border: .0625rem solid var(--color-border); border-radius: .75rem; }
-.compose-heading, .compose-actions { display: flex; gap: 1rem; align-items: center; justify-content: space-between; }
-textarea { width: 100%; padding: .65rem; border: .0625rem solid var(--color-border); border-radius: .65rem; color: var(--color-text); background: rgb(16 13 24 / 88%); resize: vertical; }
-.compose-actions label { display: flex; gap: .45rem; align-items: center; color: var(--color-text-muted); font-size: .72rem; }
-.compose-actions input { width: 1rem; min-height: 1rem; }
-.compose-actions > button { min-height: 2.3rem; padding: 0 .9rem; border: 0; border-radius: 999rem; color: #100d18; background: var(--color-accent); font-weight: 800; cursor: pointer; }
-.state, .error { margin: 0; padding: .7rem; border-radius: .65rem; color: var(--color-text-muted); background: rgb(255 255 255 / 3%); }
-.error { color: #ffd1dd; }
+:host {
+  display: block;
+  grid-column: 1 / -1;
+}
+.comments {
+  border-top: 0.0625rem solid var(--color-border);
+}
+.comments__toggle {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.7rem 0 0;
+  border: 0;
+  color: var(--color-text-muted);
+  background: transparent;
+  cursor: pointer;
+}
+.comments__toggle span {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.comments__toggle strong {
+  color: var(--color-accent-strong);
+  font-size: 0.75rem;
+}
+.comments__body {
+  display: grid;
+  gap: 0.8rem;
+  padding-top: 0.8rem;
+}
+.thread,
+.replies {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.replies {
+  margin: 0.55rem 0 0 1.2rem;
+  padding-left: 0.8rem;
+  border-left: 0.125rem solid rgb(255 113 154 / 25%);
+}
+.comment {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.7rem;
+  border-radius: 0.75rem;
+  background: rgb(255 255 255 / 3%);
+}
+.comment header {
+  display: flex;
+  gap: 0.55rem;
+  align-items: baseline;
+  min-width: 0;
+}
+.comment header a {
+  overflow: hidden;
+  color: var(--color-accent-strong);
+  font-weight: 800;
+  text-overflow: ellipsis;
+}
+.comment time,
+.comment header small {
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+}
+.comment p {
+  margin: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+.comment footer {
+  display: flex;
+  gap: 0.7rem;
+}
+.comment footer button,
+.compose-heading button {
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  color: var(--color-text-muted);
+  background: transparent;
+  font-size: 0.7rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+.comment .deleted {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+.spoiler {
+  min-height: 2.4rem;
+  border: 0.0625rem dashed rgb(255 113 154 / 45%);
+  border-radius: 0.6rem;
+  color: #ffd1dd;
+  background: rgb(255 113 154 / 8%);
+  cursor: pointer;
+}
+form {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.75rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 0.75rem;
+}
+.compose-heading,
+.compose-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+textarea {
+  width: 100%;
+  padding: 0.65rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 0.65rem;
+  color: var(--color-text);
+  background: rgb(16 13 24 / 88%);
+  resize: vertical;
+}
+.compose-actions label {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+}
+.compose-actions input {
+  width: 1rem;
+  min-height: 1rem;
+}
+.compose-actions > button {
+  min-height: 2.3rem;
+  padding: 0 0.9rem;
+  border: 0;
+  border-radius: 999rem;
+  color: #100d18;
+  background: var(--color-accent);
+  font-weight: 800;
+  cursor: pointer;
+}
+.state,
+.error {
+  margin: 0;
+  padding: 0.7rem;
+  border-radius: 0.65rem;
+  color: var(--color-text-muted);
+  background: rgb(255 255 255 / 3%);
+}
+.error {
+  color: #ffd1dd;
+}
+
+@media (max-width: 38rem) {
+  .comments__toggle {
+    min-height: 2.75rem;
+    align-items: center;
+  }
+
+  .comment header {
+    flex-wrap: wrap;
+  }
+
+  .comment footer button,
+  .compose-heading button {
+    min-height: 2.75rem;
+    padding-inline: 0.5rem;
+  }
+
+  .replies {
+    margin-left: 0.4rem;
+    padding-left: 0.55rem;
+  }
+
+  .compose-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .compose-actions > button {
+    width: 100%;
+    min-height: 2.75rem;
+  }
+}

@@ -55,6 +55,10 @@ describe('SharedListComments', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
+    expect(element.querySelector('.comments__toggle')?.getAttribute('aria-controls')).toBe(
+      'comments-item-1',
+    );
+    expect(element.querySelector('.comments__body')?.id).toBe('comments-item-1');
     expect(element.textContent).not.toContain('The finale reveals everything.');
     const spoiler = element.querySelector<HTMLButtonElement>('.spoiler');
     expect(spoiler?.textContent).toContain('Spoiler hidden');

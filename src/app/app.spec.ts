@@ -97,6 +97,31 @@ describe('App', () => {
     ).toBe('true');
   });
 
+  it('keeps programmatic route focus visually silent', async () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    const main = compiled.querySelector<HTMLElement>('#main-content');
+    const heading = document.createElement('h1');
+    heading.textContent = 'Library';
+    main?.append(heading);
+
+    (
+      fixture.componentInstance as unknown as {
+        handleRouteActivation(): void;
+      }
+    ).handleRouteActivation();
+    await fixture.whenStable();
+
+    expect(heading.classList).toContain('route-focus-target');
+    expect(heading.getAttribute('tabindex')).toBe('-1');
+
+    heading.dispatchEvent(new FocusEvent('blur'));
+
+    expect(heading.classList).not.toContain('route-focus-target');
+    expect(heading.hasAttribute('tabindex')).toBe(false);
+  });
+
   it('renders the five Phase 1 mobile destinations for an authenticated user', async () => {
     authenticated.set(true);
     session.set({
