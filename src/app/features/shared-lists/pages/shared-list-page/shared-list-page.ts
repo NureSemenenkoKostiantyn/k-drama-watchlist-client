@@ -1,4 +1,5 @@
 import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { DatePipe, DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -8,8 +9,10 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { map } from 'rxjs';
 
 import { LibraryService } from '../../../library/data-access/library.service';
 import {
@@ -25,6 +28,8 @@ import {
   SharedListVisibility,
 } from '../../models/shared-list';
 
+const mobileSharedListBreakpoint = '(max-width: 48rem)';
+
 @Component({
   selector: 'app-shared-list-page',
   imports: [
@@ -37,10 +42,11 @@ import {
     SharedListComments,
   ],
   templateUrl: './shared-list-page.html',
-  styleUrls: ['./shared-list-page.scss', './shared-list-items.scss'],
+  styleUrls: ['./shared-list-page.scss', './shared-list-items.scss', './shared-list-mobile.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SharedListPage implements OnInit {
+  private readonly breakpointObserver = inject(BreakpointObserver);
   private readonly formBuilder = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -50,6 +56,12 @@ export class SharedListPage implements OnInit {
   protected readonly library = inject(LibraryService);
   protected readonly list = this.sharedLists.activeList;
   protected readonly isSaving = signal(false);
+  protected readonly isMobileSharedListLayout = toSignal(
+    this.breakpointObserver
+      .observe(mobileSharedListBreakpoint)
+      .pipe(map((breakpointState) => breakpointState.matches)),
+    { initialValue: false },
+  );
   protected readonly pendingDelete = signal(false);
   protected readonly activeMemberId = signal<string | null>(null);
   protected readonly pendingMemberRemovalId = signal<string | null>(null);
@@ -62,6 +74,9 @@ export class SharedListPage implements OnInit {
   protected readonly isOwner = computed(() => this.list()?.role === 'owner');
   protected readonly canEdit = computed(() =>
     ['owner', 'editor'].includes(this.list()?.role ?? ''),
+  );
+  protected readonly isItemDragDisabled = computed(
+    () => this.isMobileSharedListLayout() || !this.canEdit() || this.isSaving(),
   );
   protected readonly publicUrl = computed(() => {
     const publicSlug = this.list()?.publicSlug;

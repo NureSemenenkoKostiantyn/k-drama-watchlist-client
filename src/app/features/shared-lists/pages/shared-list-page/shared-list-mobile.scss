@@ -1,0 +1,105 @@
+@media (max-width: 48rem) {
+  .media-item.cdk-drag {
+    cursor: default;
+    touch-action: manipulation;
+  }
+
+  .section-heading {
+    align-items: start;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .section-heading > span {
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: 38rem) {
+  .list-page {
+    padding-inline: 0.75rem;
+  }
+
+  .hero {
+    gap: 1rem;
+  }
+
+  .panel,
+  .danger {
+    padding: 0.9rem;
+  }
+
+  .panel > button,
+  .danger > button {
+    width: 100%;
+  }
+
+  .invite,
+  .public-link {
+    grid-template-columns: 1fr;
+  }
+
+  .invite strong,
+  .invite small,
+  .public-link strong,
+  .public-link a {
+    grid-column: 1;
+  }
+
+  .invite button,
+  .public-link button {
+    width: 100%;
+  }
+
+  .members li {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .member-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .member-actions select {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-height: 2.75rem;
+  }
+
+  .member-actions button {
+    min-height: 2.75rem;
+  }
+}
+
+@media (max-width: 30rem) {
+  .media-item {
+    grid-template-columns: 4.75rem minmax(0, 1fr);
+  }
+
+  .media-item__body {
+    padding: 0.75rem;
+  }
+
+  .media-item__title {
+    grid-template-columns: 2rem minmax(0, 1fr);
+  }
+
+  .media-item__title app-keyboard-reorder-controls {
+    grid-column: 1 / -1;
+    justify-self: end;
+  }
+
+  .progress {
+    grid-template-columns: 1fr;
+  }
+
+  .progress button {
+    grid-column: 1;
+    width: 100%;
+  }
+
+  .remove {
+    width: 100%;
+  }
+}

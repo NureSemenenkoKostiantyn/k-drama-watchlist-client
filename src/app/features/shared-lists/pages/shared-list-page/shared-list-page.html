@@ -32,7 +32,13 @@
             <p>Group queue</p>
             <h2>Titles</h2>
           </div>
-          <span>Drag or use arrow controls to reorder</span>
+          <span>
+            @if (isMobileSharedListLayout()) {
+              Use arrow controls to reorder
+            } @else {
+              Drag or use arrow controls to reorder
+            }
+          </span>
         </div>
         <p class="visually-hidden" aria-live="polite" aria-atomic="true">
           {{ reorderAnnouncement() }}
@@ -41,11 +47,11 @@
           class="items"
           cdkDropList
           [cdkDropListData]="currentList.items"
-          [cdkDropListDisabled]="!canEdit() || isSaving()"
+          [cdkDropListDisabled]="isItemDragDisabled()"
           (cdkDropListDropped)="drop($event)"
         >
           @for (item of currentList.items; track item.id) {
-            <article class="media-item" cdkDrag [cdkDragDisabled]="!canEdit() || isSaving()">
+            <article class="media-item" cdkDrag [cdkDragDisabled]="isItemDragDisabled()">
               <div class="poster">
                 @if (item.media.posterUrl) {
                   <img [src]="item.media.posterUrl" [alt]="item.media.title + ' poster'" />
@@ -70,6 +76,7 @@
                   @if (canEdit()) {
                     <app-keyboard-reorder-controls
                       [itemLabel]="item.media.title"
+                      [touchFriendly]="isMobileSharedListLayout()"
                       [disabled]="isSaving()"
                       [canMoveBefore]="$index > 0"
                       [canMoveAfter]="$index < currentList.items.length - 1"
