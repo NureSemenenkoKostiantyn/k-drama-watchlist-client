@@ -12,6 +12,20 @@ import {
   UpdateProgressRequest,
   WatchStatus,
 } from '../models/library';
+import {
+  withOptimisticCategories,
+  withOptimisticDescription,
+  withOptimisticPlaybackPreference,
+  withOptimisticProgress,
+  withOptimisticRating,
+  withOptimisticStatus,
+} from '../utils/optimistic-library-entry';
+
+interface OptimisticSnapshot {
+  readonly entry: LibraryEntry;
+  readonly index: number;
+  readonly version: symbol;
+}
 
 @Injectable({ providedIn: 'root' })
 export class LibraryService {
@@ -19,6 +33,7 @@ export class LibraryService {
   private readonly entriesState = signal<LibraryEntry[]>([]);
   private readonly loadingState = signal(false);
   private readonly errorState = signal<string | null>(null);
+  private readonly mutationVersions = new Map<string, symbol>();
 
   readonly entries = this.entriesState.asReadonly();
   readonly isLoading = this.loadingState.asReadonly();
@@ -57,6 +72,11 @@ export class LibraryService {
   ): Promise<LibraryEntry | null> {
     this.errorState.set(null);
     const existing = this.entryFor(mediaType, tmdbId);
+    const snapshot = existing
+      ? this.beginOptimisticMutation(existing.id, (entry) =>
+          withOptimisticStatus(entry, status),
+        )
+      : null;
 
     try {
       const entry = existing
@@ -77,9 +97,12 @@ export class LibraryService {
             ),
           );
 
-      this.upsertEntry(entry);
+      this.commitOptimisticMutation(snapshot, entry);
       return entry;
     } catch (error: unknown) {
+      if (!this.rollbackOptimisticMutation(snapshot)) {
+        return null;
+      }
       this.errorState.set(
         readApiErrorMessage(error, 'The library could not be updated. Please try again.'),
       );
@@ -89,14 +112,18 @@ export class LibraryService {
 
   async remove(entryId: string): Promise<boolean> {
     this.errorState.set(null);
+    const snapshot = this.beginOptimisticMutation(entryId, () => null);
 
     try {
       await firstValueFrom(
         this.http.delete<void>(`${environment.apiBaseUrl}/library/${entryId}`),
       );
-      this.entriesState.update((entries) => entries.filter((entry) => entry.id !== entryId));
+      this.commitOptimisticMutation(snapshot);
       return true;
     } catch (error: unknown) {
+      if (!this.rollbackOptimisticMutation(snapshot)) {
+        return false;
+      }
       this.errorState.set(
         readApiErrorMessage(error, 'The title could not be removed. Please try again.'),
       );
@@ -113,6 +140,7 @@ export class LibraryService {
       'progress',
       progress,
       'Your progress could not be updated. Please try again.',
+      (entry) => withOptimisticProgress(entry, progress),
     );
   }
 
@@ -122,6 +150,7 @@ export class LibraryService {
       'rating',
       { rating },
       'Your rating could not be updated. Please try again.',
+      (entry) => withOptimisticRating(entry, rating),
     );
   }
 
@@ -134,6 +163,7 @@ export class LibraryService {
       null,
       { description },
       'Your description could not be updated. Please try again.',
+      (entry) => withOptimisticDescription(entry, description),
     );
   }
 
@@ -146,6 +176,7 @@ export class LibraryService {
       null,
       { categoryIds },
       'The categories could not be assigned. Please try again.',
+      (entry) => withOptimisticCategories(entry, categoryIds),
     );
   }
 
@@ -205,6 +236,7 @@ export class LibraryService {
       'playback-preference',
       preference,
       'Your playback preference could not be updated. Please try again.',
+      (entry) => withOptimisticPlaybackPreference(entry, preference),
     );
   }
 
@@ -217,9 +249,11 @@ export class LibraryService {
     endpoint: string | null,
     body: unknown,
     fallbackMessage: string,
+    optimisticUpdate: (entry: LibraryEntry) => LibraryEntry,
   ): Promise<LibraryEntry | null> {
     this.errorState.set(null);
     const suffix = endpoint === null ? '' : `/${endpoint}`;
+    const snapshot = this.beginOptimisticMutation(entryId, optimisticUpdate);
 
     try {
       const entry = await firstValueFrom(
@@ -228,12 +262,97 @@ export class LibraryService {
           body,
         ),
       );
-      this.upsertEntry(entry);
+      this.commitOptimisticMutation(snapshot, entry);
       return entry;
     } catch (error: unknown) {
+      if (!this.rollbackOptimisticMutation(snapshot)) {
+        return null;
+      }
       this.errorState.set(readApiErrorMessage(error, fallbackMessage));
       return null;
     }
+  }
+
+  private beginOptimisticMutation(
+    entryId: string,
+    update: (entry: LibraryEntry) => LibraryEntry | null,
+  ): OptimisticSnapshot | null {
+    const entries = this.entriesState();
+    const index = entries.findIndex((entry) => entry.id === entryId);
+    const entry = entries[index];
+
+    if (!entry) {
+      return null;
+    }
+
+    const snapshot = {
+      entry,
+      index,
+      version: Symbol(entryId),
+    } satisfies OptimisticSnapshot;
+    this.mutationVersions.set(entryId, snapshot.version);
+    const optimisticEntry = update(entry);
+    this.entriesState.update((currentEntries) =>
+      optimisticEntry === null
+        ? currentEntries.filter((candidate) => candidate.id !== entryId)
+        : currentEntries.map((candidate) =>
+            candidate.id === entryId
+              ? withUpdatedTimestamp(optimisticEntry)
+              : candidate,
+          ),
+    );
+    return snapshot;
+  }
+
+  private commitOptimisticMutation(
+    snapshot: OptimisticSnapshot | null,
+    serverEntry?: LibraryEntry,
+  ): void {
+    if (snapshot === null) {
+      if (serverEntry) {
+        this.upsertEntry(serverEntry);
+      }
+      return;
+    }
+
+    if (this.mutationVersions.get(snapshot.entry.id) !== snapshot.version) {
+      return;
+    }
+
+    this.mutationVersions.delete(snapshot.entry.id);
+    if (serverEntry) {
+      this.upsertEntry(serverEntry);
+    }
+  }
+
+  private rollbackOptimisticMutation(
+    snapshot: OptimisticSnapshot | null,
+  ): boolean {
+    if (snapshot === null) {
+      return true;
+    }
+
+    if (this.mutationVersions.get(snapshot.entry.id) !== snapshot.version) {
+      return false;
+    }
+
+    this.mutationVersions.delete(snapshot.entry.id);
+    this.entriesState.update((entries) => {
+      const existingIndex = entries.findIndex(
+        (entry) => entry.id === snapshot.entry.id,
+      );
+
+      if (existingIndex !== -1) {
+        return entries.map((entry) =>
+          entry.id === snapshot.entry.id ? snapshot.entry : entry,
+        );
+      }
+
+      const restored = [...entries];
+      restored.splice(Math.min(snapshot.index, restored.length), 0, snapshot.entry);
+      return restored;
+    });
+    return true;
   }
 
   private upsertEntry(entry: LibraryEntry): void {
@@ -247,4 +366,8 @@ export class LibraryService {
       return entries.map((candidate) => (candidate.id === entry.id ? entry : candidate));
     });
   }
+}
+
+function withUpdatedTimestamp(entry: LibraryEntry): LibraryEntry {
+  return { ...entry, updatedAt: new Date().toISOString() };
 }

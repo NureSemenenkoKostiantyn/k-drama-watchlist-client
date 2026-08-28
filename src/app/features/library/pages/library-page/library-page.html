@@ -133,7 +133,8 @@
 
   @if (library.error()) {
     <div class="library-state library-state--error" role="alert">{{ library.error() }}</div>
-  } @else if (library.isLoading()) {
+  }
+  @if (library.isLoading()) {
     <div class="library-state" role="status">Loading your library…</div>
   } @else if (baseEntries().length === 0) {
     <div class="library-state">
