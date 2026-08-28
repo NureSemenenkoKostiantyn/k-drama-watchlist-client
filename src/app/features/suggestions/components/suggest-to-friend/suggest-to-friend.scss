@@ -107,3 +107,21 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 34rem) {
+  .suggest-friend {
+    margin-inline: 1rem;
+    padding: 1rem;
+  }
+
+  .suggest-friend select,
+  .suggest-friend textarea,
+  .suggest-friend button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .suggest-friend button {
+    min-height: 2.75rem;
+  }
+}

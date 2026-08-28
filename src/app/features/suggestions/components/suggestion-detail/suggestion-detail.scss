@@ -161,11 +161,31 @@ blockquote span {
 
 @media (max-width: 34rem) {
   .grid {
-    grid-template-columns: 5.5rem minmax(0, 1fr);
+    grid-template-columns: 1fr;
     gap: 1rem;
+    padding: 1rem;
   }
 
-  :is(.friend, blockquote, .no-message, .actions) {
-    grid-column: 1 / -1;
+  .poster {
+    width: 7.5rem;
+  }
+
+  h2 {
+    font-size: clamp(1.8rem, 11vw, 2.7rem);
+    overflow-wrap: anywhere;
+  }
+
+  .friend a,
+  blockquote {
+    overflow-wrap: anywhere;
+  }
+
+  .actions {
+    display: grid;
+  }
+
+  .actions :is(button, a) {
+    width: 100%;
+    min-height: 2.75rem;
   }
 }
