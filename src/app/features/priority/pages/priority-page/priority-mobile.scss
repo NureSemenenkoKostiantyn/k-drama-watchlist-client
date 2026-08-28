@@ -1,3 +1,18 @@
+@media (max-width: 48rem) {
+  .priority-lane,
+  .priority-item {
+    cursor: default;
+  }
+
+  .priority-lane {
+    touch-action: pan-x pan-y;
+  }
+
+  .priority-item {
+    touch-action: manipulation;
+  }
+}
+
 @media (max-width: 40rem) {
   .priority-page__header,
   .priority-page__create {
@@ -15,5 +30,13 @@
 
   .priority-lane {
     flex-basis: min(18rem, calc(100vw - 3rem));
+  }
+
+  .priority-lane__actions {
+    width: 100%;
+  }
+
+  .priority-lane > header {
+    flex-wrap: wrap;
   }
 }

@@ -13,6 +13,7 @@ export class KeyboardReorderControls {
   readonly groupLabel = input('group');
   readonly orientation = input<'horizontal' | 'vertical'>('vertical');
   readonly disabled = input(false);
+  readonly touchFriendly = input(false);
   readonly showPositionMoves = input(true);
   readonly showGroupMoves = input(false);
   readonly canMoveBefore = input(false);

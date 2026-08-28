@@ -24,6 +24,13 @@
   <p class="visually-hidden" aria-live="polite" aria-atomic="true">
     {{ reorderAnnouncement() }}
   </p>
+  <p class="priority-page__reorder-help">
+    @if (isMobilePriorityLayout()) {
+      Use the arrow buttons to move lanes and titles.
+    } @else {
+      Drag lanes and titles, or use their arrow buttons.
+    }
+  </p>
   @if (caseOpening(); as opening) {
     <section
       class="case-opening"
@@ -101,18 +108,20 @@
         class="priority-items"
         cdkDropList
         id="unassigned-priority-items"
+        [cdkDropListDisabled]="isPriorityDragDisabled()"
         [cdkDropListData]="unassigned()"
         [cdkDropListConnectedTo]="itemDropListIds()"
         (cdkDropListDropped)="dropItem($event)"
       >
         @for (entry of unassigned(); track entry.id) {
-          <article class="priority-item" cdkDrag [cdkDragDisabled]="isInteractionLocked()">
+          <article class="priority-item" cdkDrag [cdkDragDisabled]="isPriorityDragDisabled()">
             <a [routerLink]="['/media', entry.media.mediaType, entry.media.tmdbId]">
               {{ entry.media.title }}
             </a>
             <app-keyboard-reorder-controls
               [itemLabel]="entry.media.title"
               groupLabel="lane"
+              [touchFriendly]="isMobilePriorityLayout()"
               [disabled]="isInteractionLocked()"
               [showPositionMoves]="false"
               [showGroupMoves]="true"
@@ -130,11 +139,12 @@
       class="priority-board"
       cdkDropList
       cdkDropListOrientation="horizontal"
+      [cdkDropListDisabled]="isPriorityDragDisabled()"
       [cdkDropListData]="laneViews()"
       (cdkDropListDropped)="dropLane($event)"
     >
       @for (view of laneViews(); track view.lane.id; let laneIndex = $index) {
-        <section class="priority-lane" cdkDrag [cdkDragDisabled]="isInteractionLocked()">
+        <section class="priority-lane" cdkDrag [cdkDragDisabled]="isPriorityDragDisabled()">
           <header>
             @if (editingLaneId() === view.lane.id) {
               <form
@@ -175,6 +185,7 @@
                 <app-keyboard-reorder-controls
                   [itemLabel]="view.lane.name + ' lane'"
                   orientation="horizontal"
+                  [touchFriendly]="isMobilePriorityLayout()"
                   [disabled]="isInteractionLocked()"
                   [canMoveBefore]="laneIndex > 0"
                   [canMoveAfter]="laneIndex < laneViews().length - 1"
@@ -259,6 +270,7 @@
             class="priority-items priority-items--lane"
             cdkDropList
             [id]="laneListId(view.lane.id)"
+            [cdkDropListDisabled]="isPriorityDragDisabled()"
             [cdkDropListData]="view.items"
             [cdkDropListConnectedTo]="itemDropListIds()"
             (cdkDropListDropped)="dropItem($event)"
@@ -267,7 +279,7 @@
               <article
                 class="priority-item"
                 cdkDrag
-                [cdkDragDisabled]="isInteractionLocked()"
+                [cdkDragDisabled]="isPriorityDragDisabled()"
                 (pointerdown)="$event.stopPropagation()"
               >
                 @if (entry.media.posterUrl) {
@@ -282,6 +294,7 @@
                 <app-keyboard-reorder-controls
                   [itemLabel]="entry.media.title"
                   groupLabel="lane"
+                  [touchFriendly]="isMobilePriorityLayout()"
                   [disabled]="isInteractionLocked()"
                   [showGroupMoves]="true"
                   [canMoveBefore]="itemIndex > 0"
