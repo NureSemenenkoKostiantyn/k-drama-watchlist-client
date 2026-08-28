@@ -178,7 +178,17 @@
 }
 
 @media (max-width: 30rem) {
+  .share-card-preview-stage {
+    padding: 0.625rem;
+  }
+
   .share-card-preview--story {
     width: min(90%, 18rem);
+  }
+
+  .share-card-preview h3,
+  .share-card-preview blockquote,
+  .share-card-preview footer span {
+    overflow-wrap: anywhere;
   }
 }

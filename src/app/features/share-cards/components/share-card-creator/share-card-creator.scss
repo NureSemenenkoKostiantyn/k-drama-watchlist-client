@@ -153,9 +153,30 @@
 }
 
 @media (max-width: 30rem) {
+  .share-card-creator {
+    padding: 1rem;
+  }
+
   .share-card-creator > header {
     display: grid;
     align-items: start;
   }
 
+  .share-card-controls fieldset {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .share-card-controls fieldset label {
+    min-height: 2.75rem;
+  }
+
+  .share-card-controls__actions {
+    display: grid;
+  }
+
+  .share-card-controls__actions button {
+    width: 100%;
+    min-height: 2.75rem;
+  }
 }

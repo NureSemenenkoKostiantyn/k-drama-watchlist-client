@@ -58,6 +58,13 @@
   }
 
   .media-share > button {
-    justify-self: start;
+    width: 100%;
+    min-height: 2.75rem;
+  }
+}
+
+@media (max-width: 30rem) {
+  .media-share {
+    padding-inline: 1rem;
   }
 }

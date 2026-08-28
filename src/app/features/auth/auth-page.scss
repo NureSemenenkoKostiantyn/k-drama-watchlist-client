@@ -192,3 +192,32 @@ form {
     max-width: 31rem;
   }
 }
+
+@media (max-width: 30rem) {
+  .auth-page {
+    gap: 1.5rem;
+    min-height: calc(100vh - 4.5rem);
+    padding-block: 1.5rem 3rem;
+  }
+
+  h1 {
+    font-size: clamp(2.5rem, 15vw, 3.5rem);
+    overflow-wrap: anywhere;
+  }
+
+  .auth-page__summary {
+    margin-top: 1rem;
+    font-size: 0.95rem;
+  }
+
+  .auth-card {
+    padding: 1.25rem;
+    border-radius: 1.125rem;
+  }
+
+  .field__label-row {
+    align-items: start;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+}
