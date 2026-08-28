@@ -129,12 +129,70 @@
       </svg>
       <span>Priority</span>
     </a>
-    <a routerLink="/wheels" routerLinkActive="is-active" ariaCurrentWhenActive="page">
+    <button
+      #mobileMoreButton
+      type="button"
+      class="app-shell__mobile-more-button"
+      [class.is-active]="mobileMenuOpen()"
+      [attr.aria-expanded]="mobileMenuOpen()"
+      aria-controls="mobile-more-menu"
+      (click)="toggleMobileMenu()"
+    >
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <circle cx="12" cy="12" r="8" />
-        <path d="M12 4v8l5.7 5.7M4 12h8" />
+        <circle cx="5" cy="12" r="1" />
+        <circle cx="12" cy="12" r="1" />
+        <circle cx="19" cy="12" r="1" />
       </svg>
-      <span>Wheels</span>
-    </a>
+      <span>More</span>
+    </button>
   </nav>
+
+  @if (mobileMenuOpen()) {
+    <div class="app-shell__mobile-more-overlay" role="presentation" (click)="closeMobileMenu()">
+      <section
+        id="mobile-more-menu"
+        class="app-shell__mobile-more-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="mobile-more-title"
+        cdkTrapFocus
+        [cdkTrapFocusAutoCapture]="true"
+        (click)="$event.stopPropagation()"
+        (keydown.escape)="closeMobileMenu()"
+      >
+        <header>
+          <div>
+            <p>Navigation</p>
+            <h2 id="mobile-more-title">More</h2>
+          </div>
+          <button type="button" cdkFocusInitial (click)="closeMobileMenu()">Close</button>
+        </header>
+
+        <nav aria-label="More destinations">
+          <a routerLink="/activity" (click)="closeMobileMenu(false)">Activity</a>
+          <a routerLink="/statistics" (click)="closeMobileMenu(false)">Statistics</a>
+          <a routerLink="/wheels" (click)="closeMobileMenu(false)">Wheels</a>
+          <a routerLink="/lists" (click)="closeMobileMenu(false)">Shared lists</a>
+          <a routerLink="/friends" (click)="closeMobileMenu(false)">Friends</a>
+          <a routerLink="/suggestions" (click)="closeMobileMenu(false)">Suggestions</a>
+          <a routerLink="/notifications" (click)="closeMobileMenu(false)">
+            Notifications
+            @if (notificationBadge(); as badge) {
+              <span>{{ badge }}</span>
+            }
+          </a>
+          <a routerLink="/profile" (click)="closeMobileMenu(false)">Profile</a>
+        </nav>
+
+        <button
+          type="button"
+          class="app-shell__mobile-sign-out"
+          [disabled]="authentication.isPending()"
+          (click)="signOut()"
+        >
+          Sign out
+        </button>
+      </section>
+    </div>
+  }
 }
