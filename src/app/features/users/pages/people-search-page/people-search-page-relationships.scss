@@ -172,10 +172,33 @@
 @media (max-width: 34rem) {
   .people-card {
     grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0.875rem;
   }
 
   .people-card__buttons {
-    justify-content: start;
-    padding-left: 4.375rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+    width: 100%;
+    padding-left: 0;
+  }
+
+  .people-card__buttons button,
+  .people-card__buttons a,
+  .people-card__buttons > span {
+    display: grid;
+    min-height: 2.75rem;
+    place-items: center;
+    text-align: center;
+  }
+
+  .people-card__identity strong,
+  .people-card__identity span {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .people-search__empty {
+    padding: 1.5rem 1rem;
   }
 }
