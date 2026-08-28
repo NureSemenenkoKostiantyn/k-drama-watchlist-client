@@ -128,8 +128,13 @@
 }
 
 @media (max-width: 34rem) {
+  .public-profile {
+    padding-block: 1.5rem 7rem;
+  }
+
   .profile-card {
     grid-template-columns: 1fr;
+    padding: 1.25rem;
     text-align: center;
   }
 
@@ -139,6 +144,17 @@
   }
 
   .profile-card__actions {
-    justify-content: center;
+    display: grid;
+    width: 100%;
+  }
+
+  .profile-card__actions a {
+    width: 100%;
+    text-align: center;
+  }
+
+  .profile-card__identity h1,
+  .profile-card__identity strong {
+    overflow-wrap: anywhere;
   }
 }

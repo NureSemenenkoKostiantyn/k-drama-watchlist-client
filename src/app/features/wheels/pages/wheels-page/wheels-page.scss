@@ -47,15 +47,17 @@
 
 .wheel-create {
   display: grid;
-  grid-template-columns: minmax(10rem, 1fr) minmax(12rem, 1.2fr) minmax(12rem, 1.4fr) minmax(12rem, 1fr) auto;
+  grid-template-columns: minmax(10rem, 1fr) minmax(12rem, 1.2fr) minmax(12rem, 1.4fr) minmax(
+      12rem,
+      1fr
+    ) auto;
   gap: 1rem;
   align-items: end;
   padding: 1.25rem;
   border: 0.0625rem solid var(--color-border);
   border-radius: 1.25rem;
   background:
-    linear-gradient(135deg, rgb(255 113 154 / 12%), transparent 45%),
-    var(--color-surface);
+    linear-gradient(135deg, rgb(255 113 154 / 12%), transparent 45%), var(--color-surface);
 }
 
 .wheel-create__heading {
@@ -153,21 +155,11 @@
   aspect-ratio: 1;
   border: 0.4rem solid rgb(255 255 255 / 8%);
   border-radius: 50%;
-  background: conic-gradient(
-    #3d334f 0 25%,
-    #271f35 25% 50%,
-    #3d334f 50% 75%,
-    #271f35 75%
-  );
+  background: conic-gradient(#3d334f 0 25%, #271f35 25% 50%, #3d334f 50% 75%, #271f35 75%);
 }
 
 .wheel-card__disc--active {
-  background: conic-gradient(
-    #ff719a 0 25%,
-    #886cff 25% 50%,
-    #39c6b0 50% 75%,
-    #ffc857 75%
-  );
+  background: conic-gradient(#ff719a 0 25%, #886cff 25% 50%, #39c6b0 50% 75%, #ffc857 75%);
 }
 
 .wheel-card__disc span {
@@ -240,5 +232,14 @@
 
   .wheel-card__disc {
     width: 4.5rem;
+  }
+
+  .wheels-page {
+    padding-inline: 0.75rem;
+  }
+
+  .wheel-create button {
+    width: 100%;
+    justify-self: stretch;
   }
 }

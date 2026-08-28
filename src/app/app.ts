@@ -5,14 +5,12 @@ import {
   effect,
   inject,
   signal,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
+import { A11yModule } from '@angular/cdk/a11y';
 import { DOCUMENT } from '@angular/common';
-import {
-  Router,
-  RouterLink,
-  RouterLinkActive,
-  RouterOutlet,
-} from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { environment } from '../environments/environment';
 import { AuthenticationService } from './core/auth/authentication.service';
@@ -21,7 +19,7 @@ import { SettingsService } from './features/settings/data-access/settings.servic
 
 @Component({
   selector: 'app-root',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [A11yModule, RouterLink, RouterLinkActive, RouterOutlet],
   templateUrl: './app.html',
   styleUrls: ['./app.scss', './app-mobile-nav.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,11 +35,12 @@ export class App {
   });
   protected readonly notificationLabel = computed(() => {
     const count = this.notifications.unreadCount();
-    return count === 0
-      ? 'Notifications'
-      : `Notifications, ${count} unread`;
+    return count === 0 ? 'Notifications' : `Notifications, ${count} unread`;
   });
   protected readonly routeAnnouncement = signal('');
+  protected readonly mobileMenuOpen = signal(false);
+  @ViewChild('mobileMoreButton')
+  private mobileMoreButton?: ElementRef<HTMLButtonElement>;
   private readonly document = inject(DOCUMENT);
   private readonly router = inject(Router);
 
@@ -57,6 +56,7 @@ export class App {
   }
 
   protected handleRouteActivation(): void {
+    this.closeMobileMenu(false);
     queueMicrotask(() => {
       const main = this.document.getElementById('main-content');
       const heading = main?.querySelector<HTMLElement>('h1');
@@ -84,15 +84,29 @@ export class App {
       );
       focusTarget.focus();
       const pageName = heading?.textContent?.trim();
-      this.routeAnnouncement.set(
-        pageName ? `${pageName} page loaded` : 'Page loaded',
-      );
+      this.routeAnnouncement.set(pageName ? `${pageName} page loaded` : 'Page loaded');
     });
   }
 
   protected async signOut(): Promise<void> {
+    this.closeMobileMenu(false);
     if (await this.authentication.signOut()) {
       await this.router.navigate(['/login']);
+    }
+  }
+
+  protected toggleMobileMenu(): void {
+    this.mobileMenuOpen.update((isOpen) => !isOpen);
+  }
+
+  protected closeMobileMenu(restoreFocus = true): void {
+    if (!this.mobileMenuOpen()) {
+      return;
+    }
+
+    this.mobileMenuOpen.set(false);
+    if (restoreFocus) {
+      queueMicrotask(() => this.mobileMoreButton?.nativeElement.focus());
     }
   }
 }

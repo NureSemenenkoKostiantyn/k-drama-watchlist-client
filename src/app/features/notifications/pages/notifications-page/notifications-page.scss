@@ -185,21 +185,48 @@ article > button {
 }
 
 @media (max-width: 38rem) {
+  .notifications {
+    padding-top: 1.5rem;
+    padding-bottom: 7rem;
+  }
+
   .notifications > header {
     display: grid;
     align-items: start;
   }
 
+  header h1 {
+    font-size: clamp(2.4rem, 14vw, 3.4rem);
+    overflow-wrap: anywhere;
+  }
+
   .notifications > header button {
-    justify-self: start;
+    width: 100%;
+    min-height: 2.75rem;
   }
 
   article {
     grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  article > a {
+    min-height: 5.5rem;
+    padding: 1rem 0.875rem;
+  }
+
+  .copy strong {
+    overflow-wrap: anywhere;
   }
 
   article > button {
-    justify-self: start;
-    margin: 0 0 1rem 2.4rem;
+    width: auto;
+    min-height: 2.75rem;
+    margin: 0 0.875rem 0.875rem 2.25rem;
+  }
+
+  .empty {
+    min-height: 15rem;
+    padding: 1.5rem 1rem;
   }
 }

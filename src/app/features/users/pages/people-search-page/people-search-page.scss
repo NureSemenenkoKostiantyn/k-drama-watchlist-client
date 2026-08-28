@@ -105,7 +105,20 @@
 }
 
 @media (max-width: 34rem) {
+  .people-search {
+    gap: 1.5rem;
+    padding-block: 1.5rem 7rem;
+  }
+
+  .people-search__header h1 {
+    font-size: clamp(2rem, 12vw, 3rem);
+  }
+
   .people-search__form > div {
     grid-template-columns: 1fr;
+  }
+
+  .people-search__form button {
+    width: 100%;
   }
 }

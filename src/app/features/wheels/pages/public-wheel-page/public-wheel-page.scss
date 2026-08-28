@@ -33,3 +33,17 @@ h1, h2, p { margin: 0; }
 .state--error { display: grid; gap: .7rem; color: #ffd1dd; }
 @media (max-width: 52rem) { .candidates { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 38rem) { .hero { align-items: start; flex-direction: column; } .summary { text-align: left; } .candidates, .lower-grid { grid-template-columns: 1fr; } .machine { grid-template-columns: 1fr; } }
+
+@media (max-width: 38rem) {
+  .public-wheel {
+    padding-inline: 0.75rem;
+  }
+
+  .disc {
+    justify-self: center;
+  }
+
+  .panel li {
+    flex-wrap: wrap;
+  }
+}

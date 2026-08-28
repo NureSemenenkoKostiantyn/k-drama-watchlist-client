@@ -237,22 +237,43 @@
     overflow-x: auto;
     border-right: 0;
     border-bottom: 0.0625rem solid var(--color-border);
+    scroll-snap-type: inline mandatory;
   }
 
   .item {
     border-right: 0.0625rem solid var(--color-border);
     border-bottom: 0;
+    scroll-snap-align: start;
   }
-
 }
 
 @media (max-width: 34rem) {
+  .suggestions {
+    padding-bottom: 7rem;
+  }
+
   .tabs {
-    overflow-x: auto;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .tabs button {
-    flex: 1 0 auto;
+    justify-content: center;
+    min-width: 0;
+    min-height: 2.75rem;
+    padding-inline: 0.5rem;
   }
 
+  .inbox {
+    min-height: 0;
+  }
+
+  .list {
+    grid-auto-columns: minmax(16rem, 88%);
+  }
+
+  .detail-empty {
+    min-height: 18rem;
+    padding: 1.5rem;
+  }
 }

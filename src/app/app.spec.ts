@@ -74,9 +74,7 @@ describe('App', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.app-shell__brand')?.textContent).toContain('Drama Watch');
     expect(
-      compiled
-        .querySelector<HTMLImageElement>('.app-shell__brand-mark')
-        ?.getAttribute('src'),
+      compiled.querySelector<HTMLImageElement>('.app-shell__brand-mark')?.getAttribute('src'),
     ).toBe('/brand/drama-watch-mark.png');
   });
 
@@ -86,15 +84,11 @@ describe('App', () => {
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
 
-    expect(compiled.querySelector('.skip-link')?.getAttribute('href')).toBe(
-      '#main-content',
+    expect(compiled.querySelector('.skip-link')?.getAttribute('href')).toBe('#main-content');
+    expect(compiled.querySelector('#main-content')?.getAttribute('tabindex')).toBe('-1');
+    expect(compiled.querySelector('[aria-live="polite"]')?.getAttribute('aria-atomic')).toBe(
+      'true',
     );
-    expect(compiled.querySelector('#main-content')?.getAttribute('tabindex')).toBe(
-      '-1',
-    );
-    expect(
-      compiled.querySelector('[aria-live="polite"]')?.getAttribute('aria-atomic'),
-    ).toBe('true');
   });
 
   it('keeps programmatic route focus visually silent', async () => {
@@ -122,7 +116,7 @@ describe('App', () => {
     expect(heading.hasAttribute('tabindex')).toBe(false);
   });
 
-  it('renders the five Phase 1 mobile destinations for an authenticated user', async () => {
+  it('renders the primary mobile destinations and opens the complete navigation sheet', async () => {
     authenticated.set(true);
     session.set({
       user: {
@@ -144,14 +138,36 @@ describe('App', () => {
       'Search',
       'Library',
       'Priority',
-      'Wheels',
     ]);
     expect(links.map((link) => link.getAttribute('href'))).toEqual([
       '/',
       '/search',
       '/library',
       '/priority',
+    ]);
+    const moreButton = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      '.app-shell__mobile-more-button',
+    );
+    expect(moreButton?.textContent).toContain('More');
+    expect(moreButton?.getAttribute('aria-expanded')).toBe('false');
+
+    moreButton?.click();
+    fixture.detectChanges();
+
+    const sheet = (fixture.nativeElement as HTMLElement).querySelector(
+      '.app-shell__mobile-more-sheet',
+    );
+    const moreLinks = Array.from(sheet?.querySelectorAll<HTMLAnchorElement>('nav a') ?? []);
+    expect(sheet?.getAttribute('aria-modal')).toBe('true');
+    expect(moreLinks.map((link) => link.getAttribute('href'))).toEqual([
+      '/activity',
+      '/statistics',
       '/wheels',
+      '/lists',
+      '/friends',
+      '/suggestions',
+      '/notifications',
+      '/profile',
     ]);
     expect(
       (fixture.nativeElement as HTMLElement)
@@ -177,9 +193,7 @@ describe('App', () => {
       '.app-shell__notifications-link',
     );
     expect(link?.getAttribute('href')).toBe('/notifications');
-    expect(link?.getAttribute('aria-label')).toBe(
-      'Notifications, 3 unread',
-    );
+    expect(link?.getAttribute('aria-label')).toBe('Notifications, 3 unread');
     expect(link?.textContent).toContain('3');
   });
 });
