@@ -5,6 +5,7 @@ import {
   moveItemInArray,
   transferArrayItem,
 } from '@angular/cdk/drag-drop';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -15,8 +16,10 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { map } from 'rxjs';
 
 import { LibraryService } from '../../../library/data-access/library.service';
 import { LibraryEntry } from '../../../library/models/library';
@@ -53,6 +56,7 @@ const caseOpeningGap = 12;
 const caseOpeningWinnerIndex = 32;
 const caseOpeningItemCount = 42;
 const caseOpeningDurationMs = 5_200;
+const mobilePriorityBreakpoint = '(max-width: 48rem)';
 
 @Component({
   selector: 'app-priority-page',
@@ -62,6 +66,7 @@ const caseOpeningDurationMs = 5_200;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PriorityPage implements OnInit, OnDestroy {
+  private readonly breakpointObserver = inject(BreakpointObserver);
   private readonly formBuilder = inject(FormBuilder);
   private caseOpeningTimer: ReturnType<typeof setTimeout> | undefined;
   private caseOpeningFrame: number | undefined;
@@ -70,6 +75,12 @@ export class PriorityPage implements OnInit, OnDestroy {
   protected readonly laneViews = signal<PriorityLaneView[]>([]);
   protected readonly unassigned = signal<LibraryEntry[]>([]);
   protected readonly isSaving = signal(false);
+  protected readonly isMobilePriorityLayout = toSignal(
+    this.breakpointObserver
+      .observe(mobilePriorityBreakpoint)
+      .pipe(map((breakpointState) => breakpointState.matches)),
+    { initialValue: false },
+  );
   protected readonly editingLaneId = signal<string | null>(null);
   protected readonly pendingDeleteLaneId = signal<string | null>(null);
   protected readonly randomPick = signal<string | null>(null);
@@ -81,6 +92,9 @@ export class PriorityPage implements OnInit, OnDestroy {
     return opening !== null && opening.phase !== 'complete';
   });
   protected readonly isInteractionLocked = computed(() => this.isSaving() || this.isCaseOpening());
+  protected readonly isPriorityDragDisabled = computed(
+    () => this.isMobilePriorityLayout() || this.isInteractionLocked(),
+  );
   protected readonly createForm = this.formBuilder.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(100)]],
   });

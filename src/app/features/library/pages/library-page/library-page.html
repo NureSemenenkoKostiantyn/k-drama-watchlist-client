@@ -9,131 +9,154 @@
     </nav>
   </header>
 
-  <div class="library-tools">
-    <label>
-      <span>Filter by category</span>
-      <select [value]="selectedCategoryId()" (change)="changeCategoryFilter($event)">
-        <option value="all">All categories</option>
-        @for (category of categories.categories(); track category.id) {
-          <option [value]="category.id">{{ category.name }}</option>
-        }
-      </select>
-    </label>
-    @if (status === 'to_watch') {
+  <button
+    class="library-filter-toggle"
+    type="button"
+    aria-controls="library-filter-panel"
+    [attr.aria-expanded]="isFilterPanelExpanded()"
+    (click)="toggleFilterPanel()"
+  >
+    <span>Filter and organize</span>
+    <span class="library-filter-toggle__summary">
+      @if (activeFilterCount() > 0) {
+        {{ activeFilterCount() }} active
+      }
+      <span aria-hidden="true">{{ isFilterPanelExpanded() ? '−' : '+' }}</span>
+    </span>
+  </button>
+
+  <div
+    id="library-filter-panel"
+    class="library-filter-panel"
+    [hidden]="isMobileLibraryLayout() && !isFilterPanelExpanded()"
+  >
+    <div class="library-tools">
       <label>
-        <span>Filter by priority</span>
-        <select [value]="selectedPriorityLaneId()" (change)="changePriorityFilter($event)">
-          <option value="all">All priority lanes</option>
-          <option value="unassigned">Unassigned</option>
-          @for (lane of priority.lanes(); track lane.id) {
-            <option [value]="lane.id">{{ lane.name }}</option>
+        <span>Filter by category</span>
+        <select [value]="selectedCategoryId()" (change)="changeCategoryFilter($event)">
+          <option value="all">All categories</option>
+          @for (category of categories.categories(); track category.id) {
+            <option [value]="category.id">{{ category.name }}</option>
           }
         </select>
       </label>
-    }
-    <details>
-      <summary>Manage categories</summary>
-      <app-category-manager />
-    </details>
-  </div>
-
-  <form class="library-filters" [formGroup]="filters" (ngSubmit)="applyFilters()">
-    <label class="library-filters__search">
-      <span>Title</span>
-      <input type="search" formControlName="query" placeholder="Search your library" />
-    </label>
-    <label>
-      <span>Type</span>
-      <select formControlName="mediaType">
-        <option value="">Movies and TV</option>
-        <option value="tv">TV series</option>
-        <option value="movie">Movies</option>
-      </select>
-    </label>
-    <label>
-      <span>Airing status</span>
-      <select formControlName="releaseStatus">
-        <option value="">All statuses</option>
-        @for (releaseStatus of releaseStatusOptions; track releaseStatus.value) {
-          <option [value]="releaseStatus.value">{{ releaseStatus.label }}</option>
-        }
-      </select>
-    </label>
-    <label>
-      <span>Genre</span>
-      <select formControlName="genreId">
-        <option [ngValue]="null">All genres</option>
-        @for (genre of genreOptions; track genre.value) {
-          <option [ngValue]="genre.value">{{ genre.label }}</option>
-        }
-      </select>
-    </label>
-    <label>
-      <span>Country</span>
-      <select formControlName="country">
-        <option value="">All countries</option>
-        @for (country of countryOptions; track country.value) {
-          <option [value]="country.value">{{ country.label }}</option>
-        }
-      </select>
-    </label>
-    <label>
-      <span>Minimum rating</span>
-      <input
-        type="number"
-        formControlName="minRating"
-        min="1"
-        max="10"
-        step="0.5"
-        placeholder="Any"
-      />
-    </label>
-    <label>
-      <span>Year from</span>
-      <input type="number" formControlName="yearFrom" min="1900" max="2100" placeholder="Any" />
-    </label>
-    <label>
-      <span>Year to</span>
-      <input type="number" formControlName="yearTo" min="1900" max="2100" placeholder="Any" />
-    </label>
-    <label>
-      <span>Suggested by</span>
-      <select formControlName="suggestedByUserId">
-        <option value="">Any friend</option>
-        @for (source of suggestionSources(); track source.value) {
-          <option [value]="source.value">@{{ source.label }}</option>
-        }
-      </select>
-    </label>
-    <label>
-      <span>Shared list</span>
-      <select formControlName="sharedListId">
-        <option value="">Any shared list</option>
-        @for (list of sharedListOptions(); track list.value) {
-          <option [value]="list.value">{{ list.label }}</option>
-        }
-      </select>
-    </label>
-    <label>
-      <span>Sort by</span>
-      <select formControlName="sort">
-        @for (sort of sortOptions; track sort.value) {
-          <option [value]="sort.value">{{ sort.label }}</option>
-        }
-      </select>
-    </label>
-    <div class="library-filters__actions">
-      <button type="submit">Apply filters</button>
-      <button type="button" class="is-secondary" (click)="clearFilters()">Clear</button>
+      @if (status === 'to_watch') {
+        <label>
+          <span>Filter by priority</span>
+          <select [value]="selectedPriorityLaneId()" (change)="changePriorityFilter($event)">
+            <option value="all">All priority lanes</option>
+            <option value="unassigned">Unassigned</option>
+            @for (lane of priority.lanes(); track lane.id) {
+              <option [value]="lane.id">{{ lane.name }}</option>
+            }
+          </select>
+        </label>
+      }
+      <details>
+        <summary>Manage categories</summary>
+        <app-category-manager />
+      </details>
     </div>
-    @if (filters.hasError('yearRange') && filters.touched) {
-      <p class="library-filters__error" role="alert">Year from cannot be later than year to.</p>
-    }
-  </form>
+
+    <form class="library-filters" [formGroup]="filters" (ngSubmit)="applyFilters()">
+      <label class="library-filters__search">
+        <span>Title</span>
+        <input type="search" formControlName="query" placeholder="Search your library" />
+      </label>
+      <label>
+        <span>Type</span>
+        <select formControlName="mediaType">
+          <option value="">Movies and TV</option>
+          <option value="tv">TV series</option>
+          <option value="movie">Movies</option>
+        </select>
+      </label>
+      <label>
+        <span>Airing status</span>
+        <select formControlName="releaseStatus">
+          <option value="">All statuses</option>
+          @for (releaseStatus of releaseStatusOptions; track releaseStatus.value) {
+            <option [value]="releaseStatus.value">{{ releaseStatus.label }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Genre</span>
+        <select formControlName="genreId">
+          <option [ngValue]="null">All genres</option>
+          @for (genre of genreOptions; track genre.value) {
+            <option [ngValue]="genre.value">{{ genre.label }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Country</span>
+        <select formControlName="country">
+          <option value="">All countries</option>
+          @for (country of countryOptions; track country.value) {
+            <option [value]="country.value">{{ country.label }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Minimum rating</span>
+        <input
+          type="number"
+          formControlName="minRating"
+          min="1"
+          max="10"
+          step="0.5"
+          placeholder="Any"
+        />
+      </label>
+      <label>
+        <span>Year from</span>
+        <input type="number" formControlName="yearFrom" min="1900" max="2100" placeholder="Any" />
+      </label>
+      <label>
+        <span>Year to</span>
+        <input type="number" formControlName="yearTo" min="1900" max="2100" placeholder="Any" />
+      </label>
+      <label>
+        <span>Suggested by</span>
+        <select formControlName="suggestedByUserId">
+          <option value="">Any friend</option>
+          @for (source of suggestionSources(); track source.value) {
+            <option [value]="source.value">@{{ source.label }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Shared list</span>
+        <select formControlName="sharedListId">
+          <option value="">Any shared list</option>
+          @for (list of sharedListOptions(); track list.value) {
+            <option [value]="list.value">{{ list.label }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>Sort by</span>
+        <select formControlName="sort">
+          @for (sort of sortOptions; track sort.value) {
+            <option [value]="sort.value">{{ sort.label }}</option>
+          }
+        </select>
+      </label>
+      <div class="library-filters__actions">
+        <button type="submit">Apply filters</button>
+        <button type="button" class="is-secondary" (click)="clearFilters()">Clear</button>
+      </div>
+      @if (filters.hasError('yearRange') && filters.touched) {
+        <p class="library-filters__error" role="alert">Year from cannot be later than year to.</p>
+      }
+    </form>
+  </div>
 
   @if (library.error()) {
     <div class="library-state library-state--error" role="alert">{{ library.error() }}</div>
-  } @else if (library.isLoading()) {
+  }
+  @if (library.isLoading()) {
     <div class="library-state" role="status">Loading your library…</div>
   } @else if (baseEntries().length === 0) {
     <div class="library-state">

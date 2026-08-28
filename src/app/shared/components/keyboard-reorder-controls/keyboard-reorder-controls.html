@@ -1,5 +1,6 @@
 <div
   class="keyboard-reorder"
+  [class.keyboard-reorder--touch]="touchFriendly()"
   role="group"
   [attr.aria-label]="'Reorder ' + itemLabel()"
   (pointerdown)="$event.stopPropagation()"

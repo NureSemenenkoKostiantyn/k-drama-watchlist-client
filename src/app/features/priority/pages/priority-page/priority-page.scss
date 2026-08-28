@@ -99,10 +99,16 @@
 
 .priority-page__error,
 .priority-page__pick,
-.priority-page__state {
+.priority-page__state,
+.priority-page__reorder-help {
   margin-top: 1rem;
   padding: 0.75rem 1rem;
   border-radius: 0.75rem;
+}
+
+.priority-page__reorder-help {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
 }
 
 .priority-page__error {

@@ -70,6 +70,7 @@ describe('LibraryService', () => {
       status: 'watching',
     };
     const updateResult = service.setStatus('tv', 1, 'watching');
+    expect(service.entries()[0]?.status).toBe('watching');
     const updateRequest = http.expectOne('/api/library/entry-1/status');
 
     expect(updateRequest.request.method).toBe('PATCH');
@@ -86,6 +87,7 @@ describe('LibraryService', () => {
     await loadResult;
 
     const removeResult = service.remove(entry.id);
+    expect(service.entries()).toEqual([]);
     const request = http.expectOne('/api/library/entry-1');
 
     expect(request.request.method).toBe('DELETE');
@@ -118,6 +120,14 @@ describe('LibraryService', () => {
       currentEpisode: 2,
       includeSpecials: false,
     });
+    expect(service.entries()[0]).toMatchObject({
+      status: 'watching',
+      progress: {
+        currentSeason: 1,
+        currentEpisode: 2,
+        completedEpisodes: 2,
+      },
+    });
     const request = http.expectOne('/api/library/entry-1/progress');
 
     expect(request.request.method).toBe('PATCH');
@@ -133,13 +143,19 @@ describe('LibraryService', () => {
   });
 
   it('updates personal metadata through the dedicated endpoints', async () => {
+    const loadResult = service.load();
+    http.expectOne('/api/library').flush([entry]);
+    await loadResult;
+
     const ratingResult = service.updateRating(entry.id, 8.5);
+    expect(service.entries()[0]?.rating).toBe(8.5);
     const ratingRequest = http.expectOne('/api/library/entry-1/rating');
     expect(ratingRequest.request.body).toEqual({ rating: 8.5 });
     ratingRequest.flush({ ...entry, rating: 8.5 });
     await expect(ratingResult).resolves.toMatchObject({ rating: 8.5 });
 
     const descriptionResult = service.updateDescription(entry.id, 'A private note');
+    expect(service.entries()[0]?.description).toBe('A private note');
     const descriptionRequest = http.expectOne('/api/library/entry-1');
     expect(descriptionRequest.request.body).toEqual({ description: 'A private note' });
     descriptionRequest.flush({ ...entry, rating: 8.5, description: 'A private note' });
@@ -148,6 +164,13 @@ describe('LibraryService', () => {
     });
 
     const playbackResult = service.updatePlaybackPreference(entry.id, {
+      audio: {
+        type: 'dubbed',
+        languageCode: 'uk',
+      },
+      subtitleLanguageCode: 'en',
+    });
+    expect(service.entries()[0]?.playbackPreference).toEqual({
       audio: {
         type: 'dubbed',
         languageCode: 'uk',
@@ -192,6 +215,7 @@ describe('LibraryService', () => {
     await loadResult;
 
     const updateResult = service.updateCategories(entry.id, ['category-1']);
+    expect(service.entries()[0]?.categoryIds).toEqual(['category-1']);
     const request = http.expectOne('/api/library/entry-1');
 
     expect(request.request.method).toBe('PATCH');
@@ -237,5 +261,39 @@ describe('LibraryService', () => {
         priorityPosition: 0,
       },
     ]);
+  });
+
+  it('rolls back failed optimistic updates and removals', async () => {
+    const prioritizedEntry: LibraryEntry = {
+      ...entry,
+      priorityLaneId: 'lane-1',
+      priorityPosition: 0,
+    };
+    const loadResult = service.load();
+    http.expectOne('/api/library').flush([prioritizedEntry]);
+    await loadResult;
+
+    const statusResult = service.setStatus('tv', 1, 'watching');
+    expect(service.entries()[0]).toMatchObject({ status: 'watching' });
+    expect(service.entries()[0]?.priorityLaneId).toBeUndefined();
+    http.expectOne('/api/library/entry-1/status').flush(
+      { message: 'Unavailable' },
+      { status: 503, statusText: 'Service unavailable' },
+    );
+
+    await expect(statusResult).resolves.toBeNull();
+    expect(service.entries()[0]).toEqual(prioritizedEntry);
+    expect(service.error()).toContain('library could not be updated');
+
+    const removeResult = service.remove(entry.id);
+    expect(service.entries()).toEqual([]);
+    http.expectOne('/api/library/entry-1').flush(
+      { message: 'Unavailable' },
+      { status: 503, statusText: 'Service unavailable' },
+    );
+
+    await expect(removeResult).resolves.toBe(false);
+    expect(service.entries()).toEqual([prioritizedEntry]);
+    expect(service.error()).toContain('title could not be removed');
   });
 });

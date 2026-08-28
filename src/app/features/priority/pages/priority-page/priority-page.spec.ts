@@ -1,6 +1,10 @@
+import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { signal } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
 import { vi } from 'vitest';
 
 import { LibraryService } from '../../../library/data-access/library.service';
@@ -38,6 +42,12 @@ describe('PriorityPage', () => {
       imports: [PriorityPage],
       providers: [
         provideRouter([]),
+        {
+          provide: BreakpointObserver,
+          useValue: {
+            observe: vi.fn().mockReturnValue(of({ matches: false, breakpoints: {} })),
+          },
+        },
         {
           provide: PriorityService,
           useValue: {
@@ -84,6 +94,12 @@ describe('PriorityPage', () => {
     expect(root.querySelector('.priority-item__handle')).toBeNull();
     expect(root.querySelector('.priority-lane__drag')).toBeNull();
     expect(root.querySelector('.priority-lane.cdk-drag')).not.toBeNull();
+    expect(
+      fixture.debugElement
+        .queryAll(By.directive(CdkDrag))
+        .every((element) => !element.injector.get(CdkDrag).disabled),
+    ).toBe(true);
+    expect(root.querySelector('.priority-page__reorder-help')?.textContent).toContain('Drag lanes');
     expect(root.querySelector('button[aria-label="Pick a random title"] svg')).not.toBeNull();
     expect(root.textContent).not.toContain('Collapse');
 
@@ -130,6 +146,83 @@ describe('PriorityPage', () => {
     fixture.detectChanges();
 
     expect(root.querySelector('.case-opening__status')?.textContent).toContain('Goblin');
+  });
+
+  it('disables drag and drop and exposes touch-sized move controls on mobile', async () => {
+    const reorderItems = vi.fn().mockResolvedValue(true);
+    const applyPriorityOrder = vi.fn();
+
+    await TestBed.configureTestingModule({
+      imports: [PriorityPage],
+      providers: [
+        provideRouter([]),
+        {
+          provide: BreakpointObserver,
+          useValue: {
+            observe: vi.fn().mockReturnValue(of({ matches: true, breakpoints: {} })),
+          },
+        },
+        {
+          provide: PriorityService,
+          useValue: {
+            lanes: signal([
+              {
+                id: 'lane-1',
+                name: 'Must watch',
+                position: 0,
+                isDefault: true,
+                createdAt: '2026-07-24T10:00:00.000Z',
+                updatedAt: '2026-07-24T10:00:00.000Z',
+              },
+            ]).asReadonly(),
+            isLoading: signal(false).asReadonly(),
+            error: signal<string | null>(null).asReadonly(),
+            load: vi.fn().mockResolvedValue(true),
+            create: vi.fn(),
+            update: vi.fn(),
+            delete: vi.fn(),
+            reorderLanes: vi.fn(),
+            reorderItems,
+          },
+        },
+        {
+          provide: LibraryService,
+          useValue: {
+            entries: signal([entry]).asReadonly(),
+            isLoading: signal(false).asReadonly(),
+            load: vi.fn().mockResolvedValue(true),
+            applyPriorityOrder,
+            clearPriorityLane: vi.fn(),
+          },
+        },
+      ],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(PriorityPage);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(
+      fixture.debugElement
+        .queryAll(By.directive(CdkDrag))
+        .every((element) => element.injector.get(CdkDrag).disabled),
+    ).toBe(true);
+    expect(
+      fixture.debugElement
+        .queryAll(By.directive(CdkDropList))
+        .every((element) => element.injector.get(CdkDropList).disabled),
+    ).toBe(true);
+    expect(root.querySelector('.priority-page__reorder-help')?.textContent).toContain(
+      'Use the arrow buttons',
+    );
+    expect(root.querySelectorAll('.keyboard-reorder--touch').length).toBeGreaterThan(0);
+
+    findButtonByLabel(root, 'Move Goblin to next lane').click();
+    await fixture.whenStable();
+
+    expect(reorderItems).toHaveBeenCalledWith([{ laneId: 'lane-1', itemIds: ['entry-1'] }]);
+    expect(applyPriorityOrder).toHaveBeenCalledWith('lane-1', ['entry-1']);
   });
 });
 
