@@ -48,15 +48,10 @@
 }
 
 .app-shell__brand-mark {
-  display: grid;
-  width: 2rem;
-  height: 2rem;
-  place-items: center;
-  border-radius: 0.625rem;
-  color: #100d18;
-  background: var(--color-accent);
-  font-size: 0.6875rem;
-  letter-spacing: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 auto;
+  object-fit: contain;
 }
 
 .app-shell__authenticated,

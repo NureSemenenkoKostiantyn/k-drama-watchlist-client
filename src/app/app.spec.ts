@@ -73,6 +73,11 @@ describe('App', () => {
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.app-shell__brand')?.textContent).toContain('Drama Watch');
+    expect(
+      compiled
+        .querySelector<HTMLImageElement>('.app-shell__brand-mark')
+        ?.getAttribute('src'),
+    ).toBe('/brand/drama-watch-mark.png');
   });
 
   it('provides a skip target and a polite route announcement', async () => {
