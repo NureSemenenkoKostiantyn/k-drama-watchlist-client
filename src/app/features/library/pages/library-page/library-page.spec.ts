@@ -1,6 +1,8 @@
+import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
+import { BehaviorSubject } from 'rxjs';
 import { vi } from 'vitest';
 
 import { CategoriesService } from '../../../categories/data-access/categories.service';
@@ -10,6 +12,7 @@ import { LibraryEntry } from '../../models/library';
 import { LibraryPage } from './library-page';
 
 describe('LibraryPage', () => {
+  let breakpointState: BehaviorSubject<BreakpointState>;
   const entry: LibraryEntry = {
     id: 'entry-1',
     mediaId: 'media-1',
@@ -59,6 +62,7 @@ describe('LibraryPage', () => {
   };
 
   beforeEach(async () => {
+    breakpointState = new BehaviorSubject<BreakpointState>({ matches: false, breakpoints: {} });
     const entries = signal([entry, movieEntry]);
     const categories = signal([]);
     const isLoading = signal(false);
@@ -68,6 +72,12 @@ describe('LibraryPage', () => {
       imports: [LibraryPage],
       providers: [
         provideRouter([]),
+        {
+          provide: BreakpointObserver,
+          useValue: {
+            observe: vi.fn().mockReturnValue(breakpointState),
+          },
+        },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -186,5 +196,36 @@ describe('LibraryPage', () => {
         title.textContent?.trim(),
       ),
     ).toEqual(['Parasite']);
+  });
+
+  it('uses a collapsible filter panel on mobile and reports active filters', async () => {
+    breakpointState.next({ matches: true, breakpoints: {} });
+    const fixture = TestBed.createComponent(LibraryPage);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const toggle = root.querySelector<HTMLButtonElement>('.library-filter-toggle');
+    const panel = root.querySelector<HTMLElement>('#library-filter-panel');
+
+    expect(toggle?.getAttribute('aria-expanded')).toBe('false');
+    expect(panel?.hidden).toBe(true);
+
+    toggle?.click();
+    fixture.detectChanges();
+
+    expect(toggle?.getAttribute('aria-expanded')).toBe('true');
+    expect(panel?.hidden).toBe(false);
+
+    const query = root.querySelector<HTMLInputElement>('input[formControlName="query"]');
+    const form = root.querySelector<HTMLFormElement>('.library-filters');
+    query!.value = 'Goblin';
+    query!.dispatchEvent(new Event('input'));
+    form!.dispatchEvent(new Event('submit'));
+    fixture.detectChanges();
+
+    expect(toggle?.getAttribute('aria-expanded')).toBe('false');
+    expect(toggle?.textContent).toContain('1 active');
+    expect(panel?.hidden).toBe(true);
   });
 });

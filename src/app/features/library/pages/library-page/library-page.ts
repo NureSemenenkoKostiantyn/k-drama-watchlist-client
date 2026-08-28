@@ -1,3 +1,4 @@
+import { BreakpointObserver } from '@angular/cdk/layout';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -7,6 +8,7 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
   FormControl,
@@ -15,6 +17,7 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
+import { map } from 'rxjs';
 
 import { CategoryManager } from '../../../categories/components/category-manager/category-manager';
 import { EntryCategoryPicker } from '../../../categories/components/entry-category-picker/entry-category-picker';
@@ -38,6 +41,7 @@ import {
 } from '../../utils/library-filters';
 
 type LibraryView = 'grid' | 'list';
+const mobileLibraryBreakpoint = '(max-width: 48rem)';
 
 @Component({
   selector: 'app-library-page',
@@ -54,6 +58,7 @@ type LibraryView = 'grid' | 'list';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LibraryPage implements OnInit {
+  private readonly breakpointObserver = inject(BreakpointObserver);
   private readonly route = inject(ActivatedRoute);
   protected readonly library = inject(LibraryService);
   protected readonly categories = inject(CategoriesService);
@@ -63,7 +68,20 @@ export class LibraryPage implements OnInit {
   protected readonly selectedCategoryId = signal('all');
   protected readonly selectedPriorityLaneId = signal('all');
   protected readonly view = signal<LibraryView>('grid');
+  protected readonly isMobileLibraryLayout = toSignal(
+    this.breakpointObserver
+      .observe(mobileLibraryBreakpoint)
+      .pipe(map((breakpointState) => breakpointState.matches)),
+    { initialValue: false },
+  );
+  protected readonly isFilterPanelExpanded = signal(false);
   protected readonly appliedFilters = signal<LibraryAdvancedFilters>(DEFAULT_LIBRARY_FILTERS);
+  protected readonly activeFilterCount = computed(
+    () =>
+      countActiveLibraryFilters(this.appliedFilters()) +
+      Number(this.selectedCategoryId() !== 'all') +
+      Number(this.status === 'to_watch' && this.selectedPriorityLaneId() !== 'all'),
+  );
   protected readonly genreOptions = MEDIA_GENRE_OPTIONS;
   protected readonly countryOptions = MEDIA_COUNTRY_OPTIONS;
   protected readonly sortOptions = MEDIA_SORT_OPTIONS;
@@ -206,6 +224,10 @@ export class LibraryPage implements OnInit {
     }
   }
 
+  protected toggleFilterPanel(): void {
+    this.isFilterPanelExpanded.update((isExpanded) => !isExpanded);
+  }
+
   protected applyFilters(): void {
     this.filters.markAllAsTouched();
 
@@ -227,6 +249,10 @@ export class LibraryPage implements OnInit {
       sharedListId: value.sharedListId,
       sort: value.sort,
     });
+
+    if (this.isMobileLibraryLayout()) {
+      this.isFilterPanelExpanded.set(false);
+    }
   }
 
   protected clearFilters(): void {
@@ -258,4 +284,20 @@ function uniqueOptions(
   return [...new Map(options.map((option) => [option.value, option])).values()].sort(
     (left, right) => left.label.localeCompare(right.label, undefined, { sensitivity: 'base' }),
   );
+}
+
+function countActiveLibraryFilters(filters: LibraryAdvancedFilters): number {
+  return [
+    filters.query.trim().length > 0,
+    filters.mediaType !== '',
+    filters.releaseStatus !== '',
+    filters.minRating !== null,
+    filters.genreId !== null,
+    filters.country !== '',
+    filters.yearFrom !== null,
+    filters.yearTo !== null,
+    filters.suggestedByUserId !== '',
+    filters.sharedListId !== '',
+    filters.sort !== 'recent',
+  ].filter(Boolean).length;
 }

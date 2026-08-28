@@ -47,6 +47,14 @@
   background: var(--color-accent);
 }
 
+.library-filter-toggle {
+  display: none;
+}
+
+.library-filter-panel[hidden] {
+  display: none;
+}
+
 .library-tools {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
