@@ -69,13 +69,19 @@ export class App {
       const hadTabIndex = focusTarget.hasAttribute('tabindex');
       if (!hadTabIndex) {
         focusTarget.setAttribute('tabindex', '-1');
-        focusTarget.addEventListener(
-          'blur',
-          () => focusTarget.removeAttribute('tabindex'),
-          { once: true },
-        );
       }
 
+      focusTarget.classList.add('route-focus-target');
+      focusTarget.addEventListener(
+        'blur',
+        () => {
+          focusTarget.classList.remove('route-focus-target');
+          if (!hadTabIndex) {
+            focusTarget.removeAttribute('tabindex');
+          }
+        },
+        { once: true },
+      );
       focusTarget.focus();
       const pageName = heading?.textContent?.trim();
       this.routeAnnouncement.set(
