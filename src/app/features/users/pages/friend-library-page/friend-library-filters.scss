@@ -76,3 +76,20 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+@media (max-width: 30rem) {
+  .friend-library__filters {
+    grid-template-columns: 1fr;
+    padding: 0.875rem;
+  }
+
+  .friend-library__filter-actions {
+    display: grid;
+    grid-column: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .friend-library__filter-actions button {
+    min-height: 2.75rem;
+  }
+}

@@ -116,3 +116,17 @@
 .visibility-settings__status--error {
   color: #ffd1dd;
 }
+
+@media (max-width: 34rem) {
+  .visibility-settings {
+    padding: 1rem;
+  }
+
+  .visibility-settings label {
+    min-height: 2.75rem;
+  }
+
+  .visibility-settings button {
+    width: 100%;
+  }
+}
