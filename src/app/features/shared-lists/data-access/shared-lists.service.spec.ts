@@ -10,7 +10,9 @@ describe('SharedListsService', () => {
   let http: HttpTestingController;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
     service = TestBed.inject(SharedListsService);
     http = TestBed.inject(HttpTestingController);
   });
@@ -38,6 +40,20 @@ describe('SharedListsService', () => {
     await expect(promise).resolves.toEqual(invitation);
   });
 
+  it('lists and revokes owner-scoped pending invitations', async () => {
+    const pending = service.listInvites(list.id);
+    const listRequest = http.expectOne(`/api/lists/${list.id}/invites`);
+    expect(listRequest.request.method).toBe('GET');
+    listRequest.flush([invitation]);
+    await expect(pending).resolves.toEqual([invitation]);
+
+    const revoked = service.revokeInvite(list.id, invitation.id);
+    const revokeRequest = http.expectOne(`/api/lists/${list.id}/invites/${invitation.id}`);
+    expect(revokeRequest.request.method).toBe('DELETE');
+    revokeRequest.flush(null);
+    await expect(revoked).resolves.toBe(true);
+  });
+
   it('updates visibility and retains the server-issued public slug', async () => {
     const shared = { ...list, visibility: 'unlisted' as const, publicSlug: 'abcdefghijklmnop' };
     const promise = service.update(list.id, { visibility: 'unlisted' });
@@ -56,7 +72,10 @@ describe('SharedListsService', () => {
     await load;
 
     const reordered = [...list.items].reverse().map((item, position) => ({ ...item, position }));
-    const promise = service.reorder(list.id, reordered.map((item) => item.id));
+    const promise = service.reorder(
+      list.id,
+      reordered.map((item) => item.id),
+    );
     const request = http.expectOne(`/api/lists/${list.id}/reorder`);
     expect(request.request.body).toEqual({ itemIds: ['item-2', 'item-1'] });
     request.flush(reordered);
@@ -114,6 +133,7 @@ const invitation = {
   target: member.user,
   role: 'commenter' as const,
   expiresAt: '2026-08-29T12:00:00.000Z',
+  createdAt: '2026-08-22T12:00:00.000Z',
 };
 
 const list: SharedListDetails = {

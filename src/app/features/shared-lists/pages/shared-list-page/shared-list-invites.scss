@@ -1,0 +1,131 @@
+.invite-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+}
+
+.invite-candidates {
+  display: grid;
+  gap: 0.4rem;
+  max-height: 14rem;
+  overflow-y: auto;
+}
+
+.invite-candidates > button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 0.65rem 0.75rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 0.75rem;
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  text-align: left;
+}
+
+.invite-candidates > button > span {
+  display: grid;
+  min-width: 0;
+}
+
+.invite-candidates strong,
+.invite-candidates small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.invite-candidates small {
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+}
+
+.invite-candidates > button:disabled {
+  color: var(--color-text-muted);
+}
+
+.invite-feedback,
+.invite-error {
+  color: #b9f5d2;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.invite-error {
+  color: #ffd1dd;
+}
+
+.pending-invites {
+  display: grid;
+  gap: 0.65rem;
+  padding-top: 0.85rem;
+  border-top: 0.0625rem solid var(--color-border);
+}
+
+.pending-invites > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.pending-invites h3 {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.pending-invites > div > span {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+}
+
+.pending-invites ul {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pending-invites li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 0.75rem;
+}
+
+.pending-invites li > div:first-child {
+  display: grid;
+  min-width: 0;
+  gap: 0.2rem;
+}
+
+.pending-invites li span,
+.pending-invites__empty {
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  line-height: 1.4;
+}
+
+.pending-invites li button {
+  flex: none;
+  min-height: 2.25rem;
+  padding-inline: 0.7rem;
+  color: #ffb3c5;
+  background: transparent;
+  border: 0.0625rem solid var(--color-border);
+}
+
+.pending-invites__confirm {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.pending-invites__empty {
+  margin: 0;
+}

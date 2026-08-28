@@ -89,12 +89,16 @@ export interface PublicSharedListDiscovery {
   items: PublicSharedListDiscoveryItem[];
 }
 
-export interface SharedListInvite {
+export interface SharedListPendingInvite {
   id: string;
-  acceptUrl: string;
   target: PublicUserProfile;
   role: Exclude<SharedListRole, 'owner'>;
   expiresAt: string;
+  createdAt: string;
+}
+
+export interface SharedListInvite extends SharedListPendingInvite {
+  acceptUrl: string;
 }
 
 export interface UpdateSharedListItemRequest {

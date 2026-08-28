@@ -1,3 +1,5 @@
+export type StatisticsStatus = 'to_watch' | 'watching' | 'watched';
+
 export interface StatisticsTotals {
   library: number;
   toWatch: number;

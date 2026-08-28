@@ -41,11 +41,24 @@ describe('StatisticsPage', () => {
 
   it('renders exact personal library statistics', () => {
     const page = fixture.nativeElement as HTMLElement;
-    expect(getOverview).toHaveBeenCalledOnce();
+    expect(getOverview).toHaveBeenCalledWith(['watching', 'watched']);
     expect(page.querySelector('h1')?.textContent).toContain('Statistics');
     expect(page.textContent).toContain('24');
     expect(page.textContent).toContain('Drama');
     expect(page.textContent).toContain('South Korea');
     expect(page.textContent).toContain('8.67');
+  });
+
+  it('applies a user-selected status scope', async () => {
+    const page = fixture.nativeElement as HTMLElement;
+    const buttons = Array.from(
+      page.querySelectorAll<HTMLButtonElement>('.statistics__status-options button'),
+    );
+    buttons.find((button) => button.textContent?.includes('To watch'))?.click();
+    fixture.detectChanges();
+    page.querySelector<HTMLButtonElement>('.statistics__apply')?.click();
+    await fixture.whenStable();
+
+    expect(getOverview).toHaveBeenLastCalledWith(['watching', 'watched', 'to_watch']);
   });
 });

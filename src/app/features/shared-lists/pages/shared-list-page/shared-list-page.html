@@ -193,21 +193,70 @@
               <p>Secure access</p>
               <h2>Invite a person</h2>
             </div>
-            <label
-              ><span>Exact username</span
-              ><input
-                formControlName="username"
-                maxlength="30"
-                autocomplete="off"
-                placeholder="username" /></label
-            ><label
-              ><span>Role</span
-              ><select formControlName="role">
+            <label>
+              <span>Name or username</span>
+              <div class="invite-search">
+                <input
+                  formControlName="username"
+                  maxlength="30"
+                  autocomplete="off"
+                  placeholder="Search people or choose a friend"
+                />
+                <button
+                  type="button"
+                  [disabled]="isSearchingPeople()"
+                  (click)="searchInvitePeople()"
+                >
+                  {{ isSearchingPeople() ? 'Searching…' : 'Search' }}
+                </button>
+              </div>
+            </label>
+
+            @if (inviteCandidates().length > 0) {
+              <div class="invite-candidates" aria-label="People available to invite">
+                @for (candidate of inviteCandidates(); track candidate.id) {
+                  <button
+                    type="button"
+                    [disabled]="isListMember(candidate.id)"
+                    (click)="selectInviteCandidate(candidate)"
+                  >
+                    <span>
+                      <strong>{{ candidate.name }}</strong>
+                      <small>&#64;{{ candidate.displayUsername }}</small>
+                    </span>
+                    <small>
+                      {{
+                        isListMember(candidate.id)
+                          ? 'Member'
+                          : isFriend(candidate)
+                            ? 'Friend'
+                            : 'Person'
+                      }}
+                    </small>
+                  </button>
+                }
+              </div>
+            }
+
+            <label>
+              <span>Role</span>
+              <select formControlName="role">
                 <option value="editor">Editor · manage titles</option>
                 <option value="commenter">Commenter · join discussions</option>
                 <option value="viewer">Viewer · read only</option>
-              </select></label
-            ><button type="submit" [disabled]="inviteForm.invalid">Send invitation</button>
+              </select>
+            </label>
+            <button type="submit" [disabled]="inviteForm.invalid || isInviting()">
+              {{ isInviting() ? 'Sending…' : 'Send invitation' }}
+            </button>
+
+            @if (inviteFeedback()) {
+              <p class="invite-feedback" role="status">{{ inviteFeedback() }}</p>
+            }
+            @if (inviteError()) {
+              <p class="invite-error" role="alert">{{ inviteError() }}</p>
+            }
+
             @if (invite(); as link) {
               <div class="invite">
                 <strong>Invitation sent to {{ link.target }}</strong
@@ -222,6 +271,44 @@
                 >
               </div>
             }
+
+            <section class="pending-invites" aria-labelledby="pending-invites-title">
+              <div>
+                <h3 id="pending-invites-title">Pending invitations</h3>
+                <span>{{ pendingInvites().length }}</span>
+              </div>
+              @if (pendingInvites().length > 0) {
+                <ul>
+                  @for (pending of pendingInvites(); track pending.id) {
+                    <li>
+                      <div>
+                        <strong>{{ pending.target.name }}</strong>
+                        <span>
+                          &#64;{{ pending.target.displayUsername }} · {{ pending.role }} · expires
+                          {{ pending.expiresAt | date: 'mediumDate' }}
+                        </span>
+                      </div>
+                      @if (pendingInviteRevokeId() === pending.id) {
+                        <div class="pending-invites__confirm">
+                          <button
+                            type="button"
+                            [disabled]="activeInviteId() !== null"
+                            (click)="revokeInvite(pending)"
+                          >
+                            {{ activeInviteId() === pending.id ? 'Revoking…' : 'Confirm revoke' }}
+                          </button>
+                          <button type="button" (click)="cancelInviteRevoke()">Keep</button>
+                        </div>
+                      } @else {
+                        <button type="button" (click)="revokeInvite(pending)">Revoke</button>
+                      }
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <p class="pending-invites__empty">No pending invitations.</p>
+              }
+            </section>
           </form>
         }
         @if (canEdit()) {

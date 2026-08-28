@@ -37,7 +37,7 @@ describe('StatisticsService', () => {
       completedByMonth: [{ month: '2026-08', count: 1 }],
     };
     const request = service.getOverview();
-    http.expectOne('/api/statistics').flush(response);
+    http.expectOne('/api/statistics?statuses=watching,watched').flush(response);
 
     await expect(request).resolves.toEqual(response);
   });
