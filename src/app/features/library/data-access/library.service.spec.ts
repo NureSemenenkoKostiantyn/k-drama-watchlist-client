@@ -14,6 +14,7 @@ describe('LibraryService', () => {
     mediaId: 'media-1',
     status: 'to_watch',
     categoryIds: [],
+    sharedLists: [],
     media: {
       id: 'tv:1',
       tmdbId: 1,

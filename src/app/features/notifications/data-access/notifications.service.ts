@@ -14,6 +14,8 @@ const EMPTY_OVERVIEW: NotificationsOverview = {
   unreadCount: 0,
 };
 
+export const NOTIFICATION_REFRESH_COOLDOWN_MS = 30_000;
+
 @Injectable({ providedIn: 'root' })
 export class NotificationsService {
   private readonly http = inject(HttpClient);
@@ -21,6 +23,7 @@ export class NotificationsService {
   private readonly overviewState =
     signal<NotificationsOverview>(EMPTY_OVERVIEW);
   private refreshInFlight: Promise<NotificationsOverview> | null = null;
+  private lastRefreshAttemptAt: number | null = null;
   private stateVersion = 0;
 
   readonly items = computed(() => this.overviewState().items);
@@ -33,6 +36,7 @@ export class NotificationsService {
       return this.refreshInFlight;
     }
 
+    this.lastRefreshAttemptAt = Date.now();
     const refreshVersion = this.stateVersion;
     const request = firstValueFrom(
       this.http.get<NotificationsOverview>(this.baseUrl),
@@ -50,6 +54,23 @@ export class NotificationsService {
       });
     this.refreshInFlight = request;
     return request;
+  }
+
+  refreshIfStale(
+    minimumAgeMs = NOTIFICATION_REFRESH_COOLDOWN_MS,
+  ): Promise<NotificationsOverview> {
+    if (this.refreshInFlight) {
+      return this.refreshInFlight;
+    }
+
+    if (
+      this.lastRefreshAttemptAt !== null &&
+      Date.now() - this.lastRefreshAttemptAt < minimumAgeMs
+    ) {
+      return Promise.resolve(this.overviewState());
+    }
+
+    return this.refresh();
   }
 
   async markRead(notificationId: string): Promise<void> {
@@ -102,6 +123,7 @@ export class NotificationsService {
   clear(): void {
     this.stateVersion += 1;
     this.refreshInFlight = null;
+    this.lastRefreshAttemptAt = null;
     this.overviewState.set(EMPTY_OVERVIEW);
   }
 }

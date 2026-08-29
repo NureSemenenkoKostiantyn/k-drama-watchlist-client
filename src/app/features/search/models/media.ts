@@ -1,51 +1,16 @@
-export type MediaType = 'movie' | 'tv';
+import type { components } from '../../../core/api/generated/api-contracts';
+
+type ApiSchemas = components['schemas'];
+
+export type MediaType = ApiSchemas['MediaType'];
 export type SearchMediaType = 'all' | MediaType;
-export type MediaReleaseStatus = 'airing' | 'upcoming' | 'ended' | 'unknown';
+export type MediaReleaseStatus = ApiSchemas['MediaReleaseStatus'];
+export type MediaSummary = ApiSchemas['MediaSummary'];
+export type MediaSeason = ApiSchemas['MediaSeason'];
+export type MediaDetails = ApiSchemas['MediaDetails'];
+export type MediaSearchResponse = ApiSchemas['MediaSearchResponse'];
 
-export interface MediaSummary {
-  id: string;
-  tmdbId: number;
-  mediaType: MediaType;
-  title: string;
-  originalTitle: string;
-  overview?: string;
-  posterPath?: string;
-  posterUrl?: string;
-  backdropPath?: string;
-  backdropUrl?: string;
-  releaseDate?: string;
-  firstAirDate?: string;
-  originCountry: string[];
-  originalLanguage?: string;
-  genreIds: number[];
-  tmdbVoteAverage?: number;
-  tmdbVoteCount?: number;
-}
-
-export interface MediaSeason {
-  tmdbSeasonId?: number;
-  seasonNumber: number;
-  name: string;
-  episodeCount: number;
-  airDate?: string;
-  posterPath?: string;
-}
-
-export interface MediaDetails extends MediaSummary {
-  releaseStatus?: MediaReleaseStatus;
-  runtimeMinutes?: number;
-  totalEpisodes?: number;
-  totalSeasons?: number;
-  seasons?: MediaSeason[];
-}
-
-export interface MediaSearchResponse {
-  page: number;
-  totalPages: number;
-  totalResults: number;
-  results: MediaSummary[];
-}
-
+/** UI-level search input; the data-access service maps it to API query parameters. */
 export interface MediaSearchRequest {
   query: string;
   type: SearchMediaType;

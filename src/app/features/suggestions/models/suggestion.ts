@@ -1,28 +1,9 @@
-import { MediaDetails, MediaType } from '../../search/models/media';
-import { PublicUserProfile } from '../../users/models/public-user-profile';
+import type { components } from '../../../core/api/generated/api-contracts';
 
-export type SuggestionStatus = 'pending' | 'accepted' | 'dismissed';
-export type SuggestionDirection = 'received' | 'sent';
+type ApiSchemas = components['schemas'];
 
-export interface Suggestion {
-  id: string;
-  status: SuggestionStatus;
-  direction: SuggestionDirection;
-  user: PublicUserProfile;
-  media: MediaDetails;
-  message?: string;
-  createdAt: string;
-  respondedAt?: string;
-}
-
-export interface SuggestionsOverview {
-  received: Suggestion[];
-  sent: Suggestion[];
-}
-
-export interface CreateSuggestionRequest {
-  username: string;
-  mediaType: MediaType;
-  tmdbId: number;
-  message?: string;
-}
+export type SuggestionStatus = ApiSchemas['SuggestionStatus'];
+export type SuggestionDirection = ApiSchemas['SuggestionDirection'];
+export type Suggestion = ApiSchemas['SuggestionResponse'];
+export type SuggestionsOverview = ApiSchemas['SuggestionsResponse'];
+export type CreateSuggestionRequest = ApiSchemas['CreateSuggestionDto'];

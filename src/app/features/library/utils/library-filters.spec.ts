@@ -109,6 +109,7 @@ const entries: LibraryEntry[] = [
     status: 'watched',
     rating: 8.5,
     categoryIds: [],
+    sharedLists: [],
     media: {
       id: 'movie:705996',
       tmdbId: 705996,
@@ -128,6 +129,7 @@ const entries: LibraryEntry[] = [
     mediaId: 'media-3',
     status: 'watched',
     categoryIds: [],
+    sharedLists: [],
     media: {
       id: 'tv:3',
       tmdbId: 3,

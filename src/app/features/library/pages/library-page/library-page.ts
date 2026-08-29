@@ -20,7 +20,6 @@ import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
 import { map } from 'rxjs';
 
 import { CategoryManager } from '../../../categories/components/category-manager/category-manager';
-import { EntryCategoryPicker } from '../../../categories/components/entry-category-picker/entry-category-picker';
 import { CategoriesService } from '../../../categories/data-access/categories.service';
 import { PriorityService } from '../../../priority/data-access/priority.service';
 import { MediaReleaseStatus, MediaType } from '../../../search/models/media';
@@ -30,7 +29,7 @@ import {
   MEDIA_SORT_OPTIONS,
   MediaSort,
 } from '../../../../shared/media-filter-options';
-import { ProgressControls } from '../../components/progress-controls/progress-controls';
+import { LibraryEntryCard } from '../../components/library-entry-card/library-entry-card';
 import { LibraryService } from '../../data-access/library.service';
 import { LibraryEntry, WatchStatus } from '../../models/library';
 import {
@@ -50,8 +49,7 @@ const mobileLibraryBreakpoint = '(max-width: 48rem)';
     RouterLinkActive,
     ReactiveFormsModule,
     CategoryManager,
-    EntryCategoryPicker,
-    ProgressControls,
+    LibraryEntryCard,
   ],
   templateUrl: './library-page.html',
   styleUrls: ['./library-page.scss', './library-page-mobile.scss'],
@@ -186,19 +184,9 @@ export class LibraryPage implements OnInit {
     }
   }
 
-  protected displayYear(entry: LibraryEntry): string {
-    return (entry.media.firstAirDate ?? entry.media.releaseDate)?.slice(0, 4) ?? 'Year unknown';
-  }
-
-  protected async changeStatus(entry: LibraryEntry, event: Event): Promise<void> {
-    const select = event.target;
-
-    if (!(select instanceof HTMLSelectElement) || !isWatchStatus(select.value)) {
-      return;
-    }
-
+  protected async changeStatus(entry: LibraryEntry, status: WatchStatus): Promise<void> {
     this.pendingEntryId.set(entry.id);
-    await this.library.setStatus(entry.media.mediaType, entry.media.tmdbId, select.value);
+    await this.library.setStatus(entry.media.mediaType, entry.media.tmdbId, status);
     this.pendingEntryId.set(null);
   }
 

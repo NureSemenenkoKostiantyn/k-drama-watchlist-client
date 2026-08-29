@@ -10,7 +10,9 @@ import {
 } from '@angular/core';
 import { A11yModule } from '@angular/cdk/a11y';
 import { DOCUMENT } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { fromEvent, merge } from 'rxjs';
 
 import { environment } from '../environments/environment';
 import { AuthenticationService } from './core/auth/authentication.service';
@@ -53,6 +55,29 @@ export class App {
         this.settings.clear();
       }
     });
+
+    const window = this.document.defaultView;
+
+    if (window) {
+      merge(
+        fromEvent(window, 'focus'),
+        fromEvent(window, 'online'),
+        fromEvent(this.document, 'visibilitychange'),
+      )
+        .pipe(takeUntilDestroyed())
+        .subscribe(() => this.refreshVisibleNotifications());
+    }
+  }
+
+  private refreshVisibleNotifications(): void {
+    if (
+      !this.authentication.isAuthenticated() ||
+      this.document.visibilityState !== 'visible'
+    ) {
+      return;
+    }
+
+    void this.notifications.refreshIfStale().catch(() => undefined);
   }
 
   protected handleRouteActivation(): void {
