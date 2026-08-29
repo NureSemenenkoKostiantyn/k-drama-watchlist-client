@@ -145,6 +145,14 @@
   font-size: 0.72rem;
 }
 
+.wheel-members li div .wheel-members__username {
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 500;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.16em;
+}
+
 .wheel-members li strong {
   text-transform: capitalize;
 }

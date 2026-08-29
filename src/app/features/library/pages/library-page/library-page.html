@@ -31,15 +31,36 @@
     [hidden]="isMobileLibraryLayout() && !isFilterPanelExpanded()"
   >
     <div class="library-tools">
-      <label>
-        <span>Filter by category</span>
-        <select [value]="selectedCategoryId()" (change)="changeCategoryFilter($event)">
+      <div class="library-tools__field">
+        <div class="library-tools__label-row">
+          <label for="library-category-filter">Filter by category</label>
+          <button
+            type="button"
+            class="library-tools__category-toggle"
+            aria-label="Manage categories"
+            title="Manage categories"
+            aria-controls="library-category-manager"
+            [attr.aria-expanded]="isCategoryManagerExpanded()"
+            (click)="toggleCategoryManager()"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M12 8.25A3.75 3.75 0 1 0 12 15.75 3.75 3.75 0 0 0 12 8.25ZM19.5 12a7.58 7.58 0 0 0-.1-1.2l2.05-1.6-2-3.4-2.5 1a8.03 8.03 0 0 0-2.1-1.2L14.5 3h-5l-.35 2.6a8.03 8.03 0 0 0-2.1 1.2l-2.5-1-2 3.4 2.05 1.6a7.58 7.58 0 0 0 0 2.4l-2.05 1.6 2 3.4 2.5-1a8.03 8.03 0 0 0 2.1 1.2L9.5 21h5l.35-2.6a8.03 8.03 0 0 0 2.1-1.2l2.5 1 2-3.4-2.05-1.6c.07-.4.1-.8.1-1.2Z"
+              />
+            </svg>
+          </button>
+        </div>
+        <select
+          id="library-category-filter"
+          [value]="selectedCategoryId()"
+          (change)="changeCategoryFilter($event)"
+        >
           <option value="all">All categories</option>
           @for (category of categories.categories(); track category.id) {
             <option [value]="category.id">{{ category.name }}</option>
           }
         </select>
-      </label>
+      </div>
       @if (status === 'to_watch') {
         <label>
           <span>Filter by priority</span>
@@ -52,10 +73,13 @@
           </select>
         </label>
       }
-      <details>
-        <summary>Manage categories</summary>
+      <div
+        id="library-category-manager"
+        class="library-tools__category-manager"
+        [hidden]="!isCategoryManagerExpanded()"
+      >
         <app-category-manager />
-      </details>
+      </div>
     </div>
 
     <form class="library-filters" [formGroup]="filters" (ngSubmit)="applyFilters()">

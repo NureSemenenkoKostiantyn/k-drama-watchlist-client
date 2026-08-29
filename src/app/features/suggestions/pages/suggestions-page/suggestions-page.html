@@ -48,15 +48,17 @@
     <section class="inbox" aria-label="Suggestions inbox">
       <div class="list" aria-label="Suggestion list">
         @for (suggestion of visibleSuggestions(); track suggestion.id) {
-          <button
-            type="button"
+          <article
             class="item"
             [class.is-selected]="isSelected(suggestion.id)"
-            [attr.aria-current]="
-              isSelected(suggestion.id) ? 'true' : null
-            "
-            (click)="selectSuggestion(suggestion)"
           >
+            <button
+              type="button"
+              class="item-select"
+              [attr.aria-current]="isSelected(suggestion.id) ? 'true' : null"
+              [attr.aria-label]="'Open suggestion for ' + suggestion.media.title"
+              (click)="selectSuggestion(suggestion)"
+            ></button>
             <span class="thumb">
               @if (suggestion.media.posterUrl) {
                 <img [src]="suggestion.media.posterUrl" alt="" />
@@ -67,7 +69,9 @@
             <span class="item-copy">
               <span class="item-meta">
                 {{ activeView() === 'sent' ? 'To' : 'From' }}
-                &#64;{{ suggestion.user.displayUsername }}
+                <a [routerLink]="['/users', suggestion.user.id]">
+                  &#64;{{ suggestion.user.displayUsername }}
+                </a>
               </span>
               <strong>{{ suggestion.media.title }}</strong>
               <span>
@@ -84,7 +88,7 @@
             >
               {{ statusLabel(suggestion.status) }}
             </span>
-          </button>
+          </article>
         } @empty {
           <p class="list-empty">{{ emptyState() }}</p>
         }

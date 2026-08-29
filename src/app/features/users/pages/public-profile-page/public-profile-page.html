@@ -24,7 +24,13 @@
       <div class="profile-card__identity">
         <p>{{ isOwnProfile(currentProfile) ? 'Your profile' : 'Drama Watch profile' }}</p>
         <h1 id="profile-title">{{ currentProfile.name }}</h1>
-        <strong>@{{ currentProfile.displayUsername }}</strong>
+        <strong>
+          <a
+            [routerLink]="isOwnProfile(currentProfile) ? ['/profile'] : ['/users', currentProfile.id]"
+          >
+            @{{ currentProfile.displayUsername }}
+          </a>
+        </strong>
         <span>
           Joined {{ currentProfile.joinedAt | date: 'MMMM yyyy' }}
         </span>
@@ -43,9 +49,5 @@
       </div>
     </article>
 
-    @if (isOwnProfile(currentProfile)) {
-      <app-library-visibility-settings />
-      <app-account-data-export />
-    }
   }
 </section>

@@ -28,7 +28,7 @@
     @if (isMobilePriorityLayout()) {
       Use the arrow buttons to move lanes and titles.
     } @else {
-      Drag lanes and titles, or use their arrow buttons.
+      Drag lanes and titles to reorder the board.
     }
   </p>
   @if (caseOpening(); as opening) {
@@ -118,16 +118,18 @@
             <a [routerLink]="['/media', entry.media.mediaType, entry.media.tmdbId]">
               {{ entry.media.title }}
             </a>
-            <app-keyboard-reorder-controls
-              [itemLabel]="entry.media.title"
-              groupLabel="lane"
-              [touchFriendly]="isMobilePriorityLayout()"
-              [disabled]="isInteractionLocked()"
-              [showPositionMoves]="false"
-              [showGroupMoves]="true"
-              [canMoveToNextGroup]="laneViews().length > 0"
-              (moveRequested)="moveItemWithKeyboard(entry, 'unassigned-priority-items', $event)"
-            />
+            @if (isMobilePriorityLayout()) {
+              <app-keyboard-reorder-controls
+                [itemLabel]="entry.media.title"
+                groupLabel="lane"
+                [touchFriendly]="true"
+                [disabled]="isInteractionLocked()"
+                [showPositionMoves]="false"
+                [showGroupMoves]="true"
+                [canMoveToNextGroup]="laneViews().length > 0"
+                (moveRequested)="moveItemWithKeyboard(entry, 'unassigned-priority-items', $event)"
+              />
+            }
           </article>
         } @empty {
           <p class="priority-items__empty">Drag a title here to remove its priority.</p>
@@ -182,15 +184,17 @@
                 <span>{{ view.items.length }} titles</span>
               </div>
               <div class="priority-lane__actions" (pointerdown)="$event.stopPropagation()">
-                <app-keyboard-reorder-controls
-                  [itemLabel]="view.lane.name + ' lane'"
-                  orientation="horizontal"
-                  [touchFriendly]="isMobilePriorityLayout()"
-                  [disabled]="isInteractionLocked()"
-                  [canMoveBefore]="laneIndex > 0"
-                  [canMoveAfter]="laneIndex < laneViews().length - 1"
-                  (moveRequested)="moveLaneWithKeyboard(view, $event)"
-                />
+                @if (isMobilePriorityLayout()) {
+                  <app-keyboard-reorder-controls
+                    [itemLabel]="view.lane.name + ' lane'"
+                    orientation="horizontal"
+                    [touchFriendly]="true"
+                    [disabled]="isInteractionLocked()"
+                    [canMoveBefore]="laneIndex > 0"
+                    [canMoveAfter]="laneIndex < laneViews().length - 1"
+                    (moveRequested)="moveLaneWithKeyboard(view, $event)"
+                  />
+                }
                 @if (pendingDeleteLaneId() === view.lane.id) {
                   <div
                     class="priority-lane__delete-confirmation"
@@ -291,18 +295,20 @@
                   </a>
                   <span>{{ entry.media.mediaType === 'tv' ? 'TV series' : 'Movie' }}</span>
                 </div>
-                <app-keyboard-reorder-controls
-                  [itemLabel]="entry.media.title"
-                  groupLabel="lane"
-                  [touchFriendly]="isMobilePriorityLayout()"
-                  [disabled]="isInteractionLocked()"
-                  [showGroupMoves]="true"
-                  [canMoveBefore]="itemIndex > 0"
-                  [canMoveAfter]="itemIndex < view.items.length - 1"
-                  [canMoveToPreviousGroup]="true"
-                  [canMoveToNextGroup]="laneIndex < laneViews().length - 1"
-                  (moveRequested)="moveItemWithKeyboard(entry, laneListId(view.lane.id), $event)"
-                />
+                @if (isMobilePriorityLayout()) {
+                  <app-keyboard-reorder-controls
+                    [itemLabel]="entry.media.title"
+                    groupLabel="lane"
+                    [touchFriendly]="true"
+                    [disabled]="isInteractionLocked()"
+                    [showGroupMoves]="true"
+                    [canMoveBefore]="itemIndex > 0"
+                    [canMoveAfter]="itemIndex < view.items.length - 1"
+                    [canMoveToPreviousGroup]="true"
+                    [canMoveToNextGroup]="laneIndex < laneViews().length - 1"
+                    (moveRequested)="moveItemWithKeyboard(entry, laneListId(view.lane.id), $event)"
+                  />
+                }
               </article>
             } @empty {
               <p class="priority-items__empty">Drop to-watch titles here.</p>

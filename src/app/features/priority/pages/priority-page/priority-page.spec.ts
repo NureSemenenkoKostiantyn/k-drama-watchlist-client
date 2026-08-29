@@ -101,14 +101,11 @@ describe('PriorityPage', () => {
         .every((element) => !element.injector.get(CdkDrag).disabled),
     ).toBe(true);
     expect(root.querySelector('.priority-page__reorder-help')?.textContent).toContain('Drag lanes');
+    expect(root.querySelector('app-keyboard-reorder-controls')).toBeNull();
     expect(root.querySelector('button[aria-label="Pick a random title"] svg')).not.toBeNull();
     expect(root.textContent).not.toContain('Collapse');
-
-    findButtonByLabel(root, 'Move Goblin to next lane').click();
-    await fixture.whenStable();
-
-    expect(reorderItems).toHaveBeenCalledWith([{ laneId: 'lane-1', itemIds: ['entry-1'] }]);
-    expect(applyPriorityOrder).toHaveBeenCalledWith('lane-1', ['entry-1']);
+    expect(reorderItems).not.toHaveBeenCalled();
+    expect(applyPriorityOrder).not.toHaveBeenCalled();
 
     const deleteButton = findButtonByLabel(root, 'Delete lane');
     deleteButton.click();

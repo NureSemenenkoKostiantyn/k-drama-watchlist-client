@@ -215,14 +215,19 @@
             @if (inviteCandidates().length > 0) {
               <div class="invite-candidates" aria-label="People available to invite">
                 @for (candidate of inviteCandidates(); track candidate.id) {
-                  <button
-                    type="button"
-                    [disabled]="isListMember(candidate.id)"
-                    (click)="selectInviteCandidate(candidate)"
-                  >
+                  <div class="invite-candidate">
+                    <button
+                      class="invite-candidate__select"
+                      [attr.aria-label]="'Select ' + candidate.name + ' for invitation'"
+                      type="button"
+                      [disabled]="isListMember(candidate.id)"
+                      (click)="selectInviteCandidate(candidate)"
+                    ></button>
                     <span>
                       <strong>{{ candidate.name }}</strong>
-                      <small>&#64;{{ candidate.displayUsername }}</small>
+                      <a [routerLink]="['/users', candidate.id]">
+                        &#64;{{ candidate.displayUsername }}
+                      </a>
                     </span>
                     <small>
                       {{
@@ -233,7 +238,7 @@
                             : 'Person'
                       }}
                     </small>
-                  </button>
+                  </div>
                 }
               </div>
             }
@@ -284,7 +289,10 @@
                       <div>
                         <strong>{{ pending.target.name }}</strong>
                         <span>
-                          &#64;{{ pending.target.displayUsername }} · {{ pending.role }} · expires
+                          <a [routerLink]="['/users', pending.target.id]">
+                            &#64;{{ pending.target.displayUsername }}
+                          </a>
+                          · {{ pending.role }} · expires
                           {{ pending.expiresAt | date: 'mediumDate' }}
                         </span>
                       </div>

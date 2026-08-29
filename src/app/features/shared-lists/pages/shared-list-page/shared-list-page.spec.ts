@@ -186,8 +186,18 @@ describe('SharedListPage mobile workspace', () => {
 
     expect(root.textContent).toContain('Pending invitations');
     expect(root.textContent).toContain('@Mina');
-    const candidateButton = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(
-      (button) => button.textContent?.includes('Friend'),
+    expect(
+      root
+        .querySelector<HTMLAnchorElement>('.invite-candidate a')
+        ?.getAttribute('href'),
+    ).toBe('/users/user-2');
+    expect(
+      root
+        .querySelector<HTMLAnchorElement>('.pending-invites a')
+        ?.getAttribute('href'),
+    ).toBe('/users/user-2');
+    const candidateButton = root.querySelector<HTMLButtonElement>(
+      '.invite-candidate__select',
     );
     candidateButton?.click();
     fixture.detectChanges();

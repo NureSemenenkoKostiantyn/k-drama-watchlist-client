@@ -229,7 +229,12 @@
               <a [routerLink]="['/users', member.user.id]">
                 {{ member.user.name }}
               </a>
-              <span>@{{ member.user.displayUsername }}</span>
+              <a
+                class="wheel-members__username"
+                [routerLink]="['/users', member.user.id]"
+              >
+                @{{ member.user.displayUsername }}
+              </a>
             </div>
             @if (member.role === 'owner' || !isOwner()) {
               <strong>{{ member.role }}</strong>

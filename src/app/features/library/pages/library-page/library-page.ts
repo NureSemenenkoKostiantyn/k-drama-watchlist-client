@@ -52,7 +52,11 @@ const mobileLibraryBreakpoint = '(max-width: 48rem)';
     LibraryEntryCard,
   ],
   templateUrl: './library-page.html',
-  styleUrls: ['./library-page.scss', './library-page-mobile.scss'],
+  styleUrls: [
+    './library-page.scss',
+    './library-page-tools.scss',
+    './library-page-mobile.scss',
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LibraryPage implements OnInit {
@@ -73,6 +77,7 @@ export class LibraryPage implements OnInit {
     { initialValue: false },
   );
   protected readonly isFilterPanelExpanded = signal(false);
+  protected readonly isCategoryManagerExpanded = signal(false);
   protected readonly appliedFilters = signal<LibraryAdvancedFilters>(DEFAULT_LIBRARY_FILTERS);
   protected readonly activeFilterCount = computed(
     () =>
@@ -151,6 +156,10 @@ export class LibraryPage implements OnInit {
   );
   protected readonly heading =
     this.status === 'to_watch' ? 'To watch' : this.status === 'watching' ? 'Watching' : 'Watched';
+
+  protected toggleCategoryManager(): void {
+    this.isCategoryManagerExpanded.update((isExpanded) => !isExpanded);
+  }
 
   constructor() {
     effect(() => {
