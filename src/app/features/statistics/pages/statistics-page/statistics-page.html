@@ -8,6 +8,38 @@
     <a routerLink="/library">Open library</a>
   </header>
 
+  <section class="statistics__filters" aria-labelledby="statistics-filter-title">
+    <div>
+      <h2 id="statistics-filter-title">Include library statuses</h2>
+      <p>To watch is excluded by default so planned titles do not skew your viewing patterns.</p>
+    </div>
+    <div class="statistics__filter-actions">
+      <div class="statistics__status-options" aria-label="Included library statuses">
+        @for (option of statusOptions; track option.value) {
+          <button
+            type="button"
+            [class.statistics__status-option--selected]="selectedStatuses().includes(option.value)"
+            [attr.aria-pressed]="selectedStatuses().includes(option.value)"
+            (click)="toggleStatus(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        }
+      </div>
+      <button
+        type="button"
+        class="statistics__apply"
+        [disabled]="loading()"
+        (click)="applyFilters()"
+      >
+        {{ loading() ? 'Updating…' : 'Apply' }}
+      </button>
+    </div>
+    @if (filterError()) {
+      <p class="statistics__filter-error" role="alert">{{ filterError() }}</p>
+    }
+  </section>
+
   @if (error()) {
     <div class="statistics__state statistics__state--error" role="alert">
       <p>{{ error() }}</p>

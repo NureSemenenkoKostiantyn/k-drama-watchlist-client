@@ -29,6 +29,15 @@ export const routes: Routes = [
       import('./features/auth/pages/login-page/login-page').then(({ LoginPage }) => LoginPage),
   },
   {
+    path: 'mcp/consent',
+    title: 'Connect an application · Drama Watch',
+    canActivate: [profileCompleteGuard],
+    loadComponent: () =>
+      import('./features/auth/pages/mcp-consent-page/mcp-consent-page').then(
+        ({ McpConsentPage }) => McpConsentPage,
+      ),
+  },
+  {
     path: 'register',
     title: 'Create account · Drama Watch',
     canActivate: [anonymousOnlyGuard],

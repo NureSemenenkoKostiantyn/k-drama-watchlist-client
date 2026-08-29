@@ -8,7 +8,9 @@ import { BehaviorSubject } from 'rxjs';
 import { vi } from 'vitest';
 
 import { AuthenticationService } from '../../../../core/auth/authentication.service';
+import { FriendsService } from '../../../friends/data-access/friends.service';
 import { LibraryService } from '../../../library/data-access/library.service';
+import { UsersService } from '../../../users/data-access/users.service';
 import { SharedListCommentsService } from '../../data-access/shared-list-comments.service';
 import { SharedListsService } from '../../data-access/shared-lists.service';
 import { SharedListDetails } from '../../models/shared-list';
@@ -78,6 +80,11 @@ describe('SharedListPage mobile workspace', () => {
       breakpoints: {},
     });
     const reorder = vi.fn().mockResolvedValue(true);
+    const createInvite = vi.fn().mockResolvedValue({
+      ...pendingInvite,
+      acceptUrl: 'http://localhost:4200/lists/invites/token',
+    });
+    const revokeInvite = vi.fn().mockResolvedValue(true);
 
     await TestBed.configureTestingModule({
       imports: [SharedListPage],
@@ -105,11 +112,35 @@ describe('SharedListPage mobile workspace', () => {
             updateItem: vi.fn(),
             deleteItem: vi.fn(),
             reorder,
-            createInvite: vi.fn(),
+            createInvite,
+            listInvites: vi.fn().mockResolvedValue([pendingInvite]),
+            revokeInvite,
             updateMember: vi.fn(),
             removeMember: vi.fn(),
             delete: vi.fn(),
           },
+        },
+        {
+          provide: FriendsService,
+          useValue: {
+            list: vi.fn().mockResolvedValue({
+              friends: [
+                {
+                  id: 'friendship-1',
+                  status: 'accepted',
+                  direction: 'none',
+                  user: pendingInvite.target,
+                  createdAt: '2026-08-01T10:00:00.000Z',
+                },
+              ],
+              incomingRequests: [],
+              outgoingRequests: [],
+            }),
+          },
+        },
+        {
+          provide: UsersService,
+          useValue: { search: vi.fn().mockResolvedValue([pendingInvite.target]) },
         },
         {
           provide: LibraryService,
@@ -152,5 +183,51 @@ describe('SharedListPage mobile workspace', () => {
 
     expect(reorder).toHaveBeenCalledWith('list-1', ['item-2', 'item-1']);
     expect(root.textContent).toContain('Goblin moved to position 2.');
+
+    expect(root.textContent).toContain('Pending invitations');
+    expect(root.textContent).toContain('@Mina');
+    const candidateButton = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(
+      (button) => button.textContent?.includes('Friend'),
+    );
+    candidateButton?.click();
+    fixture.detectChanges();
+    expect(root.querySelector<HTMLInputElement>('input[formcontrolname="username"]')?.value).toBe(
+      'mina',
+    );
+
+    const sendButton = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(
+      (button) => button.textContent?.includes('Send invitation'),
+    );
+    sendButton?.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(createInvite).toHaveBeenCalledWith('list-1', 'mina', 'viewer');
+    expect(root.textContent).toContain('Invitation sent to @Mina.');
+
+    const revokeButton = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(
+      (button) => button.textContent?.trim() === 'Revoke',
+    );
+    revokeButton?.click();
+    fixture.detectChanges();
+    const confirmButton = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(
+      (button) => button.textContent?.includes('Confirm revoke'),
+    );
+    confirmButton?.click();
+    await fixture.whenStable();
+    expect(revokeInvite).toHaveBeenCalledWith('list-1', 'invite-1');
   });
 });
+
+const pendingInvite = {
+  id: 'invite-1',
+  target: {
+    id: 'user-2',
+    username: 'mina',
+    displayUsername: 'Mina',
+    name: 'Myoui Mina',
+    joinedAt: '2026-08-01T10:00:00.000Z',
+  },
+  role: 'viewer' as const,
+  expiresAt: '2026-09-04T12:00:00.000Z',
+  createdAt: '2026-08-28T12:00:00.000Z',
+};

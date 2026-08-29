@@ -1,10 +1,11 @@
 import { computed, Injectable, signal } from '@angular/core';
+import { oauthProviderClient } from '@better-auth/oauth-provider/client';
 import { createAuthClient } from 'better-auth/client';
 import { usernameClient } from 'better-auth/client/plugins';
 
 function buildAuthClient() {
   return createAuthClient({
-    plugins: [usernameClient()],
+    plugins: [usernameClient(), oauthProviderClient()],
   });
 }
 
@@ -20,6 +21,15 @@ export interface RegisterCredentials {
 export interface LoginCredentials {
   email: string;
   password: string;
+}
+
+export interface OAuthClientInformation {
+  client_id: string;
+  client_name?: string;
+  client_uri?: string;
+  logo_uri?: string;
+  policy_uri?: string;
+  tos_uri?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -166,6 +176,45 @@ export class AuthenticationService {
     });
   }
 
+  async getOAuthClient(
+    clientId: string,
+  ): Promise<OAuthClientInformation> {
+    const response = await this.client.oauth2.publicClient({
+      query: { client_id: clientId },
+    });
+
+    if (response.error) {
+      throw new Error(readErrorMessage(response.error));
+    }
+
+    if (!response.data) {
+      throw new Error('The requesting application could not be loaded.');
+    }
+
+    return response.data;
+  }
+
+  async decideOAuthConsent(
+    accept: boolean,
+    scope?: string,
+  ): Promise<void> {
+    const response = await this.client.oauth2.consent({
+      accept,
+      ...(scope ? { scope } : {}),
+    });
+
+    if (response.error) {
+      throw new Error(readErrorMessage(response.error));
+    }
+
+    const redirectUri = readOAuthRedirect(response.data);
+    if (!redirectUri) {
+      throw new Error('The authorization redirect is unavailable.');
+    }
+
+    globalThis.location.assign(redirectUri);
+  }
+
   clearError(): void {
     this.errorState.set(null);
     this.emailVerificationRequiredState.set(false);
@@ -242,4 +291,21 @@ function readErrorCode(error: unknown): string | null {
 
 function applicationUrl(path: string): string {
   return new URL(path, globalThis.location.origin).toString();
+}
+
+function readOAuthRedirect(value: unknown): string | null {
+  if (typeof value !== 'object' || value === null) return null;
+
+  if (
+    'redirect_uri' in value &&
+    typeof value.redirect_uri === 'string'
+  ) {
+    return value.redirect_uri;
+  }
+
+  if ('url' in value && typeof value.url === 'string') {
+    return value.url;
+  }
+
+  return null;
 }

@@ -15,6 +15,9 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
 import { LibraryService } from '../../../library/data-access/library.service';
+import { FriendsService } from '../../../friends/data-access/friends.service';
+import { UsersService } from '../../../users/data-access/users.service';
+import { PublicUserProfile } from '../../../users/models/public-user-profile';
 import {
   KeyboardReorderAction,
   KeyboardReorderControls,
@@ -24,6 +27,7 @@ import { SharedListsService } from '../../data-access/shared-lists.service';
 import {
   SharedListItem,
   SharedListMember,
+  SharedListPendingInvite,
   SharedListRole,
   SharedListVisibility,
 } from '../../models/shared-list';
@@ -42,7 +46,12 @@ const mobileSharedListBreakpoint = '(max-width: 48rem)';
     SharedListComments,
   ],
   templateUrl: './shared-list-page.html',
-  styleUrls: ['./shared-list-page.scss', './shared-list-items.scss', './shared-list-mobile.scss'],
+  styleUrls: [
+    './shared-list-page.scss',
+    './shared-list-invites.scss',
+    './shared-list-items.scss',
+    './shared-list-mobile.scss',
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SharedListPage implements OnInit {
@@ -54,6 +63,8 @@ export class SharedListPage implements OnInit {
   private readonly listId = this.route.snapshot.paramMap.get('listId') ?? '';
   protected readonly sharedLists = inject(SharedListsService);
   protected readonly library = inject(LibraryService);
+  private readonly friendsService = inject(FriendsService);
+  private readonly usersService = inject(UsersService);
   protected readonly list = this.sharedLists.activeList;
   protected readonly isSaving = signal(false);
   protected readonly isMobileSharedListLayout = toSignal(
@@ -69,6 +80,15 @@ export class SharedListPage implements OnInit {
     null,
   );
   protected readonly copied = signal(false);
+  protected readonly inviteFriends = signal<PublicUserProfile[]>([]);
+  protected readonly inviteCandidates = signal<PublicUserProfile[]>([]);
+  protected readonly pendingInvites = signal<SharedListPendingInvite[]>([]);
+  protected readonly isInviting = signal(false);
+  protected readonly isSearchingPeople = signal(false);
+  protected readonly activeInviteId = signal<string | null>(null);
+  protected readonly pendingInviteRevokeId = signal<string | null>(null);
+  protected readonly inviteFeedback = signal<string | null>(null);
+  protected readonly inviteError = signal<string | null>(null);
   protected readonly publicLinkCopied = signal(false);
   protected readonly reorderAnnouncement = signal('');
   protected readonly isOwner = computed(() => this.list()?.role === 'owner');
@@ -207,8 +227,11 @@ export class SharedListPage implements OnInit {
   }
 
   protected async createInvite(): Promise<void> {
-    if (!this.isOwner() || this.inviteForm.invalid) return;
+    if (!this.isOwner() || this.inviteForm.invalid || this.isInviting()) return;
     const value = this.inviteForm.getRawValue();
+    this.isInviting.set(true);
+    this.inviteFeedback.set(null);
+    this.inviteError.set(null);
     const result = await this.sharedLists.createInvite(
       this.listId,
       value.username.trim(),
@@ -220,7 +243,84 @@ export class SharedListPage implements OnInit {
         expiresAt: result.expiresAt,
         target: result.target.displayUsername,
       });
+      this.pendingInvites.update((invites) => [
+        result,
+        ...invites.filter((candidate) => candidate.target.id !== result.target.id),
+      ]);
+      this.inviteFeedback.set(`Invitation sent to @${result.target.displayUsername}.`);
+    } else {
+      this.inviteError.set(this.sharedLists.error() ?? 'The invitation could not be sent.');
     }
+    this.isInviting.set(false);
+  }
+
+  protected async searchInvitePeople(): Promise<void> {
+    const query = this.inviteForm.controls.username.value.trim();
+    this.inviteFeedback.set(null);
+    this.inviteError.set(null);
+    if (query.length < 2) {
+      this.inviteCandidates.set(this.inviteFriends());
+      return;
+    }
+
+    this.isSearchingPeople.set(true);
+    try {
+      const friendIds = new Set(this.inviteFriends().map((friend) => friend.id));
+      const candidates = await this.usersService.search(query, 8);
+      this.inviteCandidates.set(
+        [...candidates].sort(
+          (left, right) => Number(friendIds.has(right.id)) - Number(friendIds.has(left.id)),
+        ),
+      );
+    } catch {
+      this.inviteCandidates.set([]);
+      this.inviteError.set('People search is unavailable right now.');
+    } finally {
+      this.isSearchingPeople.set(false);
+    }
+  }
+
+  protected selectInviteCandidate(candidate: PublicUserProfile): void {
+    if (this.isListMember(candidate.id)) return;
+    this.inviteForm.controls.username.setValue(candidate.username);
+    this.inviteFeedback.set(`Selected @${candidate.displayUsername}.`);
+  }
+
+  protected isFriend(candidate: PublicUserProfile): boolean {
+    return this.inviteFriends().some((friend) => friend.id === candidate.id);
+  }
+
+  protected isListMember(userId: string): boolean {
+    return this.list()?.members.some((member) => member.user.id === userId) ?? false;
+  }
+
+  protected async revokeInvite(invite: SharedListPendingInvite): Promise<void> {
+    if (this.pendingInviteRevokeId() !== invite.id) {
+      this.pendingInviteRevokeId.set(invite.id);
+      return;
+    }
+
+    this.activeInviteId.set(invite.id);
+    this.inviteFeedback.set(null);
+    this.inviteError.set(null);
+    const revoked = await this.sharedLists.revokeInvite(this.listId, invite.id);
+    if (revoked) {
+      this.pendingInvites.update((invites) =>
+        invites.filter((candidate) => candidate.id !== invite.id),
+      );
+      if (this.invite()?.target === invite.target.displayUsername) {
+        this.invite.set(null);
+      }
+      this.inviteFeedback.set(`Invitation for @${invite.target.displayUsername} revoked.`);
+      this.pendingInviteRevokeId.set(null);
+    } else {
+      this.inviteError.set(this.sharedLists.error() ?? 'The invitation could not be revoked.');
+    }
+    this.activeInviteId.set(null);
+  }
+
+  protected cancelInviteRevoke(): void {
+    this.pendingInviteRevokeId.set(null);
   }
 
   protected async updateMember(member: SharedListMember, event: Event): Promise<void> {
@@ -278,6 +378,23 @@ export class SharedListPage implements OnInit {
         description: list.description ?? '',
         visibility: list.visibility,
       });
+      await this.loadInvitationWorkspace();
+    }
+  }
+
+  private async loadInvitationWorkspace(): Promise<void> {
+    this.inviteError.set(null);
+    const [friendships, invites] = await Promise.all([
+      this.friendsService.list().catch(() => null),
+      this.sharedLists.listInvites(this.listId),
+    ]);
+    const friends = friendships?.friends.map((friendship) => friendship.user) ?? [];
+    this.inviteFriends.set(friends);
+    this.inviteCandidates.set(friends);
+    if (invites) {
+      this.pendingInvites.set(invites);
+    } else {
+      this.inviteError.set(this.sharedLists.error() ?? 'Pending invitations could not be loaded.');
     }
   }
 }

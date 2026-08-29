@@ -4,7 +4,7 @@ import { provideRouter, Router } from '@angular/router';
 import { vi } from 'vitest';
 
 import { AuthenticationService } from '../../../../core/auth/authentication.service';
-import { LoginPage } from './login-page';
+import { buildOAuthContinuation, LoginPage } from './login-page';
 
 describe('LoginPage', () => {
   const signIn = vi.fn();
@@ -64,6 +64,26 @@ describe('LoginPage', () => {
 
     expect(signIn).not.toHaveBeenCalled();
     expect(fixture.nativeElement.querySelectorAll('.field__error')).toHaveLength(2);
+  });
+});
+
+describe('buildOAuthContinuation', () => {
+  it('resumes a signed OAuth authorization request after login', () => {
+    expect(
+      buildOAuthContinuation({
+        client_id: 'https://assistant.example/client.json',
+        scope: 'openid mcp:library:read',
+        sig: 'signed-value',
+      }),
+    ).toBe(
+      '/api/auth/oauth2/authorize?' +
+        'client_id=https%3A%2F%2Fassistant.example%2Fclient.json&' +
+        'scope=openid+mcp%3Alibrary%3Aread&sig=signed-value',
+    );
+  });
+
+  it('does not turn an ordinary login query into an OAuth continuation', () => {
+    expect(buildOAuthContinuation({ returnUrl: '/library' })).toBeNull();
   });
 });
 

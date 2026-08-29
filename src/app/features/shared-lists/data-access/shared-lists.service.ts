@@ -8,6 +8,7 @@ import {
   SharedList,
   SharedListDetails,
   SharedListInvite,
+  SharedListPendingInvite,
   SharedListItem,
   SharedListMember,
   SharedListRole,
@@ -44,7 +45,10 @@ export class SharedListsService {
 
   async create(title: string, description?: string): Promise<SharedListDetails | null> {
     return this.request(
-      this.http.post<SharedListDetails>(this.baseUrl, { title, ...(description ? { description } : {}) }),
+      this.http.post<SharedListDetails>(this.baseUrl, {
+        title,
+        ...(description ? { description } : {}),
+      }),
       'The shared list could not be created.',
       (list) => this.sync(list),
     );
@@ -54,7 +58,9 @@ export class SharedListsService {
     this.loadingState.set(true);
     this.errorState.set(null);
     try {
-      const list = await firstValueFrom(this.http.get<SharedListDetails>(`${this.baseUrl}/${listId}`));
+      const list = await firstValueFrom(
+        this.http.get<SharedListDetails>(`${this.baseUrl}/${listId}`),
+      );
       this.activeListState.set(list);
       this.sync(list);
       return true;
@@ -106,9 +112,29 @@ export class SharedListsService {
     );
   }
 
+  async listInvites(listId: string): Promise<SharedListPendingInvite[] | null> {
+    return this.request(
+      this.http.get<SharedListPendingInvite[]>(`${this.baseUrl}/${listId}/invites`),
+      'Pending invitations could not be loaded.',
+    );
+  }
+
+  async revokeInvite(listId: string, inviteId: string): Promise<boolean> {
+    try {
+      await firstValueFrom(this.http.delete<void>(`${this.baseUrl}/${listId}/invites/${inviteId}`));
+      this.errorState.set(null);
+      return true;
+    } catch (error: unknown) {
+      return this.fail(error, 'The invitation could not be revoked.');
+    }
+  }
+
   async acceptInvite(token: string): Promise<SharedListDetails | null> {
     return this.request(
-      this.http.post<SharedListDetails>(`${environment.apiBaseUrl}/list-invites/${token}/accept`, {}),
+      this.http.post<SharedListDetails>(
+        `${environment.apiBaseUrl}/list-invites/${token}/accept`,
+        {},
+      ),
       'This invitation is invalid, expired, or already used.',
       (list) => {
         this.activeListState.set(list);
@@ -123,17 +149,14 @@ export class SharedListsService {
     role: Exclude<SharedListRole, 'owner'>,
   ): Promise<SharedListMember | null> {
     const member = await this.request(
-      this.http.patch<SharedListMember>(
-        `${this.baseUrl}/${listId}/members/${memberUserId}`,
-        { role },
-      ),
+      this.http.patch<SharedListMember>(`${this.baseUrl}/${listId}/members/${memberUserId}`, {
+        role,
+      }),
       'The member role could not be changed.',
     );
     if (member) {
       this.updateMembers(listId, (members) =>
-        members.map((candidate) =>
-          candidate.user.id === member.user.id ? member : candidate,
-        ),
+        members.map((candidate) => (candidate.user.id === member.user.id ? member : candidate)),
       );
     }
     return member;
@@ -142,9 +165,7 @@ export class SharedListsService {
   async removeMember(listId: string, memberUserId: string): Promise<boolean> {
     try {
       await firstValueFrom(
-        this.http.delete<void>(
-          `${this.baseUrl}/${listId}/members/${memberUserId}`,
-        ),
+        this.http.delete<void>(`${this.baseUrl}/${listId}/members/${memberUserId}`),
       );
       this.updateMembers(listId, (members) =>
         members.filter((member) => member.user.id !== memberUserId),
@@ -164,19 +185,25 @@ export class SharedListsService {
     );
   }
 
-  updateItem(listId: string, itemId: string, input: UpdateSharedListItemRequest): Promise<SharedListItem | null> {
+  updateItem(
+    listId: string,
+    itemId: string,
+    input: UpdateSharedListItemRequest,
+  ): Promise<SharedListItem | null> {
     return this.itemRequest(
       listId,
       this.http.patch<SharedListItem>(`${this.baseUrl}/${listId}/items/${itemId}`, input),
       'The shared title could not be updated.',
-      (items, item) => items.map((candidate) => candidate.id === item.id ? item : candidate),
+      (items, item) => items.map((candidate) => (candidate.id === item.id ? item : candidate)),
     );
   }
 
   async deleteItem(listId: string, itemId: string): Promise<boolean> {
     try {
       await firstValueFrom(this.http.delete<void>(`${this.baseUrl}/${listId}/items/${itemId}`));
-      this.updateItems(listId, (items) => items.filter((item) => item.id !== itemId).map((item, position) => ({ ...item, position })));
+      this.updateItems(listId, (items) =>
+        items.filter((item) => item.id !== itemId).map((item, position) => ({ ...item, position })),
+      );
       return true;
     } catch (error: unknown) {
       return this.fail(error, 'The title could not be removed from this list.');
@@ -185,7 +212,9 @@ export class SharedListsService {
 
   async reorder(listId: string, itemIds: string[]): Promise<boolean> {
     try {
-      const items = await firstValueFrom(this.http.post<SharedListItem[]>(`${this.baseUrl}/${listId}/reorder`, { itemIds }));
+      const items = await firstValueFrom(
+        this.http.post<SharedListItem[]>(`${this.baseUrl}/${listId}/reorder`, { itemIds }),
+      );
       this.updateItems(listId, () => items);
       return true;
     } catch (error: unknown) {
@@ -211,7 +240,11 @@ export class SharedListsService {
     return item;
   }
 
-  private async request<T>(request: Observable<T>, fallback: string, success?: (value: T) => void): Promise<T | null> {
+  private async request<T>(
+    request: Observable<T>,
+    fallback: string,
+    success?: (value: T) => void,
+  ): Promise<T | null> {
     this.errorState.set(null);
     try {
       const value = await firstValueFrom(request);
@@ -238,9 +271,7 @@ export class SharedListsService {
     update: (members: SharedListMember[]) => SharedListMember[],
   ): void {
     this.activeListState.update((list) =>
-      !list || list.id !== listId
-        ? list
-        : { ...list, members: update(list.members) },
+      !list || list.id !== listId ? list : { ...list, members: update(list.members) },
     );
   }
 
@@ -255,9 +286,11 @@ export class SharedListsService {
       updatedAt: details.updatedAt,
       ...(details.description ? { description: details.description } : {}),
     };
-    this.listsState.update((lists) => lists.some((list) => list.id === summary.id)
-      ? lists.map((list) => list.id === summary.id ? summary : list)
-      : [summary, ...lists]);
+    this.listsState.update((lists) =>
+      lists.some((list) => list.id === summary.id)
+        ? lists.map((list) => (list.id === summary.id ? summary : list))
+        : [summary, ...lists],
+    );
   }
 
   private fail(error: unknown, fallback: string): false {

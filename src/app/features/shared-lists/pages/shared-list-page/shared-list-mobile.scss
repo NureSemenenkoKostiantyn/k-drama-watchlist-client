@@ -35,7 +35,8 @@
   }
 
   .invite,
-  .public-link {
+  .public-link,
+  .invite-search {
     grid-template-columns: 1fr;
   }
 
@@ -47,7 +48,19 @@
   }
 
   .invite button,
-  .public-link button {
+  .public-link button,
+  .invite-search button {
+    width: 100%;
+  }
+
+  .pending-invites li {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pending-invites li > button,
+  .pending-invites__confirm,
+  .pending-invites__confirm button {
     width: 100%;
   }
 

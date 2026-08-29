@@ -1,0 +1,85 @@
+<section class="auth-page" aria-labelledby="mcp-consent-title">
+  <div class="auth-page__intro">
+    <p class="auth-page__eyebrow">External access</p>
+    <h1 id="mcp-consent-title">Connect to Drama Watch?</h1>
+    <p class="auth-page__summary">
+      Review exactly what the requesting application can read before granting access.
+    </p>
+  </div>
+
+  <div class="auth-card consent-card">
+    @if (isLoading()) {
+      <p class="auth-card__lead" role="status">Loading authorization request…</p>
+    } @else if (client(); as requestingClient) {
+      <div class="consent-card__client">
+        @if (requestingClient.logo_uri) {
+          <img
+            [src]="requestingClient.logo_uri"
+            alt=""
+            width="48"
+            height="48"
+          />
+        }
+        <div>
+          <p class="consent-card__label">Application</p>
+          <h2>{{ requestingClient.client_name || requestingClient.client_id }}</h2>
+          @if (requestingClient.client_uri) {
+            <a
+              [href]="requestingClient.client_uri"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View application website
+            </a>
+          }
+        </div>
+      </div>
+
+      <p class="auth-card__lead">This application is requesting permission to:</p>
+      <ul class="consent-card__scopes">
+        @for (scope of scopes(); track scope.name) {
+          <li>
+            <span aria-hidden="true">✓</span>
+            <div>
+              <strong>{{ scope.description }}</strong>
+              <small>{{ scope.name }}</small>
+            </div>
+          </li>
+        } @empty {
+          <li>No additional permissions were requested.</li>
+        }
+      </ul>
+
+      <p class="consent-card__notice">
+        Access is read-only. You can deny this request without changing your account.
+      </p>
+
+      @if (error(); as errorMessage) {
+        <p class="auth-card__error" role="alert">{{ errorMessage }}</p>
+      }
+
+      <div class="consent-card__actions">
+        <button
+          class="consent-card__deny"
+          type="button"
+          [disabled]="isSubmitting()"
+          (click)="deny()"
+        >
+          Deny
+        </button>
+        <button
+          type="button"
+          [disabled]="isSubmitting()"
+          (click)="approve()"
+        >
+          {{ isSubmitting() ? 'Connecting…' : 'Allow access' }}
+        </button>
+      </div>
+    } @else {
+      <h2>Authorization unavailable</h2>
+      <p class="auth-card__error" role="alert">
+        {{ error() || 'The requesting application could not be loaded.' }}
+      </p>
+    }
+  </div>
+</section>
