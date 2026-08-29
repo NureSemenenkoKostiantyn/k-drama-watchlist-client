@@ -3,10 +3,11 @@ import {
   Component,
   computed,
   effect,
+  ElementRef,
+  HostListener,
   inject,
   signal,
   ViewChild,
-  ElementRef,
 } from '@angular/core';
 import { A11yModule } from '@angular/cdk/a11y';
 import { DOCUMENT } from '@angular/common';
@@ -23,7 +24,7 @@ import { SettingsService } from './features/settings/data-access/settings.servic
   selector: 'app-root',
   imports: [A11yModule, RouterLink, RouterLinkActive, RouterOutlet],
   templateUrl: './app.html',
-  styleUrls: ['./app.scss', './app-mobile-nav.scss'],
+  styleUrls: ['./app.scss', './app-desktop-nav.scss', './app-mobile-nav.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
@@ -39,10 +40,26 @@ export class App {
     const count = this.notifications.unreadCount();
     return count === 0 ? 'Notifications' : `Notifications, ${count} unread`;
   });
+  protected readonly profileName = computed(
+    () =>
+      this.authentication.session()?.user?.displayUsername ??
+      this.authentication.session()?.user?.username ??
+      this.authentication.session()?.user?.name ??
+      'Account',
+  );
+  protected readonly profileInitial = computed(
+    () => this.profileName().trim().charAt(0).toUpperCase() || '?',
+  );
   protected readonly routeAnnouncement = signal('');
   protected readonly mobileMenuOpen = signal(false);
+  protected readonly desktopMoreMenuOpen = signal(false);
+  protected readonly profileMenuOpen = signal(false);
   @ViewChild('mobileMoreButton')
   private mobileMoreButton?: ElementRef<HTMLButtonElement>;
+  @ViewChild('desktopMoreButton')
+  private desktopMoreButton?: ElementRef<HTMLButtonElement>;
+  @ViewChild('profileMenuButton')
+  private profileMenuButton?: ElementRef<HTMLButtonElement>;
   private readonly document = inject(DOCUMENT);
   private readonly router = inject(Router);
 
@@ -82,6 +99,7 @@ export class App {
 
   protected handleRouteActivation(): void {
     this.closeMobileMenu(false);
+    this.closeDesktopMenus(false);
     queueMicrotask(() => {
       const main = this.document.getElementById('main-content');
       const heading = main?.querySelector<HTMLElement>('h1');
@@ -115,8 +133,56 @@ export class App {
 
   protected async signOut(): Promise<void> {
     this.closeMobileMenu(false);
+    this.closeDesktopMenus(false);
     if (await this.authentication.signOut()) {
       await this.router.navigate(['/login']);
+    }
+  }
+
+  protected toggleDesktopMoreMenu(): void {
+    this.desktopMoreMenuOpen.update((isOpen) => !isOpen);
+    this.profileMenuOpen.set(false);
+  }
+
+  protected toggleProfileMenu(): void {
+    this.profileMenuOpen.update((isOpen) => !isOpen);
+    this.desktopMoreMenuOpen.set(false);
+  }
+
+  @HostListener('document:click', ['$event'])
+  protected handleDocumentClick(event: MouseEvent): void {
+    const target = event.target;
+    if (
+      target instanceof Element &&
+      (target.closest('.app-shell__desktop-menu') || target.closest('.app-shell__profile-menu'))
+    ) {
+      return;
+    }
+
+    this.closeDesktopMenus(false);
+  }
+
+  @HostListener('document:keydown.escape')
+  protected handleEscape(): void {
+    this.closeDesktopMenus(true);
+    this.closeMobileMenu(true);
+  }
+
+  protected closeDesktopMenus(restoreFocus = true): void {
+    const restoreMoreFocus = restoreFocus && this.desktopMoreMenuOpen();
+    const restoreProfileFocus = restoreFocus && this.profileMenuOpen();
+
+    this.desktopMoreMenuOpen.set(false);
+    this.profileMenuOpen.set(false);
+
+    if (restoreMoreFocus || restoreProfileFocus) {
+      queueMicrotask(() => {
+        if (restoreMoreFocus) {
+          this.desktopMoreButton?.nativeElement.focus();
+        } else {
+          this.profileMenuButton?.nativeElement.focus();
+        }
+      });
     }
   }
 

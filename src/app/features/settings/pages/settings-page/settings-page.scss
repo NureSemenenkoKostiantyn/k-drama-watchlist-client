@@ -1,0 +1,43 @@
+.settings-page {
+  display: grid;
+  gap: 1.5rem;
+  width: min(100%, 42rem);
+  margin-inline: auto;
+  padding-block: clamp(2rem, 7vw, 5rem);
+}
+
+.settings-page__heading :is(p, h1, span) {
+  margin: 0;
+}
+
+.settings-page__heading p {
+  color: var(--color-accent-strong);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.settings-page__heading h1 {
+  margin-top: 0.35rem;
+  font-size: clamp(2.25rem, 8vw, 4rem);
+  letter-spacing: -0.05em;
+}
+
+.settings-page__heading span {
+  display: block;
+  margin-top: 0.5rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.settings-page__content {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (max-width: 34rem) {
+  .settings-page {
+    padding-block: 1.5rem 7rem;
+  }
+}

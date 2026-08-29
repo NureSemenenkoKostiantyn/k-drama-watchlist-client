@@ -11,7 +11,8 @@
   overflow-y: auto;
 }
 
-.invite-candidates > button {
+.invite-candidate {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -25,7 +26,29 @@
   text-align: left;
 }
 
-.invite-candidates > button > span {
+.invite-candidate__select {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.invite-candidate__select:focus-visible {
+  outline: 0.125rem solid var(--color-accent);
+  outline-offset: -0.125rem;
+}
+
+.invite-candidate > span,
+.invite-candidate > small {
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.invite-candidate > span {
   display: grid;
   min-width: 0;
 }
@@ -42,7 +65,20 @@
   font-size: 0.68rem;
 }
 
-.invite-candidates > button:disabled {
+.invite-candidate a {
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+  text-overflow: ellipsis;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.16em;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+.invite-candidate:has(.invite-candidate__select:disabled) {
   color: var(--color-text-muted);
 }
 
@@ -110,6 +146,12 @@
   color: var(--color-text-muted);
   font-size: 0.7rem;
   line-height: 1.4;
+}
+
+.pending-invites li span a {
+  color: inherit;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.16em;
 }
 
 .pending-invites li button {

@@ -12,19 +12,12 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { readApiErrorMessage } from '../../../../core/api/api-error';
 import { AuthenticationService } from '../../../../core/auth/authentication.service';
-import { AccountDataExportComponent } from '../../../account/components/account-data-export/account-data-export';
-import { LibraryVisibilitySettingsComponent } from '../../../settings/components/library-visibility-settings/library-visibility-settings';
 import { UsersService } from '../../data-access/users.service';
 import { PublicUserProfile } from '../../models/public-user-profile';
 
 @Component({
   selector: 'app-public-profile-page',
-  imports: [
-    DatePipe,
-    RouterLink,
-    AccountDataExportComponent,
-    LibraryVisibilitySettingsComponent,
-  ],
+  imports: [DatePipe, RouterLink],
   templateUrl: './public-profile-page.html',
   styleUrl: './public-profile-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

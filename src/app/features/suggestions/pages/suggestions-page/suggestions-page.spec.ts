@@ -68,6 +68,9 @@ describe('SuggestionsPage', () => {
 
     expect(root.textContent).toContain('Goblin');
     expect(root.textContent).toContain('Watch this next');
+    expect(
+      root.querySelector<HTMLAnchorElement>('.item-meta a')?.getAttribute('href'),
+    ).toBe('/users/user-1');
     const acceptButton = Array.from(
       root.querySelectorAll('button'),
     ).find((button) => button.textContent?.includes('Add to watchlist'));

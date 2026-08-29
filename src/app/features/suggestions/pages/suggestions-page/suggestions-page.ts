@@ -6,6 +6,7 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import { readApiErrorMessage } from '../../../../core/api/api-error';
 import {
@@ -21,9 +22,12 @@ import {
 
 @Component({
   selector: 'app-suggestions-page',
-  imports: [SuggestionDetail],
+  imports: [RouterLink, SuggestionDetail],
   templateUrl: './suggestions-page.html',
-  styleUrl: './suggestions-page.scss',
+  styleUrls: [
+    './suggestions-page.scss',
+    './suggestions-page-links.scss',
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SuggestionsPage implements OnInit {

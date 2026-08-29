@@ -25,33 +25,56 @@
           >
             Home
           </a>
-          <a routerLink="/activity" routerLinkActive="is-active" ariaCurrentWhenActive="page">
-            Activity
-          </a>
-          <a routerLink="/statistics" routerLinkActive="is-active" ariaCurrentWhenActive="page">
-            Stats
-          </a>
           <a routerLink="/search" routerLinkActive="is-active" ariaCurrentWhenActive="page">
             Search
           </a>
           <a routerLink="/library" routerLinkActive="is-active" ariaCurrentWhenActive="page">
             Library
           </a>
-          <a routerLink="/priority" routerLinkActive="is-active" ariaCurrentWhenActive="page">
-            Priority
-          </a>
-          <a routerLink="/wheels" routerLinkActive="is-active" ariaCurrentWhenActive="page">
-            Wheels
-          </a>
-          <a routerLink="/lists" routerLinkActive="is-active" ariaCurrentWhenActive="page">
-            Lists
-          </a>
-          <a routerLink="/friends" routerLinkActive="is-active" ariaCurrentWhenActive="page">
-            Friends
-          </a>
-          <a routerLink="/suggestions" routerLinkActive="is-active" ariaCurrentWhenActive="page">
-            Suggestions
-          </a>
+
+          <div class="app-shell__desktop-menu">
+            <button
+              #desktopMoreButton
+              type="button"
+              class="app-shell__menu-trigger"
+              [class.is-active]="desktopMoreMenuOpen()"
+              [attr.aria-expanded]="desktopMoreMenuOpen()"
+              aria-haspopup="true"
+              aria-controls="desktop-more-menu"
+              (click)="toggleDesktopMoreMenu()"
+            >
+              More
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m7 10 5 5 5-5" />
+              </svg>
+            </button>
+
+            @if (desktopMoreMenuOpen()) {
+              <nav id="desktop-more-menu" class="app-shell__menu-panel" aria-label="More destinations">
+                <a routerLink="/activity" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeDesktopMenus(false)">
+                  Activity
+                </a>
+                <a routerLink="/statistics" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeDesktopMenus(false)">
+                  Statistics
+                </a>
+                <a routerLink="/priority" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeDesktopMenus(false)">
+                  Priority
+                </a>
+                <a routerLink="/wheels" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeDesktopMenus(false)">
+                  Wheels
+                </a>
+                <a routerLink="/lists" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeDesktopMenus(false)">
+                  Shared lists
+                </a>
+                <a routerLink="/friends" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeDesktopMenus(false)">
+                  Friends
+                </a>
+                <a routerLink="/suggestions" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeDesktopMenus(false)">
+                  Suggestions
+                </a>
+              </nav>
+            }
+          </div>
         </nav>
         <div class="app-shell__account">
           <a
@@ -68,16 +91,38 @@
               <span>{{ badge }}</span>
             }
           </a>
-          <a class="app-shell__profile-link" routerLink="/profile">
-            {{
-              authentication.session()?.user?.displayUsername ??
-                authentication.session()?.user?.username ??
-                authentication.session()?.user?.name
-            }}
-          </a>
-          <button type="button" (click)="signOut()" [disabled]="authentication.isPending()">
-            Sign out
-          </button>
+          <div class="app-shell__profile-menu">
+            <button
+              #profileMenuButton
+              type="button"
+              class="app-shell__profile-trigger"
+              [class.is-active]="profileMenuOpen()"
+              [attr.aria-expanded]="profileMenuOpen()"
+              aria-haspopup="true"
+              aria-controls="profile-menu"
+              (click)="toggleProfileMenu()"
+            >
+              <span class="app-shell__profile-avatar" aria-hidden="true">{{ profileInitial() }}</span>
+              <span class="app-shell__profile-name">{{ profileName() }}</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m7 10 5 5 5-5" />
+              </svg>
+            </button>
+
+            @if (profileMenuOpen()) {
+              <div id="profile-menu" class="app-shell__menu-panel app-shell__profile-panel">
+                <a routerLink="/profile" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeDesktopMenus(false)">
+                  Profile
+                </a>
+                <a routerLink="/settings" routerLinkActive="is-active" ariaCurrentWhenActive="page" (click)="closeDesktopMenus(false)">
+                  Settings
+                </a>
+                <button type="button" (click)="signOut()" [disabled]="authentication.isPending()">
+                  Sign out
+                </button>
+              </div>
+            }
+          </div>
         </div>
       </div>
     } @else {
@@ -123,12 +168,6 @@
       </svg>
       <span>Library</span>
     </a>
-    <a routerLink="/priority" routerLinkActive="is-active" ariaCurrentWhenActive="page">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 5h16v4H4zM4 11h16v4H4zM4 17h16v2H4z" />
-      </svg>
-      <span>Priority</span>
-    </a>
     <button
       #mobileMoreButton
       type="button"
@@ -171,6 +210,7 @@
         <nav aria-label="More destinations">
           <a routerLink="/activity" (click)="closeMobileMenu(false)">Activity</a>
           <a routerLink="/statistics" (click)="closeMobileMenu(false)">Statistics</a>
+          <a routerLink="/priority" (click)="closeMobileMenu(false)">Priority</a>
           <a routerLink="/wheels" (click)="closeMobileMenu(false)">Wheels</a>
           <a routerLink="/lists" (click)="closeMobileMenu(false)">Shared lists</a>
           <a routerLink="/friends" (click)="closeMobileMenu(false)">Friends</a>
@@ -182,6 +222,7 @@
             }
           </a>
           <a routerLink="/profile" (click)="closeMobileMenu(false)">Profile</a>
+          <a routerLink="/settings" (click)="closeMobileMenu(false)">Settings</a>
         </nav>
 
         <button

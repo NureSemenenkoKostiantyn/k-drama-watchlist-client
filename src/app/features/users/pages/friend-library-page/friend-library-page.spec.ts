@@ -83,6 +83,11 @@ describe('FriendLibraryPage', () => {
       expect.objectContaining({ page: 1, limit: 24 }),
     );
     expect(root.textContent).toContain("Kim Dahyun's library");
+    expect(
+      root
+        .querySelector<HTMLAnchorElement>('.friend-library__header p a')
+        ?.getAttribute('href'),
+    ).toBe(`/users/${profile.id}`);
     expect(root.textContent).toContain('Friends-only library');
     expect(root.textContent).toContain('Goblin');
     expect(root.textContent).toContain('8.5 / 10');

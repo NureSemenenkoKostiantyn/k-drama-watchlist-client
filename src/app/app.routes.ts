@@ -154,6 +154,15 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'settings',
+    title: 'Settings · Drama Watch',
+    canActivate: [profileCompleteGuard],
+    loadComponent: () =>
+      import('./features/settings/pages/settings-page/settings-page').then(
+        ({ SettingsPage }) => SettingsPage,
+      ),
+  },
+  {
     path: 'users/:userId/library',
     title: 'Shared library - Drama Watch',
     loadComponent: () =>

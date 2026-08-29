@@ -136,6 +136,30 @@ describe('LibraryPage', () => {
     ).toBe(true);
   });
 
+  it('opens category management from the category filter label', async () => {
+    const fixture = TestBed.createComponent(LibraryPage);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const toggle = root.querySelector<HTMLButtonElement>(
+      '.library-tools__category-toggle',
+    );
+    const manager = root.querySelector<HTMLElement>(
+      '#library-category-manager',
+    );
+
+    expect(toggle?.getAttribute('aria-expanded')).toBe('false');
+    expect(manager?.hidden).toBe(true);
+
+    toggle?.click();
+    fixture.detectChanges();
+
+    expect(toggle?.getAttribute('aria-expanded')).toBe('true');
+    expect(manager?.hidden).toBe(false);
+    expect(manager?.querySelector('app-category-manager')).not.toBeNull();
+  });
+
   it('applies title filters and switches between grid and list views', async () => {
     const fixture = TestBed.createComponent(LibraryPage);
     fixture.detectChanges();

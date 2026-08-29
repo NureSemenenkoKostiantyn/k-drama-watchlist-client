@@ -64,35 +64,7 @@
 }
 
 .app-shell__authenticated {
-  gap: 1.5rem;
-}
-
-.app-shell__primary-links {
-  gap: 1rem;
-}
-
-.app-shell__primary-links a {
-  color: var(--color-text-muted);
-  font-size: 0.8125rem;
-  font-weight: 650;
-  text-decoration: none;
-}
-
-.app-shell__primary-links a:hover,
-.app-shell__primary-links a.is-active {
-  color: var(--color-text);
-}
-
-.app-shell__profile-link {
-  color: var(--color-text-muted);
-  font-size: 0.8125rem;
-  font-weight: 650;
-  text-decoration: none;
-}
-
-.app-shell__profile-link:hover,
-.app-shell__profile-link.is-active {
-  color: var(--color-text);
+  gap: 1.25rem;
 }
 
 .app-shell__notifications-link {
@@ -163,13 +135,6 @@
 @media (max-width: 30rem) {
   .app-shell__auth-links > :first-child {
     display: none;
-  }
-
-  .app-shell__profile-link {
-    overflow: hidden;
-    max-width: 7rem;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   .app-shell__authenticated {

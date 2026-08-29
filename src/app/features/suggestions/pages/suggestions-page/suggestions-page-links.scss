@@ -1,0 +1,28 @@
+.item-select {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.item-select:focus-visible {
+  outline: 0.125rem solid var(--color-accent);
+  outline-offset: -0.125rem;
+}
+
+.item > :not(.item-select) {
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.item-meta a {
+  position: relative;
+  z-index: 2;
+  color: inherit;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.14em;
+  pointer-events: auto;
+}

@@ -45,7 +45,7 @@ describe('PublicProfilePage', () => {
           useValue: {
             session: signal({
               user: {
-                id: 'current-user',
+                id: profile.id,
                 username: 'current_user',
               },
             }).asReadonly(),
@@ -67,9 +67,17 @@ describe('PublicProfilePage', () => {
     fixture.detectChanges();
 
     expect(getById).toHaveBeenCalledWith(profile.id);
-    const content = fixture.nativeElement.textContent as string;
+    const root = fixture.nativeElement as HTMLElement;
+    const content = root.textContent as string;
     expect(content).toContain('Dahyun Fan');
     expect(content).toContain('@Dahyun.Fan');
+    expect(
+      root.querySelector<HTMLAnchorElement>(
+        '.profile-card__identity strong a',
+      )?.getAttribute('href'),
+    ).toBe('/profile');
     expect(content).not.toContain('email');
+    expect(root.querySelector('app-library-visibility-settings')).toBeNull();
+    expect(root.querySelector('app-account-data-export')).toBeNull();
   });
 });

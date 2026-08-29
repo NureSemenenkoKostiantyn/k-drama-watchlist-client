@@ -122,7 +122,7 @@ describe('App', () => {
     expect(heading.hasAttribute('tabindex')).toBe(false);
   });
 
-  it('renders the primary mobile destinations and opens the complete navigation sheet', async () => {
+  it('renders the compact primary navigation and opens the complete mobile navigation sheet', async () => {
     authenticated.set(true);
     session.set({
       user: {
@@ -143,13 +143,11 @@ describe('App', () => {
       'Home',
       'Search',
       'Library',
-      'Priority',
     ]);
     expect(links.map((link) => link.getAttribute('href'))).toEqual([
       '/',
       '/search',
       '/library',
-      '/priority',
     ]);
     const moreButton = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
       '.app-shell__mobile-more-button',
@@ -168,18 +166,77 @@ describe('App', () => {
     expect(moreLinks.map((link) => link.getAttribute('href'))).toEqual([
       '/activity',
       '/statistics',
+      '/priority',
       '/wheels',
       '/lists',
       '/friends',
       '/suggestions',
       '/notifications',
       '/profile',
+      '/settings',
     ]);
     expect(
       (fixture.nativeElement as HTMLElement)
-        .querySelector('.app-shell__profile-link')
-        ?.getAttribute('href'),
-    ).toBe('/profile');
+        .querySelector('.app-shell__profile-trigger')
+        ?.textContent,
+    ).toContain('dahyun');
+  });
+
+  it('keeps desktop navigation focused on primary destinations', async () => {
+    authenticated.set(true);
+    session.set({
+      user: {
+        name: 'Dahyun',
+        displayUsername: 'dahyun',
+      },
+    });
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const primaryLinks = Array.from(
+      compiled.querySelectorAll<HTMLAnchorElement>('.app-shell__primary-links > a'),
+    );
+    expect(primaryLinks.map((link) => link.textContent?.trim())).toEqual([
+      'Home',
+      'Search',
+      'Library',
+    ]);
+
+    const moreButton = compiled.querySelector<HTMLButtonElement>('.app-shell__menu-trigger');
+    expect(moreButton?.textContent).toContain('More');
+    expect(moreButton?.getAttribute('aria-expanded')).toBe('false');
+
+    moreButton?.click();
+    fixture.detectChanges();
+
+    const moreLinks = Array.from(
+      compiled.querySelectorAll<HTMLAnchorElement>('#desktop-more-menu a'),
+    );
+    expect(moreLinks.map((link) => link.getAttribute('href'))).toEqual([
+      '/activity',
+      '/statistics',
+      '/priority',
+      '/wheels',
+      '/lists',
+      '/friends',
+      '/suggestions',
+    ]);
+
+    const profileTrigger = compiled.querySelector<HTMLButtonElement>('.app-shell__profile-trigger');
+    expect(profileTrigger?.textContent).toContain('dahyun');
+
+    profileTrigger?.click();
+    fixture.detectChanges();
+    const accountLinks = Array.from(
+      compiled.querySelectorAll<HTMLAnchorElement>('#profile-menu a'),
+    );
+    expect(accountLinks.map((link) => link.getAttribute('href'))).toEqual([
+      '/profile',
+      '/settings',
+    ]);
+    expect(compiled.querySelector('#profile-menu button')?.textContent).toContain('Sign out');
   });
 
   it('shows the unread notification count for an authenticated user', async () => {

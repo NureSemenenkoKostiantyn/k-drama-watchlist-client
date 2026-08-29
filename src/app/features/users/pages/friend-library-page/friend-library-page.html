@@ -17,7 +17,11 @@
       }
 
       <div>
-        <p>{{ '@' + currentProfile.displayUsername }}</p>
+        <p>
+          <a [routerLink]="['/users', currentProfile.id]">
+            {{ '@' + currentProfile.displayUsername }}
+          </a>
+        </p>
         <h1>{{ currentProfile.name }}'s library</h1>
         @if (library(); as currentLibrary) {
           <span>
