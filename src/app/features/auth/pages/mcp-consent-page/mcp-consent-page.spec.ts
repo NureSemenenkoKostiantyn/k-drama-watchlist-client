@@ -36,11 +36,12 @@ describe('McpConsentPage', () => {
 
     await TestBed.inject(Router).navigateByUrl(
       '/mcp/consent?client_id=https%3A%2F%2Fassistant.example%2Fclient.json' +
-        '&scope=openid%20profile%20mcp%3Alibrary%3Aread%20mcp%3Asocial%3Aread',
+        '&scope=openid%20profile%20mcp%3Alibrary%3Aread%20mcp%3Asocial%3Aread' +
+        '%20mcp%3Alibrary%3Awrite%20mcp%3Asocial%3Awrite',
     );
   });
 
-  it('shows the client and sends the approved read-only scopes', async () => {
+  it('shows the client and sends the explicitly approved scopes', async () => {
     const fixture = TestBed.createComponent(McpConsentPage);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -53,6 +54,9 @@ describe('McpConsentPage', () => {
     expect(fixture.nativeElement.textContent).toContain(
       'Read your library, media details, and statistics.',
     );
+    expect(fixture.nativeElement.textContent).toContain(
+      'Add, update, or remove titles in your library.',
+    );
 
     const approveButton = (fixture.nativeElement as HTMLElement).querySelector(
       'button:last-child',
@@ -62,7 +66,8 @@ describe('McpConsentPage', () => {
 
     expect(decideOAuthConsent).toHaveBeenCalledWith(
       true,
-      'openid profile mcp:library:read mcp:social:read',
+      'openid profile mcp:library:read mcp:social:read ' +
+        'mcp:library:write mcp:social:write',
     );
   });
 });

@@ -22,6 +22,8 @@ const SCOPE_DESCRIPTIONS: Record<string, string> = {
   profile: 'Read your public profile information.',
   'mcp:library:read': 'Read your library, media details, and statistics.',
   'mcp:social:read': 'Read your shared lists and selection wheels.',
+  'mcp:library:write': 'Add, update, or remove titles in your library.',
+  'mcp:social:write': 'Create and update shared lists and selection wheels.',
 };
 
 @Component({
