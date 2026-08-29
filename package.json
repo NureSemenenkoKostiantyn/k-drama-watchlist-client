@@ -26,7 +26,8 @@
     "@angular/forms": "^21.2.0",
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
-    "better-auth": "^1.6.23",
+    "@better-auth/oauth-provider": "^1.7.2",
+    "better-auth": "^1.7.2",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

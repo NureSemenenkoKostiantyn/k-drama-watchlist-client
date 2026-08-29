@@ -4,6 +4,13 @@
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
+        "source": "/.well-known/**",
+        "run": {
+          "serviceId": "k-drama-watchlist",
+          "region": "europe-west1"
+        }
+      },
+      {
         "source": "/api/**",
         "run": {
           "serviceId": "k-drama-watchlist",
