@@ -12,6 +12,7 @@ describe('ProgressControls', () => {
     mediaId: 'media-1',
     status: 'watching',
     categoryIds: [],
+    sharedLists: [],
     media: {
       id: 'tv:1',
       tmdbId: 1,

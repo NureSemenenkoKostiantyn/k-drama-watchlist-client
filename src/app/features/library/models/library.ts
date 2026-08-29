@@ -1,69 +1,15 @@
-import { MediaDetails, MediaType } from '../../search/models/media';
-import { PublicUserProfile } from '../../users/models/public-user-profile';
+import type { components } from '../../../core/api/generated/api-contracts';
 
-export type WatchStatus = 'to_watch' | 'watching' | 'watched';
-export type AudioType = 'original' | 'dubbed' | 'mixed' | 'unknown';
+type ApiSchemas = components['schemas'];
 
-export interface LibraryProgress {
-  currentSeason: number;
-  currentEpisode: number;
-  completedEpisodes: number;
-  totalEpisodesSnapshot?: number;
-  completedSeasonNumbers: number[];
-  includeSpecials: boolean;
-  updatedAt: string;
-}
-
-export interface PlaybackAudioPreference {
-  type: AudioType;
-  languageCode?: string;
-  customLabel?: string;
-}
-
-export interface PlaybackPreference {
-  audio?: PlaybackAudioPreference;
-  subtitleLanguageCode?: string;
-}
-
-export interface LibraryEntry {
-  id: string;
-  mediaId: string;
-  status: WatchStatus;
-  media: MediaDetails;
-  categoryIds: string[];
-  priorityLaneId?: string;
-  priorityPosition?: number;
-  progress?: LibraryProgress;
-  rating?: number;
-  description?: string;
-  playbackPreference?: PlaybackPreference;
-  suggestedBy?: PublicUserProfile;
-  sharedLists?: LibrarySharedListReference[];
-  startedAt?: string;
-  completedAt?: string;
-  lastProgressAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface LibrarySharedListReference {
-  id: string;
-  title: string;
-}
-
-export interface AddLibraryEntryRequest {
-  mediaType: MediaType;
-  tmdbId: number;
-  status: WatchStatus;
-}
-
-export interface UpdateProgressRequest {
-  currentSeason: number;
-  currentEpisode: number;
-  includeSpecials?: boolean;
-}
-
-export interface UpdatePlaybackPreferenceRequest {
-  audio?: PlaybackAudioPreference | null;
-  subtitleLanguageCode?: string | null;
-}
+export type WatchStatus = ApiSchemas['WatchStatus'];
+export type AudioType = ApiSchemas['AudioType'];
+export type LibraryProgress = ApiSchemas['LibraryProgress'];
+export type PlaybackAudioPreference = ApiSchemas['PlaybackAudioPreference'];
+export type PlaybackPreference = ApiSchemas['PlaybackPreference'];
+export type LibraryEntry = ApiSchemas['LibraryEntryResponse'];
+export type LibrarySharedListReference = ApiSchemas['LibrarySharedListReference'];
+export type AddLibraryEntryRequest = ApiSchemas['AddLibraryEntryDto'];
+export type UpdateProgressRequest = ApiSchemas['UpdateProgressDto'];
+export type UpdatePlaybackPreferenceRequest =
+  ApiSchemas['UpdatePlaybackPreferenceDto'];

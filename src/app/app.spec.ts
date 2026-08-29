@@ -19,6 +19,10 @@ describe('App', () => {
     items: [],
     unreadCount: 0,
   });
+  const refreshNotificationsIfStale = vi.fn().mockResolvedValue({
+    items: [],
+    unreadCount: 0,
+  });
   const clearNotifications = vi.fn();
   const clearSettings = vi.fn();
 
@@ -28,6 +32,7 @@ describe('App', () => {
     signOut.mockClear();
     unreadCount.set(0);
     refreshNotifications.mockClear();
+    refreshNotificationsIfStale.mockClear();
     clearNotifications.mockClear();
     clearSettings.mockClear();
 
@@ -49,6 +54,7 @@ describe('App', () => {
           useValue: {
             unreadCount: unreadCount.asReadonly(),
             refresh: refreshNotifications,
+            refreshIfStale: refreshNotificationsIfStale,
             clear: clearNotifications,
           },
         },
@@ -195,5 +201,29 @@ describe('App', () => {
     expect(link?.getAttribute('href')).toBe('/notifications');
     expect(link?.getAttribute('aria-label')).toBe('Notifications, 3 unread');
     expect(link?.textContent).toContain('3');
+  });
+
+  it('refreshes notifications when an authenticated visible window becomes active', async () => {
+    authenticated.set(true);
+    session.set({ user: { name: 'Dahyun', displayUsername: 'dahyun' } });
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    window.dispatchEvent(new Event('focus'));
+    window.dispatchEvent(new Event('online'));
+    document.dispatchEvent(new Event('visibilitychange'));
+
+    expect(refreshNotificationsIfStale).toHaveBeenCalledTimes(3);
+  });
+
+  it('does not refresh notifications from activation events while signed out', async () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    window.dispatchEvent(new Event('focus'));
+
+    expect(refreshNotificationsIfStale).not.toHaveBeenCalled();
   });
 });

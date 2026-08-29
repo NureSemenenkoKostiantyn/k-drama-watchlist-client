@@ -33,6 +33,7 @@ describe('NotificationsService', () => {
 
   afterEach(() => {
     http.verify();
+    vi.restoreAllMocks();
   });
 
   it('loads unread state and marks one notification read', async () => {
@@ -74,5 +75,34 @@ describe('NotificationsService', () => {
 
     expect(service.items()).toEqual([]);
     expect(service.unreadCount()).toBe(0);
+  });
+
+  it('refreshes stale state while suppressing repeated visibility refreshes', async () => {
+    const now = vi.spyOn(Date, 'now').mockReturnValue(100_000);
+    const firstRefresh = service.refresh();
+    http.expectOne('/api/notifications').flush(overview);
+    await firstRefresh;
+
+    await service.refreshIfStale();
+    http.expectNone('/api/notifications');
+
+    now.mockReturnValue(130_001);
+    const staleRefresh = service.refreshIfStale();
+    http.expectOne('/api/notifications').flush({ items: [], unreadCount: 0 });
+    await staleRefresh;
+
+    expect(service.unreadCount()).toBe(0);
+  });
+
+  it('allows a new account to refresh immediately after state is cleared', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(100_000);
+    const firstRefresh = service.refresh();
+    http.expectOne('/api/notifications').flush(overview);
+    await firstRefresh;
+
+    service.clear();
+    const nextAccountRefresh = service.refreshIfStale();
+    http.expectOne('/api/notifications').flush({ items: [], unreadCount: 0 });
+    await nextAccountRefresh;
   });
 });

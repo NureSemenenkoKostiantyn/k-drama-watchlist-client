@@ -1,30 +1,10 @@
-import { PublicUserProfile } from '../../users/models/public-user-profile';
-import { WatchStatus } from '../../library/models/library';
+import type { components } from '../../../core/api/generated/api-contracts';
 
-export type FriendshipStatus = 'pending' | 'accepted' | 'blocked';
-export type FriendshipDirection = 'incoming' | 'outgoing';
+type ApiSchemas = components['schemas'];
 
-export interface Friendship {
-  id: string;
-  status: FriendshipStatus;
-  direction: FriendshipDirection;
-  user: PublicUserProfile;
-  createdAt: string;
-  acceptedAt?: string;
-}
-
-export interface FriendshipsOverview {
-  friends: Friendship[];
-  incomingRequests: Friendship[];
-  outgoingRequests: Friendship[];
-}
-
-export interface MediaFriendActivity {
-  user: PublicUserProfile;
-  status: WatchStatus;
-  rating?: number;
-}
-
-export interface MediaFriendContext {
-  friends: MediaFriendActivity[];
-}
+export type FriendshipStatus = ApiSchemas['FriendshipStatus'];
+export type FriendshipDirection = ApiSchemas['FriendshipDirection'];
+export type Friendship = ApiSchemas['FriendshipResponse'];
+export type FriendshipsOverview = ApiSchemas['FriendshipsResponse'];
+export type MediaFriendActivity = ApiSchemas['MediaFriendActivityResponse'];
+export type MediaFriendContext = ApiSchemas['MediaFriendContextResponse'];

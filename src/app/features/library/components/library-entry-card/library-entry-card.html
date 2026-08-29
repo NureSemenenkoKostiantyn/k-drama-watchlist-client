@@ -1,0 +1,42 @@
+<article class="library-card" [class.library-card--list]="isListView()">
+  <a
+    class="library-card__poster"
+    [routerLink]="['/media', entry().media.mediaType, entry().media.tmdbId]"
+  >
+    @if (entry().media.posterUrl) {
+      <img [src]="entry().media.posterUrl" [alt]="entry().media.title + ' poster'" />
+    } @else {
+      <span>No poster</span>
+    }
+  </a>
+  <div class="library-card__body">
+    <p>
+      {{ entry().media.mediaType === 'tv' ? 'TV series' : 'Movie' }}
+      <span>·</span>
+      {{ displayYear() }}
+    </p>
+    <h2>
+      <a [routerLink]="['/media', entry().media.mediaType, entry().media.tmdbId]">
+        {{ entry().media.title }}
+      </a>
+    </h2>
+    @if (entry().media.originalTitle !== entry().media.title) {
+      <span class="library-card__original-title">{{ entry().media.originalTitle }}</span>
+    }
+    <app-entry-category-picker [entry]="entry()" [categories]="categories()" />
+    @if (entry().media.mediaType === 'tv' && entry().status === 'watching') {
+      <app-progress-controls [entry]="entry()" />
+    }
+    <div class="library-card__controls">
+      <label>
+        <span>Status</span>
+        <select [value]="entry().status" [disabled]="pending()" (change)="changeStatus($event)">
+          <option value="to_watch">To watch</option>
+          <option value="watching">Watching</option>
+          <option value="watched">Watched</option>
+        </select>
+      </label>
+      <button type="button" [disabled]="pending()" (click)="removeRequested.emit()">Remove</button>
+    </div>
+  </div>
+</article>

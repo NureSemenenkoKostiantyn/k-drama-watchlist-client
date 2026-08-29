@@ -1,41 +1,11 @@
-export type StatisticsStatus = 'to_watch' | 'watching' | 'watched';
+import type { components } from '../../../core/api/generated/api-contracts';
 
-export interface StatisticsTotals {
-  library: number;
-  toWatch: number;
-  watching: number;
-  watched: number;
-  movies: number;
-  tv: number;
-  rated: number;
-  completedEpisodes: number;
-  averageRating?: number;
-}
+type ApiSchemas = components['schemas'];
 
-export interface StatisticsRatingBucket {
-  rating: number;
-  count: number;
-}
-
-export interface StatisticsGenreBucket {
-  genreId: number;
-  count: number;
-}
-
-export interface StatisticsCountryBucket {
-  countryCode: string;
-  count: number;
-}
-
-export interface StatisticsMonthBucket {
-  month: string;
-  count: number;
-}
-
-export interface StatisticsOverview {
-  totals: StatisticsTotals;
-  ratingDistribution: StatisticsRatingBucket[];
-  topGenres: StatisticsGenreBucket[];
-  topCountries: StatisticsCountryBucket[];
-  completedByMonth: StatisticsMonthBucket[];
-}
+export type StatisticsStatus = ApiSchemas['WatchStatus'];
+export type StatisticsTotals = ApiSchemas['StatisticsTotals'];
+export type StatisticsRatingBucket = ApiSchemas['StatisticsRatingBucket'];
+export type StatisticsGenreBucket = ApiSchemas['StatisticsGenreBucket'];
+export type StatisticsCountryBucket = ApiSchemas['StatisticsCountryBucket'];
+export type StatisticsMonthBucket = ApiSchemas['StatisticsMonthBucket'];
+export type StatisticsOverview = ApiSchemas['StatisticsOverviewResponse'];

@@ -12,6 +12,7 @@ describe('optimistic library entry projections', () => {
     mediaId: 'media-1',
     status: 'to_watch',
     categoryIds: [],
+    sharedLists: [],
     priorityLaneId: 'lane-1',
     priorityPosition: 0,
     media: {

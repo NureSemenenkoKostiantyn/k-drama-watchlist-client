@@ -13,6 +13,10 @@ session state through read-only Signals, route guards protect the application by
 standalone pages provide registration, email verification and resend, login, password recovery,
 password reset, and username onboarding.
 
+Media, library, statistics, friendship, suggestion, shared-list, wheel, and public-profile models
+are aliases of types generated from the NestJS OpenAPI contract. They are not independently
+redeclared in the client.
+
 The TMDB search slice adds protected `/search` and `/media/:mediaType/:tmdbId` routes. A feature data
 service calls the same-origin NestJS API with Angular `HttpClient`, while Signals own loading, error,
 pagination, and result state. The K-drama shortcut searches TV titles with the `KR` origin-country
@@ -177,6 +181,7 @@ base URL used in production.
 
 ```bash
 npm run lint
+npm run contracts:check
 npm run typecheck
 npm test
 npm run build
@@ -184,6 +189,11 @@ npm run build
 
 Unit and component tests run with Vitest through Angular's test builder. Browser end-to-end
 automation is intentionally deferred.
+
+Run `npm run contracts:generate` after the server contract changes. By default the generator reads
+`../k-drama-watchlist-server/openapi/drama-watch.openapi.json`; set `DRAMA_WATCH_OPENAPI` when the
+server checkout is elsewhere. Frontend CI checks out the server repository and fails if regenerating
+`src/app/core/api/generated/api-contracts.ts` produces a diff.
 
 ## Project organization
 

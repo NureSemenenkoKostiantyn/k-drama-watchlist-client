@@ -1,8 +1,4 @@
-export interface PublicUserProfile {
-  id: string;
-  username: string;
-  displayUsername: string;
-  name: string;
-  joinedAt: string;
-  image?: string;
-}
+import type { components } from '../../../core/api/generated/api-contracts';
+
+export type PublicUserProfile =
+  components['schemas']['PublicUserProfileResponse'];
