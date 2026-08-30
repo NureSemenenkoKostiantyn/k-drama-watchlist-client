@@ -163,6 +163,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'telegram',
+    title: 'Drama Watch for Telegram',
+    loadComponent: () =>
+      import('./features/telegram/pages/telegram-mini-app-page/telegram-mini-app-page').then(
+        ({ TelegramMiniAppPage }) => TelegramMiniAppPage,
+      ),
+  },
+  {
     path: 'users/:userId/library',
     title: 'Shared library - Drama Watch',
     loadComponent: () =>

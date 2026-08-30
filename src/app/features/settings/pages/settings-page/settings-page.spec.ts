@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 
 import { AccountExportService } from '../../../account/data-access/account-export.service';
+import { TelegramService } from '../../../telegram/data-access/telegram.service';
 import { SettingsService } from '../../data-access/settings.service';
 import { SettingsPage } from './settings-page';
 
@@ -23,6 +24,17 @@ describe('SettingsPage', () => {
               activityVisibility: 'private',
             }),
             updatePrivacy: vi.fn(),
+          },
+        },
+        {
+          provide: TelegramService,
+          useValue: {
+            connection: signal({ enabled: false, connected: false }).asReadonly(),
+            isLoading: signal(false).asReadonly(),
+            error: signal(null).asReadonly(),
+            load: vi.fn().mockResolvedValue({ enabled: false, connected: false }),
+            createLink: vi.fn(),
+            disconnect: vi.fn(),
           },
         },
         {
@@ -48,6 +60,7 @@ describe('SettingsPage', () => {
 
     expect(content).toContain('Settings');
     expect(content).toContain('Privacy settings');
+    expect(content).toContain('Telegram');
     expect(content).toContain('Download your data');
   });
 });

@@ -1,0 +1,59 @@
+:host {
+  display: grid;
+  min-height: 100dvh;
+  padding: 1.25rem;
+  place-items: center;
+  background:
+    radial-gradient(circle at 20% 10%, rgb(255 113 154 / 28%), transparent 24rem),
+    #100d18;
+}
+
+.telegram-app {
+  width: min(100%, 32rem);
+}
+
+.telegram-app__mark {
+  display: grid;
+  width: 3.5rem;
+  height: 3.5rem;
+  place-items: center;
+  color: #100d18;
+  background: var(--color-accent);
+  font-weight: 900;
+}
+
+.telegram-app p {
+  margin: 1.5rem 0 0;
+  color: var(--color-accent-strong);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.telegram-app h1 {
+  margin: 0.45rem 0 0;
+  font-size: clamp(2.4rem, 12vw, 4.5rem);
+  line-height: 0.96;
+  letter-spacing: -0.06em;
+}
+
+.telegram-app span {
+  display: block;
+  margin-top: 1.25rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.telegram-app a {
+  display: inline-flex;
+  min-height: 3rem;
+  margin-top: 1.25rem;
+  padding-inline: 1rem;
+  align-items: center;
+  color: #100d18;
+  background: var(--color-accent);
+  text-decoration: none;
+  font-weight: 800;
+}
+
