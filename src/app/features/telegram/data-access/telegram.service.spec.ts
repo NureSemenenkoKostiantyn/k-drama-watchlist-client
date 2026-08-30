@@ -76,5 +76,105 @@ describe('TelegramService', () => {
       miniAppUrl: undefined,
     });
   });
-});
 
+  it('authenticates a Mini App request with raw Telegram init data', async () => {
+    const authentication = service.authenticateMiniApp('query_id=test&hash=signed');
+    const request = http.expectOne('/api/telegram/mini-app/session');
+
+    expect(request.request.method).toBe('POST');
+    expect(request.request.headers.get('X-Telegram-Init-Data')).toBe(
+      'query_id=test&hash=signed',
+    );
+    request.flush({
+      account: {
+        id: '507f1f77bcf86cd799439011',
+        username: 'demo_viewer',
+        displayUsername: 'Demo_Viewer',
+        name: 'Demo Viewer',
+        joinedAt: '2026-01-01T00:00:00.000Z',
+      },
+      telegramDisplayName: 'Demo Viewer',
+    });
+
+    await expect(authentication).resolves.toMatchObject({
+      account: { username: 'demo_viewer' },
+    });
+  });
+
+  it('uses authenticated Mini App data for search and library actions', async () => {
+    const authentication = service.authenticateMiniApp('auth_date=1&hash=signed');
+    http.expectOne('/api/telegram/mini-app/session').flush({
+      account: {
+        id: '507f1f77bcf86cd799439011',
+        username: 'demo_viewer',
+        displayUsername: 'Demo_Viewer',
+        name: 'Demo Viewer',
+        joinedAt: '2026-01-01T00:00:00.000Z',
+      },
+      telegramDisplayName: 'Demo Viewer',
+    });
+    await authentication;
+
+    const library = service.loadMiniAppLibrary();
+    const libraryRequest = http.expectOne('/api/telegram/mini-app/library');
+    expect(libraryRequest.request.headers.get('X-Telegram-Init-Data')).toBe(
+      'auth_date=1&hash=signed',
+    );
+    libraryRequest.flush([]);
+    await expect(library).resolves.toEqual([]);
+
+    const search = service.searchMiniApp('Goblin', 'tv');
+    const searchRequest = http.expectOne(
+      (request) =>
+        request.url === '/api/telegram/mini-app/search' &&
+        request.params.get('q') === 'Goblin' &&
+        request.params.get('type') === 'tv',
+    );
+    searchRequest.flush({ page: 1, totalPages: 0, totalResults: 0, results: [] });
+    await expect(search).resolves.toMatchObject({ results: [] });
+
+    const media = {
+      id: 'tv:1396',
+      tmdbId: 1396,
+      mediaType: 'tv' as const,
+      title: 'Goblin',
+      originalTitle: 'Goblin',
+      originCountry: ['KR'],
+      genreIds: [],
+    };
+    const add = service.addFromMiniApp(media, 'to_watch');
+    const addRequest = http.expectOne('/api/telegram/mini-app/library');
+    expect(addRequest.request.method).toBe('POST');
+    expect(addRequest.request.body).toEqual({
+      mediaType: 'tv',
+      tmdbId: 1396,
+      status: 'to_watch',
+    });
+    addRequest.flush({ id: 'entry-1' });
+    await expect(add).resolves.toMatchObject({ id: 'entry-1' });
+
+    const status = service.updateMiniAppStatus('entry-1', 'watching');
+    const statusRequest = http.expectOne(
+      '/api/telegram/mini-app/library/entry-1/status',
+    );
+    expect(statusRequest.request.body).toEqual({ status: 'watching' });
+    statusRequest.flush({ id: 'entry-1', status: 'watching' });
+    await status;
+
+    const progress = service.updateMiniAppProgress('entry-1', {
+      currentSeason: 1,
+      currentEpisode: 2,
+      includeSpecials: false,
+    });
+    const progressRequest = http.expectOne(
+      '/api/telegram/mini-app/library/entry-1/progress',
+    );
+    expect(progressRequest.request.body).toEqual({
+      currentSeason: 1,
+      currentEpisode: 2,
+      includeSpecials: false,
+    });
+    progressRequest.flush({ id: 'entry-1' });
+    await progress;
+  });
+});

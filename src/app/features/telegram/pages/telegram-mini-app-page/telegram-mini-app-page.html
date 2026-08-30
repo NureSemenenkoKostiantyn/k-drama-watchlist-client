@@ -3,17 +3,182 @@
   <p>Drama Watch for Telegram</p>
   <h1>Your watchlist, closer to the conversation.</h1>
 
-  @if (isInsideTelegram()) {
-    <span>
-      The Mini App is connected to Telegram. Secure sign-in and quick library actions are coming
-      in the next integration slice.
-    </span>
+  @if (isLoading()) {
+    <span role="status">Securely connecting your Drama Watch account&hellip;</span>
+  } @else if (session(); as activeSession) {
+    <div class="telegram-app__account">
+      <span>Connected as</span>
+      <strong>{{ activeSession.account.name }}</strong>
+      <small>&#64;{{ activeSession.account.displayUsername }}</small>
+    </div>
+
+    <nav class="telegram-app__tabs" aria-label="Mini App sections">
+      <button type="button" [class.is-active]="activeView() === 'library'" (click)="showView('library')">
+        My library
+      </button>
+      <button type="button" [class.is-active]="activeView() === 'search'" (click)="showView('search')">
+        Find titles
+      </button>
+    </nav>
+
+    @if (actionError()) {
+      <span class="telegram-app__error" role="alert">{{ actionError() }}</span>
+    }
+    @if (notice()) {
+      <span class="telegram-app__notice" role="status">{{ notice() }}</span>
+    }
+
+    @if (activeView() === 'library') {
+      <section class="telegram-app__workspace" aria-labelledby="mini-library-title">
+        <div class="telegram-app__section-heading">
+          <div>
+            <p>Your quick list</p>
+            <h2 id="mini-library-title">Watching now</h2>
+          </div>
+          <button type="button" (click)="showView('search')">Add title</button>
+        </div>
+
+        @if (isLibraryLoading()) {
+          <span role="status">Loading your library&hellip;</span>
+        } @else {
+          @if (watchingEntries().length === 0) {
+            <div class="telegram-app__empty">
+              Nothing in progress yet.
+              <button type="button" (click)="showView('search')">Find something to watch</button>
+            </div>
+          } @else {
+            <div class="telegram-app__list">
+              @for (entry of watchingEntries(); track entry.id) {
+                <article class="telegram-media">
+                  <app-media-poster [posterUrl]="entry.media.posterUrl ?? null" [title]="entry.media.title" />
+                  <div>
+                    <h3>{{ entry.media.title }}</h3>
+                    <span>{{ progressLabel(entry) }}</span>
+                    <div class="telegram-media__actions">
+                      @if (entry.media.mediaType === 'tv') {
+                        <app-button
+                          density="compact"
+                          [busy]="pendingId() === entry.id"
+                          [disabled]="pendingId() !== null || !canIncrement(entry)"
+                          (click)="increment(entry)"
+                        >
+                          +1 episode
+                        </app-button>
+                      }
+                      <app-button
+                        density="compact"
+                        variant="secondary"
+                        [disabled]="pendingId() !== null"
+                        (click)="updateStatus(entry, 'watched')"
+                      >
+                        Finish
+                      </app-button>
+                    </div>
+                  </div>
+                </article>
+              }
+            </div>
+          }
+
+          <div class="telegram-app__section-heading telegram-app__section-heading--secondary">
+            <div>
+              <p>Up next</p>
+              <h2>To watch</h2>
+            </div>
+            <span>{{ toWatchEntries().length }}</span>
+          </div>
+          <div class="telegram-app__list">
+            @for (entry of toWatchEntries().slice(0, 8); track entry.id) {
+              <article class="telegram-media telegram-media--compact">
+                <app-media-poster [posterUrl]="entry.media.posterUrl ?? null" [title]="entry.media.title" />
+                <div>
+                  <h3>{{ entry.media.title }}</h3>
+                  <app-button
+                    density="compact"
+                    variant="secondary"
+                    [disabled]="pendingId() !== null"
+                    (click)="updateStatus(entry, 'watching')"
+                  >
+                    Start watching
+                  </app-button>
+                </div>
+              </article>
+            } @empty {
+              <span>No saved titles yet.</span>
+            }
+          </div>
+        }
+      </section>
+    } @else {
+      <section class="telegram-app__workspace" aria-labelledby="mini-search-title">
+        <p>TMDB search</p>
+        <h2 id="mini-search-title">Find your next watch</h2>
+        <form class="telegram-app__search" (ngSubmit)="search()">
+          <app-form-field label="Title" inputId="telegram-title-search">
+            <input
+              id="telegram-title-search"
+              type="search"
+              maxlength="100"
+              autocomplete="off"
+              placeholder="Search movies and TV"
+              [formControl]="queryControl"
+            />
+          </app-form-field>
+          <app-form-field label="Type" inputId="telegram-media-type">
+            <select id="telegram-media-type" [formControl]="typeControl">
+              <option value="all">Movies and TV</option>
+              <option value="tv">TV series</option>
+              <option value="movie">Movies</option>
+            </select>
+          </app-form-field>
+          <app-button type="submit" [busy]="isSearching()" [disabled]="isSearching()">Search</app-button>
+        </form>
+
+        @if (isSearching()) {
+          <span role="status">Searching&hellip;</span>
+        } @else {
+          <div class="telegram-app__list telegram-app__results">
+            @for (media of searchResults(); track media.id) {
+              <article class="telegram-media">
+                <app-media-poster [posterUrl]="media.posterUrl ?? null" [title]="media.title" />
+                <div>
+                  <h3>{{ media.title }}</h3>
+                  @if (media.originalTitle !== media.title) {
+                    <span>{{ media.originalTitle }}</span>
+                  }
+                  @if (isInLibrary(media)) {
+                    <strong>Already in your library</strong>
+                  } @else {
+                    <app-button
+                      density="compact"
+                      [busy]="pendingId() === media.id"
+                      [disabled]="pendingId() !== null"
+                      (click)="addToWatch(media)"
+                    >
+                      Add to watch
+                    </app-button>
+                  }
+                </div>
+              </article>
+            } @empty {
+              @if (hasSearched()) {
+                <span>No matching titles found.</span>
+              }
+            }
+          </div>
+        }
+      </section>
+    }
+  } @else if (error()) {
+    <span class="telegram-app__error" role="alert">{{ error() }}</span>
+    <a routerLink="/settings">Connect from settings</a>
+  } @else if (isInsideTelegram()) {
+    <span>Open this Mini App again from the Drama Watch bot.</span>
   } @else {
     <span>
-      This page is designed to open inside the Drama Watch Telegram bot. Connect Telegram from
-      your account settings first.
+      This page is designed to open inside the Drama Watch Telegram bot. Connect Telegram from your
+      account settings first.
     </span>
     <a routerLink="/settings">Open settings</a>
   }
 </main>
-
