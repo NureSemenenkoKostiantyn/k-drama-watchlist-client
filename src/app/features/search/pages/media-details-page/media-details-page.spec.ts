@@ -1,3 +1,4 @@
+import { Location } from '@angular/common';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
@@ -13,11 +14,22 @@ import { MediaService } from '../../data-access/media.service';
 import { MediaDetailsPage } from './media-details-page';
 
 describe('MediaDetailsPage', () => {
+  const back = vi.fn();
+
   beforeEach(async () => {
+    vi.clearAllMocks();
+
     await TestBed.configureTestingModule({
       imports: [MediaDetailsPage],
       providers: [
         provideRouter([]),
+        {
+          provide: Location,
+          useValue: {
+            back,
+            getState: () => ({ navigationId: 2, originLabel: 'Home' }),
+          },
+        },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -121,5 +133,19 @@ describe('MediaDetailsPage', () => {
     expect(root.querySelector('.season-list__specials')?.textContent).toContain(
       'excluded from progress',
     );
+  });
+
+  it('returns through browser history with a contextual label', async () => {
+    const fixture = TestBed.createComponent(MediaDetailsPage);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const button = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      '.media-details__back',
+    );
+
+    expect(button?.textContent).toContain('Back to Home');
+    button?.click();
+    expect(back).toHaveBeenCalledOnce();
   });
 });

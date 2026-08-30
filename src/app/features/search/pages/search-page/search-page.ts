@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { readApiErrorMessage } from '../../../../core/api/api-error';
@@ -33,6 +33,8 @@ export class SearchPage implements OnInit {
   private readonly mediaService = inject(MediaService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private searchRequestId = 0;
   protected readonly library = inject(LibraryService);
 
   protected readonly searchForm = new FormGroup({
@@ -64,18 +66,25 @@ export class SearchPage implements OnInit {
 
   ngOnInit(): void {
     void this.library.load();
-    this.route.queryParamMap
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((params) => {
-        const query = (params.get('q') ?? '').trim().slice(0, 100);
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      const state = readSearchState(params);
 
-        if (!query) {
-          return;
-        }
+      this.searchForm.setValue(
+        {
+          query: state.query,
+          type: state.type,
+          koreanOnly: state.koreanOnly,
+        },
+        { emitEvent: false },
+      );
 
-        this.searchForm.controls.query.setValue(query);
-        this.submitSearch();
-      });
+      if (!state.query) {
+        this.clearSearchResults();
+        return;
+      }
+
+      void this.loadPage(state.page);
+    });
   }
 
   protected submitSearch(): void {
@@ -85,7 +94,7 @@ export class SearchPage implements OnInit {
       return;
     }
 
-    void this.loadPage(1);
+    void this.navigateToSearchPage(1);
   }
 
   protected changePage(page: number): void {
@@ -93,7 +102,7 @@ export class SearchPage implements OnInit {
       return;
     }
 
-    void this.loadPage(page);
+    void this.navigateToSearchPage(page);
   }
 
   protected displayYear(media: MediaSummary): string {
@@ -115,14 +124,11 @@ export class SearchPage implements OnInit {
   }
 
   protected statusLabel(status: WatchStatus): string {
-    return status === 'to_watch'
-      ? 'To watch'
-      : status === 'watching'
-        ? 'Watching'
-        : 'Watched';
+    return status === 'to_watch' ? 'To watch' : status === 'watching' ? 'Watching' : 'Watched';
   }
 
   private async loadPage(page: number): Promise<void> {
+    const requestId = ++this.searchRequestId;
     const values = this.searchForm.getRawValue();
     const request: MediaSearchRequest = {
       query: values.query.trim(),
@@ -136,12 +142,21 @@ export class SearchPage implements OnInit {
 
     try {
       const response = await firstValueFrom(this.mediaService.search(request));
+
+      if (requestId !== this.searchRequestId) {
+        return;
+      }
+
       this.results.set(response.results);
       this.currentPage.set(response.page);
       this.totalPages.set(response.totalPages);
       this.totalResults.set(response.totalResults);
       this.hasSearched.set(true);
     } catch (error: unknown) {
+      if (requestId !== this.searchRequestId) {
+        return;
+      }
+
       this.results.set([]);
       this.totalPages.set(0);
       this.totalResults.set(0);
@@ -150,7 +165,74 @@ export class SearchPage implements OnInit {
         readApiErrorMessage(error, 'Search is unavailable right now. Please try again.'),
       );
     } finally {
-      this.isLoading.set(false);
+      if (requestId === this.searchRequestId) {
+        this.isLoading.set(false);
+      }
     }
   }
+
+  private async navigateToSearchPage(page: number): Promise<void> {
+    const values = this.searchForm.getRawValue();
+    const queryParams = {
+      q: values.query.trim(),
+      ...(values.type !== 'all' ? { type: values.type } : {}),
+      ...(values.koreanOnly ? { korean: '1' } : {}),
+      ...(page > 1 ? { page } : {}),
+    };
+    const targetKey = searchStateKey({
+      query: queryParams.q,
+      type: values.type,
+      koreanOnly: values.koreanOnly,
+      page,
+    });
+    const currentKey = searchStateKey(readSearchState(this.route.snapshot.queryParamMap));
+
+    if (targetKey === currentKey) {
+      await this.loadPage(page);
+      return;
+    }
+
+    await this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+    });
+  }
+
+  private clearSearchResults(): void {
+    this.searchRequestId += 1;
+    this.results.set([]);
+    this.currentPage.set(1);
+    this.totalPages.set(0);
+    this.totalResults.set(0);
+    this.hasSearched.set(false);
+    this.error.set(null);
+    this.isLoading.set(false);
+  }
+}
+
+interface SearchRouteState {
+  query: string;
+  type: SearchMediaType;
+  koreanOnly: boolean;
+  page: number;
+}
+
+function readSearchState(params: ParamMap): SearchRouteState {
+  const query = (params.get('q') ?? '').trim().slice(0, 100);
+  const rawType = params.get('type');
+  const type: SearchMediaType = rawType === 'tv' || rawType === 'movie' ? rawType : 'all';
+  const koreanOnly = params.get('korean') === '1';
+  const rawPage = Number(params.get('page'));
+  const page = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
+
+  return {
+    query,
+    type: koreanOnly ? 'tv' : type,
+    koreanOnly,
+    page,
+  };
+}
+
+function searchStateKey(state: SearchRouteState): string {
+  return JSON.stringify(state);
 }

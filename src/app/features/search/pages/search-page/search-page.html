@@ -6,7 +6,12 @@
   </header>
 
   <form class="search-form" [formGroup]="searchForm" (ngSubmit)="submitSearch()">
-    <app-form-field class="search-form__query" label="Title" inputId="media-query" [mutedLabel]="true">
+    <app-form-field
+      class="search-form__query"
+      label="Title"
+      inputId="media-query"
+      [mutedLabel]="true"
+    >
       <input
         id="media-query"
         type="search"
@@ -74,6 +79,7 @@
             <a
               class="media-card__poster"
               [routerLink]="['/media', media.mediaType, media.tmdbId]"
+              [state]="{ originLabel: 'search results' }"
               [attr.aria-label]="'View ' + media.title"
             >
               <app-media-poster [posterUrl]="media.posterUrl" [title]="media.title" />
@@ -88,7 +94,10 @@
                 }
               </div>
               <h2>
-                <a [routerLink]="['/media', media.mediaType, media.tmdbId]">
+                <a
+                  [routerLink]="['/media', media.mediaType, media.tmdbId]"
+                  [state]="{ originLabel: 'search results' }"
+                >
                   {{ media.title }}
                 </a>
               </h2>
@@ -103,6 +112,7 @@
               <a
                 class="media-card__details-link"
                 [routerLink]="['/media', media.mediaType, media.tmdbId]"
+                [state]="{ originLabel: 'search results' }"
               >
                 View details
               </a>

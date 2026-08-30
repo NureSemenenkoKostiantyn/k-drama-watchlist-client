@@ -42,11 +42,8 @@
           <div class="discovery-hero__actions">
             <a
               class="discovery-hero__primary"
-              [routerLink]="[
-                '/media',
-                featured.mediaType,
-                featured.tmdbId
-              ]"
+              [routerLink]="['/media', featured.mediaType, featured.tmdbId]"
+              [state]="{ originLabel: 'Home' }"
             >
               View details
             </a>
@@ -65,10 +62,7 @@
     <div class="discovery-shelves">
       @for (shelf of discoveryHome.shelves; track shelf.key) {
         @if (shelf.items.length > 0) {
-          <section
-            class="discovery-shelf"
-            [attr.aria-labelledby]="'shelf-' + shelf.key"
-          >
+          <section class="discovery-shelf" [attr.aria-labelledby]="'shelf-' + shelf.key">
             <header>
               <div>
                 <h2 [id]="'shelf-' + shelf.key">{{ shelf.title }}</h2>
@@ -85,19 +79,12 @@
               @for (media of shelf.items; track media.id) {
                 <a
                   class="discovery-card"
-                  [routerLink]="[
-                    '/media',
-                    media.mediaType,
-                    media.tmdbId
-                  ]"
+                  [routerLink]="['/media', media.mediaType, media.tmdbId]"
+                  [state]="{ originLabel: 'Home' }"
                 >
                   <div class="discovery-card__poster">
                     @if (media.posterUrl) {
-                      <img
-                        [src]="media.posterUrl"
-                        [alt]="media.title + ' poster'"
-                        loading="lazy"
-                      />
+                      <img [src]="media.posterUrl" [alt]="media.title + ' poster'" loading="lazy" />
                     } @else {
                       <span aria-hidden="true">DW</span>
                     }
