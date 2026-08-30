@@ -17,14 +17,6 @@
     @if (authentication.isAuthenticated()) {
       <div class="app-shell__authenticated">
         <nav class="app-shell__primary-links" aria-label="Primary">
-          <a
-            routerLink="/"
-            routerLinkActive="is-active"
-            ariaCurrentWhenActive="page"
-            [routerLinkActiveOptions]="{ exact: true }"
-          >
-            Home
-          </a>
           <form
             class="app-shell__nav-search"
             role="search"

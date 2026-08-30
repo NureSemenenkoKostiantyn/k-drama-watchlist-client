@@ -7,9 +7,9 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { Location } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { readApiErrorMessage } from '../../../../core/api/api-error';
@@ -19,11 +19,7 @@ import { CategoriesService } from '../../../categories/data-access/categories.se
 import { MediaFriendContextComponent } from '../../../friends/components/media-friend-context/media-friend-context';
 import { ProgressControls } from '../../../library/components/progress-controls/progress-controls';
 import { LibraryService } from '../../../library/data-access/library.service';
-import {
-  AudioType,
-  LibraryEntry,
-  WatchStatus,
-} from '../../../library/models/library';
+import { AudioType, LibraryEntry, WatchStatus } from '../../../library/models/library';
 import { ShareCardCreator } from '../../../share-cards/components/share-card-creator/share-card-creator';
 import { ShareCardSource } from '../../../share-cards/models/share-card';
 import { SuggestToFriend } from '../../../suggestions/components/suggest-to-friend/suggest-to-friend';
@@ -34,7 +30,6 @@ import { MediaDetails, MediaType } from '../../models/media';
   selector: 'app-media-details-page',
   imports: [
     ReactiveFormsModule,
-    RouterLink,
     EntryCategoryPicker,
     MediaFriendContextComponent,
     ProgressControls,
@@ -42,21 +37,20 @@ import { MediaDetails, MediaType } from '../../models/media';
     SuggestToFriend,
   ],
   templateUrl: './media-details-page.html',
-  styleUrls: [
-    './media-details-page.scss',
-    './media-share.scss',
-    './media-details-mobile.scss',
-  ],
+  styleUrls: ['./media-details-page.scss', './media-share.scss', './media-details-mobile.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MediaDetailsPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly location = inject(Location);
+  private readonly router = inject(Router);
   private readonly mediaService = inject(MediaService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly authentication = inject(AuthenticationService);
   private syncedEntryId: string | null = null;
   protected readonly library = inject(LibraryService);
   protected readonly categories = inject(CategoriesService);
+  protected readonly backLabel = readBackLabel(this.location.getState());
 
   protected readonly media = signal<MediaDetails | null>(null);
   protected readonly isLoading = signal(true);
@@ -144,6 +138,17 @@ export class MediaDetailsPage implements OnInit {
     return score === undefined ? null : score.toFixed(1);
   }
 
+  protected goBack(): void {
+    const state = this.location.getState();
+
+    if (readNavigationId(state) > 1) {
+      this.location.back();
+      return;
+    }
+
+    void this.router.navigateByUrl('/');
+  }
+
   protected async setLibraryStatus(status: WatchStatus): Promise<void> {
     const media = this.media();
 
@@ -157,11 +162,7 @@ export class MediaDetailsPage implements OnInit {
   }
 
   protected statusLabel(status: WatchStatus): string {
-    return status === 'to_watch'
-      ? 'To watch'
-      : status === 'watching'
-        ? 'Watching'
-        : 'Watched';
+    return status === 'to_watch' ? 'To watch' : status === 'watching' ? 'Watching' : 'Watched';
   }
 
   protected async savePersonalDetails(): Promise<void> {
@@ -262,17 +263,39 @@ export class MediaDetailsPage implements OnInit {
   }
 }
 
+function readBackLabel(state: unknown): string {
+  if (
+    typeof state === 'object' &&
+    state !== null &&
+    'originLabel' in state &&
+    typeof state.originLabel === 'string' &&
+    state.originLabel.length <= 40
+  ) {
+    return `Back to ${state.originLabel}`;
+  }
+
+  return 'Back';
+}
+
+function readNavigationId(state: unknown): number {
+  if (
+    typeof state === 'object' &&
+    state !== null &&
+    'navigationId' in state &&
+    typeof state.navigationId === 'number'
+  ) {
+    return state.navigationId;
+  }
+
+  return 0;
+}
+
 function isMediaType(value: string | null): value is MediaType {
   return value === 'tv' || value === 'movie';
 }
 
 function isAudioType(value: string): value is AudioType {
-  return (
-    value === 'original' ||
-    value === 'dubbed' ||
-    value === 'mixed' ||
-    value === 'unknown'
-  );
+  return value === 'original' || value === 'dubbed' || value === 'mixed' || value === 'unknown';
 }
 
 function optionalValue<Key extends 'languageCode' | 'customLabel'>(
@@ -280,5 +303,5 @@ function optionalValue<Key extends 'languageCode' | 'customLabel'>(
   value: string,
 ): Partial<Record<Key, string>> {
   const normalized = value.trim();
-  return normalized ? { [key]: normalized } as Record<Key, string> : {};
+  return normalized ? ({ [key]: normalized } as Record<Key, string>) : {};
 }

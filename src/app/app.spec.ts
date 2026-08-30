@@ -198,10 +198,7 @@ describe('App', () => {
     const primaryLinks = Array.from(
       compiled.querySelectorAll<HTMLAnchorElement>('.app-shell__primary-links > a'),
     );
-    expect(primaryLinks.map((link) => link.textContent?.trim())).toEqual([
-      'Home',
-      'Library',
-    ]);
+    expect(primaryLinks.map((link) => link.textContent?.trim())).toEqual(['Library']);
     const navbarSearch = compiled.querySelector<HTMLFormElement>(
       '.app-shell__nav-search',
     );

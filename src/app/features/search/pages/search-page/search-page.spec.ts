@@ -111,14 +111,38 @@ describe('SearchPage', () => {
     fixture.detectChanges();
 
     expect(
-      (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(
-        '#media-query',
-      )?.value,
+      (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>('#media-query')?.value,
     ).toBe('Goblin');
     expect(search).toHaveBeenCalledWith({
       query: 'Goblin',
       type: 'all',
       page: 1,
+    });
+  });
+
+  it('restores filters and pagination from browser history query parameters', async () => {
+    const router = TestBed.inject(Router);
+    await router.navigate(['/search'], {
+      queryParams: {
+        q: 'Parasite',
+        type: 'movie',
+        korean: '1',
+        page: '3',
+      },
+    });
+    const fixture = TestBed.createComponent(SearchPage);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(root.querySelector<HTMLInputElement>('#media-query')?.value).toBe('Parasite');
+    expect(root.querySelector<HTMLInputElement>('input[type="checkbox"]')?.checked).toBe(true);
+    expect(search).toHaveBeenCalledWith({
+      query: 'Parasite',
+      type: 'tv',
+      page: 3,
+      country: 'KR',
     });
   });
 });

@@ -1,5 +1,8 @@
 <section class="media-details">
-  <a class="media-details__back" routerLink="/search">← Back to search</a>
+  <button class="media-details__back" type="button" (click)="goBack()">
+    <span aria-hidden="true">←</span>
+    {{ backLabel }}
+  </button>
 
   @if (isLoading()) {
     <div class="media-details__state" role="status">Loading media details…</div>
@@ -117,10 +120,7 @@
         </div>
       </div>
 
-      <app-media-friend-context
-        [mediaType]="item.mediaType"
-        [tmdbId]="item.tmdbId"
-      />
+      <app-media-friend-context [mediaType]="item.mediaType" [tmdbId]="item.tmdbId" />
 
       <app-suggest-to-friend [media]="item" />
 
@@ -137,10 +137,7 @@
 
           <div class="tracking__categories">
             <h3>Categories</h3>
-            <app-entry-category-picker
-              [entry]="entry"
-              [categories]="categories.categories()"
-            />
+            <app-entry-category-picker [entry]="entry" [categories]="categories.categories()" />
           </div>
 
           <div class="tracking__forms">
@@ -166,9 +163,7 @@
                   formControlName="description"
                 ></textarea>
               </label>
-              <button type="submit" [disabled]="isSavingTracking()">
-                Save personal details
-              </button>
+              <button type="submit" [disabled]="isSavingTracking()">Save personal details</button>
             </form>
 
             <form [formGroup]="playbackForm" (ngSubmit)="savePlaybackPreference()">
@@ -186,11 +181,19 @@
               <div class="tracking__row">
                 <label>
                   <span>Audio language code</span>
-                  <input maxlength="16" placeholder="e.g. ko, en, uk" formControlName="languageCode" />
+                  <input
+                    maxlength="16"
+                    placeholder="e.g. ko, en, uk"
+                    formControlName="languageCode"
+                  />
                 </label>
                 <label>
                   <span>Custom audio label</span>
-                  <input maxlength="100" placeholder="e.g. Ukrainian dub" formControlName="customLabel" />
+                  <input
+                    maxlength="100"
+                    placeholder="e.g. Ukrainian dub"
+                    formControlName="customLabel"
+                  />
                 </label>
               </div>
               <label>
@@ -216,9 +219,7 @@
           <div>
             <p>Share your watch</p>
             <h2 id="media-share-title">Create a share card</h2>
-            <span>
-              Export a rating, progress, completed, or recommendation card as a PNG.
-            </span>
+            <span> Export a rating, progress, completed, or recommendation card as a PNG. </span>
           </div>
           <button
             type="button"
