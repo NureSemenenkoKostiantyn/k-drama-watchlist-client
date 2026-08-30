@@ -1,0 +1,11 @@
+@if (variant() === 'loading') {
+  <span class="ui-page-state__pulse" aria-hidden="true"></span>
+}
+@if (heading(); as stateHeading) {
+  <h2>{{ stateHeading }}</h2>
+}
+@if (message(); as stateMessage) {
+  <p>{{ stateMessage }}</p>
+}
+<ng-content />
+<div class="ui-page-state__actions"><ng-content select="[stateAction]" /></div>

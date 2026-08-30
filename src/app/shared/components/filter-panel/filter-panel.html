@@ -1,0 +1,21 @@
+@if (collapsible()) {
+  <button
+    class="ui-filter-panel__toggle"
+    type="button"
+    [attr.aria-controls]="panelId()"
+    [attr.aria-expanded]="expanded()"
+    (click)="expandedChange.emit(!expanded())"
+  >
+    <span>{{ title() }}</span>
+    <span>
+      @if (activeCount() > 0) { {{ activeCount() }} active }
+      <span aria-hidden="true">{{ expanded() ? '−' : '+' }}</span>
+    </span>
+  </button>
+}
+
+<section [id]="panelId()" [hidden]="collapsible() && !expanded()">
+  <div class="ui-filter-panel__tools"><ng-content select="[filterTools]" /></div>
+  <ng-content />
+  <div class="ui-filter-panel__actions"><ng-content select="[filterActions]" /></div>
+</section>

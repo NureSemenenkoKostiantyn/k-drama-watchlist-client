@@ -9,6 +9,11 @@ import {
 import { RouterLink } from '@angular/router';
 
 import { readApiErrorMessage } from '../../../../core/api/api-error';
+import { PageState } from '../../../../shared/components/page-state/page-state';
+import {
+  SegmentedControl,
+  SegmentedControlOption,
+} from '../../../../shared/components/segmented-control/segmented-control';
 import {
   SuggestionDetail,
   type SuggestionView,
@@ -22,7 +27,7 @@ import {
 
 @Component({
   selector: 'app-suggestions-page',
-  imports: [RouterLink, SuggestionDetail],
+  imports: [RouterLink, PageState, SegmentedControl, SuggestionDetail],
   templateUrl: './suggestions-page.html',
   styleUrls: [
     './suggestions-page.scss',
@@ -52,6 +57,11 @@ export class SuggestionsPage implements OnInit {
       (suggestion) => suggestion.status !== 'pending',
     ),
   );
+  protected readonly viewOptions = computed<readonly SegmentedControlOption[]>(() => [
+    { value: 'pending', label: 'Pending', count: this.pendingSuggestions().length },
+    { value: 'history', label: 'History', count: this.historySuggestions().length },
+    { value: 'sent', label: 'Sent', count: this.overview().sent.length },
+  ]);
   protected readonly visibleSuggestions = computed(() => {
     switch (this.activeView()) {
       case 'pending':
@@ -87,7 +97,8 @@ export class SuggestionsPage implements OnInit {
     return this.respond(suggestion, 'dismiss');
   }
 
-  protected setView(view: SuggestionView): void {
+  protected setView(view: string): void {
+    if (view !== 'pending' && view !== 'history' && view !== 'sent') return;
     this.activeView.set(view);
     this.selectedSuggestionId.set(null);
   }

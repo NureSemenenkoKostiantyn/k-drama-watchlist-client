@@ -25,9 +25,29 @@
           >
             Home
           </a>
-          <a routerLink="/search" routerLinkActive="is-active" ariaCurrentWhenActive="page">
-            Search
-          </a>
+          <form
+            class="app-shell__nav-search"
+            role="search"
+            (submit)="searchFromNavbar($event, navbarSearch.value)"
+          >
+            <label class="visually-hidden" for="navbar-media-search">
+              Search titles
+            </label>
+            <input
+              #navbarSearch
+              id="navbar-media-search"
+              type="search"
+              maxlength="100"
+              autocomplete="off"
+              placeholder="Search titles"
+            />
+            <button type="submit" aria-label="Search titles">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="10.5" cy="10.5" r="6.5" />
+                <path d="m15.5 15.5 5 5" />
+              </svg>
+            </button>
+          </form>
           <a routerLink="/library" routerLinkActive="is-active" ariaCurrentWhenActive="page">
             Library
           </a>

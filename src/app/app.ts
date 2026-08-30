@@ -24,7 +24,12 @@ import { SettingsService } from './features/settings/data-access/settings.servic
   selector: 'app-root',
   imports: [A11yModule, RouterLink, RouterLinkActive, RouterOutlet],
   templateUrl: './app.html',
-  styleUrls: ['./app.scss', './app-desktop-nav.scss', './app-mobile-nav.scss'],
+  styleUrls: [
+    './app.scss',
+    './app-desktop-nav.scss',
+    './app-navbar-search.scss',
+    './app-mobile-nav.scss',
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
@@ -137,6 +142,15 @@ export class App {
     if (await this.authentication.signOut()) {
       await this.router.navigate(['/login']);
     }
+  }
+
+  protected searchFromNavbar(event: Event, value: string): void {
+    event.preventDefault();
+    const query = value.trim();
+    this.closeDesktopMenus(false);
+    void this.router.navigate(['/search'], {
+      queryParams: query ? { q: query } : {},
+    });
   }
 
   protected toggleDesktopMoreMenu(): void {

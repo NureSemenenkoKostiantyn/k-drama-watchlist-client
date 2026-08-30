@@ -1,0 +1,11 @@
+<button
+  [type]="type()"
+  [disabled]="disabled()"
+  [attr.aria-busy]="busy() || null"
+  [class.ui-button--secondary]="variant() === 'secondary'"
+  [class.ui-button--danger]="variant() === 'danger'"
+  [class.ui-button--compact]="density() === 'compact'"
+  [class.ui-button--full-width]="fullWidth()"
+>
+  <ng-content />
+</button>

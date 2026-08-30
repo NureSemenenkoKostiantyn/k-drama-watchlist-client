@@ -3,12 +3,14 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { AuthenticationService } from '../../../../core/auth/authentication.service';
+import { Button } from '../../../../shared/components/button/button';
+import { FormField } from '../../../../shared/components/form-field/form-field';
 
 @Component({
   selector: 'app-reset-password-page',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, Button, FormField],
   templateUrl: './reset-password-page.html',
-  styleUrl: '../../auth-page.scss',
+  styleUrls: ['../../auth-page.scss', '../../auth-password.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResetPasswordPage {
@@ -18,6 +20,8 @@ export class ResetPasswordPage {
 
   protected readonly succeeded = signal(false);
   protected readonly passwordsMismatch = signal(false);
+  protected readonly passwordVisible = signal(false);
+  protected readonly confirmationVisible = signal(false);
   protected readonly token = this.route.snapshot.queryParamMap.get('token');
   protected readonly invalidLink =
     !this.token || this.route.snapshot.queryParamMap.get('error') === 'INVALID_TOKEN';
@@ -25,6 +29,14 @@ export class ResetPasswordPage {
     password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(128)]],
     confirmation: ['', [Validators.required]],
   });
+
+  protected togglePasswordVisibility(): void {
+    this.passwordVisible.update((visible) => !visible);
+  }
+
+  protected toggleConfirmationVisibility(): void {
+    this.confirmationVisible.update((visible) => !visible);
+  }
 
   protected async submit(): Promise<void> {
     this.authentication.clearError();

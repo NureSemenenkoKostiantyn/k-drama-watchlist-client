@@ -1,0 +1,10 @@
+@if (posterUrl(); as imageUrl) {
+  <img
+    [src]="imageUrl"
+    [alt]="imageAlt()"
+    [attr.loading]="eager() ? 'eager' : 'lazy'"
+    decoding="async"
+  />
+} @else {
+  <span [attr.aria-hidden]="decorative() || null">{{ fallbackText() }}</span>
+}

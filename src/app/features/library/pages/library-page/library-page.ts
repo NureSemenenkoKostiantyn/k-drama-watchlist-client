@@ -29,6 +29,13 @@ import {
   MEDIA_SORT_OPTIONS,
   MediaSort,
 } from '../../../../shared/media-filter-options';
+import { FilterPanel } from '../../../../shared/components/filter-panel/filter-panel';
+import { IconButton } from '../../../../shared/components/icon-button/icon-button';
+import { PageState } from '../../../../shared/components/page-state/page-state';
+import {
+  SegmentedControl,
+  SegmentedControlOption,
+} from '../../../../shared/components/segmented-control/segmented-control';
 import { LibraryEntryCard } from '../../components/library-entry-card/library-entry-card';
 import { LibraryService } from '../../data-access/library.service';
 import { LibraryEntry, WatchStatus } from '../../models/library';
@@ -40,6 +47,10 @@ import {
 } from '../../utils/library-filters';
 
 type LibraryView = 'grid' | 'list';
+const LIBRARY_VIEW_OPTIONS: readonly SegmentedControlOption[] = [
+  { value: 'grid', label: 'Grid' },
+  { value: 'list', label: 'List' },
+];
 const mobileLibraryBreakpoint = '(max-width: 48rem)';
 
 @Component({
@@ -49,7 +60,11 @@ const mobileLibraryBreakpoint = '(max-width: 48rem)';
     RouterLinkActive,
     ReactiveFormsModule,
     CategoryManager,
+    FilterPanel,
+    IconButton,
     LibraryEntryCard,
+    PageState,
+    SegmentedControl,
   ],
   templateUrl: './library-page.html',
   styleUrls: [
@@ -70,6 +85,7 @@ export class LibraryPage implements OnInit {
   protected readonly selectedCategoryId = signal('all');
   protected readonly selectedPriorityLaneId = signal('all');
   protected readonly view = signal<LibraryView>('grid');
+  protected readonly viewOptions = LIBRARY_VIEW_OPTIONS;
   protected readonly isMobileLibraryLayout = toSignal(
     this.breakpointObserver
       .observe(mobileLibraryBreakpoint)
@@ -223,6 +239,10 @@ export class LibraryPage implements OnInit {
 
   protected toggleFilterPanel(): void {
     this.isFilterPanelExpanded.update((isExpanded) => !isExpanded);
+  }
+
+  protected setView(view: string): void {
+    if (view === 'grid' || view === 'list') this.view.set(view);
   }
 
   protected applyFilters(): void {

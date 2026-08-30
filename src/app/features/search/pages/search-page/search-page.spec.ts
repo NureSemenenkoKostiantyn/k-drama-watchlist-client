@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 
@@ -39,7 +39,7 @@ describe('SearchPage', () => {
     await TestBed.configureTestingModule({
       imports: [SearchPage],
       providers: [
-        provideRouter([]),
+        provideRouter([{ path: 'search', component: SearchPage }]),
         {
           provide: LibraryService,
           useValue: {
@@ -100,5 +100,25 @@ describe('SearchPage', () => {
 
     expect(search).not.toHaveBeenCalled();
     expect(fixture.nativeElement.querySelector('.search-form__error')).not.toBeNull();
+  });
+
+  it('loads a navbar search from the URL query', async () => {
+    const router = TestBed.inject(Router);
+    await router.navigate(['/search'], { queryParams: { q: 'Goblin' } });
+    const fixture = TestBed.createComponent(SearchPage);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(
+        '#media-query',
+      )?.value,
+    ).toBe('Goblin');
+    expect(search).toHaveBeenCalledWith({
+      query: 'Goblin',
+      type: 'all',
+      page: 1,
+    });
   });
 });

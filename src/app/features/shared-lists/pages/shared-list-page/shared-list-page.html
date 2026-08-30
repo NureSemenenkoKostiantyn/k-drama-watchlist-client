@@ -391,15 +391,17 @@
           <section class="danger">
             <h2>Delete list</h2>
             <p>This removes the list, its titles, and unused invitations.</p>
-            <button type="button" (click)="deleteList()">
-              {{ pendingDelete() ? 'Confirm permanent deletion' : 'Delete list' }}
-            </button>
-            @if (pendingDelete()) {
-              <button class="cancel" type="button" (click)="pendingDelete.set(false)">
-                Cancel
-              </button>
-            }
+            <button type="button" (click)="pendingDelete.set(true)">Delete list</button>
           </section>
+          <app-confirmation-dialog
+            [open]="pendingDelete()"
+            title="Delete this shared list?"
+            message="This permanently removes the list, its titles, comments, and unused invitations."
+            confirmLabel="Delete list"
+            [busy]="isSaving()"
+            (confirmed)="deleteList()"
+            (cancelled)="pendingDelete.set(false)"
+          />
         }
       </aside>
     </div>

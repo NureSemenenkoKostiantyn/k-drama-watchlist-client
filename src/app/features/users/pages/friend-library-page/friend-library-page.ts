@@ -17,6 +17,17 @@ import {
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { readApiErrorMessage } from '../../../../core/api/api-error';
+import { FilterPanel } from '../../../../shared/components/filter-panel/filter-panel';
+import { MediaPoster } from '../../../../shared/components/media-poster/media-poster';
+import { PageState } from '../../../../shared/components/page-state/page-state';
+import { Pagination } from '../../../../shared/components/pagination/pagination';
+import { PublicUserLink } from '../../../../shared/components/public-user-link/public-user-link';
+import {
+  SegmentedControl,
+  SegmentedControlOption,
+} from '../../../../shared/components/segmented-control/segmented-control';
+import { StatusBadge } from '../../../../shared/components/status-badge/status-badge';
+import { UserAvatar } from '../../../../shared/components/user-avatar/user-avatar';
 import {
   MEDIA_COUNTRY_OPTIONS,
   MEDIA_GENRE_OPTIONS,
@@ -34,10 +45,25 @@ import {
 import { PublicUserProfile } from '../../models/public-user-profile';
 
 type LibraryView = 'grid' | 'list';
+const LIBRARY_VIEW_OPTIONS: readonly SegmentedControlOption[] = [
+  { value: 'grid', label: 'Grid' },
+  { value: 'list', label: 'List' },
+];
 
 @Component({
   selector: 'app-friend-library-page',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    FilterPanel,
+    MediaPoster,
+    PageState,
+    Pagination,
+    PublicUserLink,
+    SegmentedControl,
+    StatusBadge,
+    UserAvatar,
+  ],
   templateUrl: './friend-library-page.html',
   styleUrls: [
     './friend-library-page.scss',
@@ -58,6 +84,7 @@ export class FriendLibraryPage implements OnInit {
   protected readonly isLoading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly view = signal<LibraryView>('grid');
+  protected readonly viewOptions = LIBRARY_VIEW_OPTIONS;
   protected readonly genreOptions = MEDIA_GENRE_OPTIONS;
   protected readonly countryOptions = MEDIA_COUNTRY_OPTIONS;
   protected readonly sortOptions: readonly {
@@ -136,6 +163,10 @@ export class FriendLibraryPage implements OnInit {
     void this.loadLibrary(page);
   }
 
+  protected setView(view: string): void {
+    if (view === 'grid' || view === 'list') this.view.set(view);
+  }
+
   protected statusLabel(status: WatchStatus): string {
     if (status === 'to_watch') {
       return 'To watch';
@@ -154,18 +185,6 @@ export class FriendLibraryPage implements OnInit {
 
   protected displayYear(media: MediaSummary): string | null {
     return (media.firstAirDate ?? media.releaseDate)?.slice(0, 4) ?? null;
-  }
-
-  protected initials(profile: PublicUserProfile): string {
-    return (
-      profile.name
-        .split(/\s+/)
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((part) => part[0])
-        .join('')
-        .toUpperCase() || '?'
-    );
   }
 
   private async loadProfile(userId: string): Promise<void> {

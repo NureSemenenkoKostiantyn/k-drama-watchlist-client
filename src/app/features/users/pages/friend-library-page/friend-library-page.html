@@ -8,19 +8,19 @@
     </a>
 
     <header class="friend-library__header">
-      @if (currentProfile.image) {
-        <img [src]="currentProfile.image" alt="" width="72" height="72" />
-      } @else {
-        <div class="friend-library__avatar" aria-hidden="true">
-          {{ initials(currentProfile) }}
-        </div>
-      }
+      <app-user-avatar
+        [name]="currentProfile.name"
+        [image]="currentProfile.image"
+        size="4.5rem"
+      />
 
       <div>
         <p>
-          <a [routerLink]="['/users', currentProfile.id]">
-            {{ '@' + currentProfile.displayUsername }}
-          </a>
+          <app-public-user-link
+            [userId]="currentProfile.id"
+            [username]="currentProfile.displayUsername"
+            [name]="currentProfile.name"
+          />
         </p>
         <h1>{{ currentProfile.name }}'s library</h1>
         @if (library(); as currentLibrary) {
@@ -36,21 +36,14 @@
   }
 
   @if (isLoading()) {
-    <div class="friend-library__state" role="status">
-      Loading library&hellip;
-    </div>
+    <app-page-state variant="loading" message="Loading library…" />
   } @else if (error()) {
-    <div class="friend-library__state friend-library__state--error" role="alert">
-      <h2>Library unavailable</h2>
-      <p>{{ error() }}</p>
-      <a routerLink="/friends">Open friends</a>
-    </div>
+    <app-page-state variant="error" heading="Library unavailable" [message]="error() ?? undefined">
+      <a stateAction routerLink="/friends">Open friends</a>
+    </app-page-state>
   } @else if (library(); as currentLibrary) {
-    <form
-      class="friend-library__filters"
-      [formGroup]="filters"
-      (ngSubmit)="applyFilters()"
-    >
+    <app-filter-panel panelId="friend-library-filters">
+    <form class="friend-library__filters" [formGroup]="filters" (ngSubmit)="applyFilters()">
       <label>
         <span>Status</span>
         <select formControlName="status">
@@ -144,36 +137,23 @@
         <button type="button" (click)="clearFilters()">Clear</button>
       </div>
     </form>
+    </app-filter-panel>
 
     <div class="friend-library__toolbar">
       <p>
         {{ currentLibrary.totalResults }}
         {{ currentLibrary.totalResults === 1 ? 'result' : 'results' }}
       </p>
-      <div aria-label="Library view">
-        <button
-          type="button"
-          [class.is-active]="view() === 'grid'"
-          [attr.aria-pressed]="view() === 'grid'"
-          (click)="view.set('grid')"
-        >
-          Grid
-        </button>
-        <button
-          type="button"
-          [class.is-active]="view() === 'list'"
-          [attr.aria-pressed]="view() === 'list'"
-          (click)="view.set('list')"
-        >
-          List
-        </button>
-      </div>
+      <app-segmented-control
+        label="Library view"
+        [options]="viewOptions"
+        [value]="view()"
+        (valueChange)="setView($event)"
+      />
     </div>
 
     @if (currentLibrary.items.length === 0) {
-      <div class="friend-library__state">
-        No titles match these filters.
-      </div>
+      <app-page-state variant="empty" message="No titles match these filters." />
     } @else {
       <div
         class="friend-library__items"
@@ -188,20 +168,15 @@
               item.media.tmdbId,
             ]"
           >
-            <div class="friend-library__poster">
-              @if (item.media.posterUrl) {
-                <img
-                  [src]="item.media.posterUrl"
-                  [alt]="item.media.title + ' poster'"
-                />
-              } @else {
-                <span>No poster</span>
-              }
-            </div>
+            <app-media-poster
+              class="friend-library__poster"
+              [posterUrl]="item.media.posterUrl"
+              [title]="item.media.title"
+            />
 
             <div class="friend-library__item-copy">
               <div>
-                <span>{{ statusLabel(item.status) }}</span>
+                <app-status-badge tone="accent">{{ statusLabel(item.status) }}</app-status-badge>
                 @if (displayYear(item.media); as year) {
                   <small>{{ year }}</small>
                 }
@@ -222,25 +197,12 @@
     }
 
     @if (currentLibrary.totalPages > 1) {
-      <nav class="friend-library__pagination" aria-label="Library pages">
-        <button
-          type="button"
-          [disabled]="currentLibrary.page <= 1"
-          (click)="goToPage(currentLibrary.page - 1)"
-        >
-          Previous
-        </button>
-        <span>
-          Page {{ currentLibrary.page }} of {{ currentLibrary.totalPages }}
-        </span>
-        <button
-          type="button"
-          [disabled]="currentLibrary.page >= currentLibrary.totalPages"
-          (click)="goToPage(currentLibrary.page + 1)"
-        >
-          Next
-        </button>
-      </nav>
+      <app-pagination
+        label="Library pages"
+        [page]="currentLibrary.page"
+        [totalPages]="currentLibrary.totalPages"
+        (pageChange)="goToPage($event)"
+      />
     }
   }
 </section>

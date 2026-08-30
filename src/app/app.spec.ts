@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { vi } from 'vitest';
 
 import { AuthenticationService } from './core/auth/authentication.service';
@@ -200,9 +200,12 @@ describe('App', () => {
     );
     expect(primaryLinks.map((link) => link.textContent?.trim())).toEqual([
       'Home',
-      'Search',
       'Library',
     ]);
+    const navbarSearch = compiled.querySelector<HTMLFormElement>(
+      '.app-shell__nav-search',
+    );
+    expect(navbarSearch).not.toBeNull();
 
     const moreButton = compiled.querySelector<HTMLButtonElement>('.app-shell__menu-trigger');
     expect(moreButton?.textContent).toContain('More');
@@ -237,6 +240,26 @@ describe('App', () => {
       '/settings',
     ]);
     expect(compiled.querySelector('#profile-menu button')?.textContent).toContain('Sign out');
+  });
+
+  it('submits navbar searches to the search route', async () => {
+    authenticated.set(true);
+    session.set({ user: { name: 'Dahyun', displayUsername: 'dahyun' } });
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const root = fixture.nativeElement as HTMLElement;
+    const input = root.querySelector<HTMLInputElement>('#navbar-media-search');
+    const form = root.querySelector<HTMLFormElement>('.app-shell__nav-search');
+
+    input!.value = '  Goblin  ';
+    form!.dispatchEvent(new Event('submit'));
+
+    expect(navigate).toHaveBeenCalledWith(['/search'], {
+      queryParams: { q: 'Goblin' },
+    });
   });
 
   it('shows the unread notification count for an authenticated user', async () => {

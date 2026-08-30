@@ -12,8 +12,15 @@
     <p class="auth-card__lead">Your email is private and is used only for your account.</p>
 
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-      <div class="field">
-        <label for="register-name">Name</label>
+      <app-form-field
+        label="Name"
+        inputId="register-name"
+        [error]="
+          form.controls.name.invalid && form.controls.name.touched
+            ? 'Enter the name you want shown in your account.'
+            : undefined
+        "
+      >
         <input
           id="register-name"
           type="text"
@@ -21,13 +28,17 @@
           formControlName="name"
           [attr.aria-invalid]="form.controls.name.invalid && form.controls.name.touched"
         />
-        @if (form.controls.name.invalid && form.controls.name.touched) {
-          <p class="field__error">Enter the name you want shown in your account.</p>
-        }
-      </div>
+      </app-form-field>
 
-      <div class="field">
-        <label for="register-email">Email</label>
+      <app-form-field
+        label="Email"
+        inputId="register-email"
+        [error]="
+          form.controls.email.invalid && form.controls.email.touched
+            ? 'Enter a valid email address.'
+            : undefined
+        "
+      >
         <input
           id="register-email"
           type="email"
@@ -35,34 +46,51 @@
           formControlName="email"
           [attr.aria-invalid]="form.controls.email.invalid && form.controls.email.touched"
         />
-        @if (form.controls.email.invalid && form.controls.email.touched) {
-          <p class="field__error">Enter a valid email address.</p>
-        }
-      </div>
+      </app-form-field>
 
-      <div class="field">
-        <label for="register-password">Password</label>
-        <input
-          id="register-password"
-          type="password"
-          autocomplete="new-password"
-          formControlName="password"
-          aria-describedby="password-hint"
-          [attr.aria-invalid]="form.controls.password.invalid && form.controls.password.touched"
-        />
-        <p id="password-hint" class="field__hint">Use between 8 and 128 characters.</p>
-        @if (form.controls.password.invalid && form.controls.password.touched) {
-          <p class="field__error">Choose a password with at least 8 characters.</p>
-        }
-      </div>
+      <app-form-field
+        label="Password"
+        inputId="register-password"
+        hint="Use between 8 and 128 characters."
+        hintId="password-hint"
+        [error]="
+          form.controls.password.invalid && form.controls.password.touched
+            ? 'Choose a password with at least 8 characters.'
+            : undefined
+        "
+      >
+        <div class="password-input">
+          <input
+            id="register-password"
+            [type]="passwordVisible() ? 'text' : 'password'"
+            autocomplete="new-password"
+            formControlName="password"
+            aria-describedby="password-hint"
+            [attr.aria-invalid]="form.controls.password.invalid && form.controls.password.touched"
+          />
+          <button
+            type="button"
+            aria-controls="register-password"
+            [attr.aria-pressed]="passwordVisible()"
+            (click)="togglePasswordVisibility()"
+          >
+            {{ passwordVisible() ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+      </app-form-field>
 
       @if (authentication.error(); as error) {
         <p class="auth-card__error" role="alert">{{ error }}</p>
       }
 
-      <button type="submit" [disabled]="authentication.isPending()">
+      <app-button
+        type="submit"
+        [disabled]="authentication.isPending()"
+        [busy]="authentication.isPending()"
+        [fullWidth]="true"
+      >
         {{ authentication.isPending() ? 'Creating account…' : 'Create account' }}
-      </button>
+      </app-button>
     </form>
 
     <p class="auth-card__footer">Already have an account? <a routerLink="/login">Log in</a></p>

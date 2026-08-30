@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { MediaPoster } from '../../../../shared/components/media-poster/media-poster';
 import { Category } from '../../../categories/models/category';
 import { EntryCategoryPicker } from '../../../categories/components/entry-category-picker/entry-category-picker';
 import { ProgressControls } from '../progress-controls/progress-controls';
@@ -8,7 +9,7 @@ import { LibraryEntry, WatchStatus } from '../../models/library';
 
 @Component({
   selector: 'app-library-entry-card',
-  imports: [RouterLink, EntryCategoryPicker, ProgressControls],
+  imports: [RouterLink, EntryCategoryPicker, MediaPoster, ProgressControls],
   templateUrl: './library-entry-card.html',
   styleUrl: './library-entry-card.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

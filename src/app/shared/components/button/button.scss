@@ -1,0 +1,43 @@
+:host {
+  display: inline-flex;
+  min-width: 0;
+}
+
+button {
+  min-height: 3rem;
+  padding: 0 var(--ui-button-padding-inline, 1rem);
+  border: 0.0625rem solid transparent;
+  border-radius: 0.75rem;
+  color: #100d18;
+  background: var(--color-accent);
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.ui-button--secondary {
+  border-color: var(--color-border);
+  color: var(--color-text);
+  background: transparent;
+}
+
+.ui-button--danger {
+  border-color: rgb(255 113 154 / 38%);
+  color: #ffd1dd;
+  background: rgb(255 113 154 / 9%);
+}
+
+.ui-button--compact {
+  min-height: 2.75rem;
+  padding-inline: 0.8rem;
+}
+
+.ui-button--full-width,
+:host(.ui-button-host--full-width) {
+  width: 100%;
+}

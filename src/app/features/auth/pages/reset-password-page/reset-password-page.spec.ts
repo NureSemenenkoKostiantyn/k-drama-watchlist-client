@@ -67,9 +67,27 @@ describe('ResetPasswordPage', () => {
     fixture.detectChanges();
 
     expect(resetPassword).not.toHaveBeenCalled();
-    expect(fixture.nativeElement.querySelector('.field__error')?.textContent).toContain(
+    expect(fixture.nativeElement.querySelector('.ui-form-field__error')?.textContent).toContain(
       'do not match',
     );
+  });
+
+  it('reveals each reset password independently', () => {
+    const fixture = TestBed.createComponent(ResetPasswordPage);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const password = root.querySelector<HTMLInputElement>('#reset-password');
+    const confirmation = root.querySelector<HTMLInputElement>(
+      '#reset-password-confirmation',
+    );
+
+    root
+      .querySelector<HTMLButtonElement>('button[aria-controls="reset-password-confirmation"]')
+      ?.click();
+    fixture.detectChanges();
+
+    expect(password?.type).toBe('password');
+    expect(confirmation?.type).toBe('text');
   });
 });
 

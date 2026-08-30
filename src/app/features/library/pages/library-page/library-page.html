@@ -9,46 +9,30 @@
     </nav>
   </header>
 
-  <button
-    class="library-filter-toggle"
-    type="button"
-    aria-controls="library-filter-panel"
-    [attr.aria-expanded]="isFilterPanelExpanded()"
-    (click)="toggleFilterPanel()"
+  <app-filter-panel
+    panelId="library-filter-panel"
+    [collapsible]="isMobileLibraryLayout()"
+    [expanded]="isFilterPanelExpanded()"
+    [activeCount]="activeFilterCount()"
+    (expandedChange)="isFilterPanelExpanded.set($event)"
   >
-    <span>Filter and organize</span>
-    <span class="library-filter-toggle__summary">
-      @if (activeFilterCount() > 0) {
-        {{ activeFilterCount() }} active
-      }
-      <span aria-hidden="true">{{ isFilterPanelExpanded() ? '−' : '+' }}</span>
-    </span>
-  </button>
-
-  <div
-    id="library-filter-panel"
-    class="library-filter-panel"
-    [hidden]="isMobileLibraryLayout() && !isFilterPanelExpanded()"
-  >
-    <div class="library-tools">
+    <div filterTools class="library-tools">
       <div class="library-tools__field">
         <div class="library-tools__label-row">
           <label for="library-category-filter">Filter by category</label>
-          <button
-            type="button"
+          <app-icon-button
             class="library-tools__category-toggle"
-            aria-label="Manage categories"
-            title="Manage categories"
-            aria-controls="library-category-manager"
-            [attr.aria-expanded]="isCategoryManagerExpanded()"
-            (click)="toggleCategoryManager()"
+            label="Manage categories"
+            controls="library-category-manager"
+            [expanded]="isCategoryManagerExpanded()"
+            (activated)="toggleCategoryManager()"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path
                 d="M12 8.25A3.75 3.75 0 1 0 12 15.75 3.75 3.75 0 0 0 12 8.25ZM19.5 12a7.58 7.58 0 0 0-.1-1.2l2.05-1.6-2-3.4-2.5 1a8.03 8.03 0 0 0-2.1-1.2L14.5 3h-5l-.35 2.6a8.03 8.03 0 0 0-2.1 1.2l-2.5-1-2 3.4 2.05 1.6a7.58 7.58 0 0 0 0 2.4l-2.05 1.6 2 3.4 2.5-1a8.03 8.03 0 0 0 2.1 1.2L9.5 21h5l.35-2.6a8.03 8.03 0 0 0 2.1-1.2l2.5 1 2-3.4-2.05-1.6c.07-.4.1-.8.1-1.2Z"
               />
             </svg>
-          </button>
+          </app-icon-button>
         </div>
         <select
           id="library-category-filter"
@@ -175,49 +159,41 @@
         <p class="library-filters__error" role="alert">Year from cannot be later than year to.</p>
       }
     </form>
-  </div>
+  </app-filter-panel>
 
   @if (library.error()) {
-    <div class="library-state library-state--error" role="alert">{{ library.error() }}</div>
+    <app-page-state variant="error" [message]="library.error() ?? undefined" />
   }
   @if (library.isLoading()) {
-    <div class="library-state" role="status">Loading your library…</div>
+    <app-page-state variant="loading" message="Loading your library…" />
   } @else if (baseEntries().length === 0) {
-    <div class="library-state">
-      <h2>Nothing here yet</h2>
-      <p>Find a title and add it to {{ heading.toLowerCase() }}.</p>
-      <a routerLink="/search">Search TMDB</a>
-    </div>
+    <app-page-state
+      variant="empty"
+      heading="Nothing here yet"
+      [message]="'Find a title and add it to ' + heading.toLowerCase() + '.'"
+    >
+      <a stateAction routerLink="/search">Search TMDB</a>
+    </app-page-state>
   } @else {
     <div class="library-results">
       <span>{{ entries().length }} {{ entries().length === 1 ? 'result' : 'results' }}</span>
-      <div class="library-results__views" aria-label="Library view">
-        <button
-          type="button"
-          [class.is-active]="view() === 'grid'"
-          [attr.aria-pressed]="view() === 'grid'"
-          (click)="view.set('grid')"
-        >
-          Grid
-        </button>
-        <button
-          type="button"
-          [class.is-active]="view() === 'list'"
-          [attr.aria-pressed]="view() === 'list'"
-          (click)="view.set('list')"
-        >
-          List
-        </button>
-      </div>
+      <app-segmented-control
+        label="Library view"
+        [options]="viewOptions"
+        [value]="view()"
+        (valueChange)="setView($event)"
+      />
     </div>
     @if (entries().length === 0) {
-      <div class="library-state">
-        <h2>No titles match these filters</h2>
-        <p>Try broadening your search or clearing the active filters.</p>
+      <app-page-state
+        variant="empty"
+        heading="No titles match these filters"
+        message="Try broadening your search or clearing the active filters."
+      >
         @if (hasFilters()) {
-          <button type="button" (click)="clearFilters()">Clear filters</button>
+          <button stateAction type="button" (click)="clearFilters()">Clear filters</button>
         }
-      </div>
+      </app-page-state>
     } @else {
       <div class="library-grid" [class.library-grid--list]="view() === 'list'">
         @for (entry of entries(); track entry.id) {

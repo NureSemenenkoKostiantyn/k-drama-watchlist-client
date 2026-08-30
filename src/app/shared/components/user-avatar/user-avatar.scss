@@ -1,0 +1,20 @@
+:host {
+  display: inline-grid;
+  width: var(--ui-avatar-size);
+  height: var(--ui-avatar-size);
+  flex: 0 0 var(--ui-avatar-size);
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  color: #100d18;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-strong));
+  font-size: calc(var(--ui-avatar-size) * 0.32);
+  font-weight: 800;
+}
+
+img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

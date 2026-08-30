@@ -8,10 +8,15 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { readApiErrorMessage } from '../../../../core/api/api-error';
+import { Button } from '../../../../shared/components/button/button';
+import { FormField } from '../../../../shared/components/form-field/form-field';
+import { MediaPoster } from '../../../../shared/components/media-poster/media-poster';
+import { PageState } from '../../../../shared/components/page-state/page-state';
+import { Pagination } from '../../../../shared/components/pagination/pagination';
 import { LibraryService } from '../../../library/data-access/library.service';
 import { WatchStatus } from '../../../library/models/library';
 import { MediaService } from '../../data-access/media.service';
@@ -19,7 +24,7 @@ import { MediaSearchRequest, MediaSummary, SearchMediaType } from '../../models/
 
 @Component({
   selector: 'app-search-page',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, Button, FormField, MediaPoster, PageState, Pagination],
   templateUrl: './search-page.html',
   styleUrls: ['./search-page.scss', './search-page-mobile.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,6 +32,7 @@ import { MediaSearchRequest, MediaSummary, SearchMediaType } from '../../models/
 export class SearchPage implements OnInit {
   private readonly mediaService = inject(MediaService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute);
   protected readonly library = inject(LibraryService);
 
   protected readonly searchForm = new FormGroup({
@@ -58,6 +64,18 @@ export class SearchPage implements OnInit {
 
   ngOnInit(): void {
     void this.library.load();
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const query = (params.get('q') ?? '').trim().slice(0, 100);
+
+        if (!query) {
+          return;
+        }
+
+        this.searchForm.controls.query.setValue(query);
+        this.submitSearch();
+      });
   }
 
   protected submitSearch(): void {

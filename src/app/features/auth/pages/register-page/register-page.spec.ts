@@ -47,6 +47,20 @@ describe('RegisterPage', () => {
     });
     expect(router.navigate).toHaveBeenCalledWith(['/verify-email']);
   });
+
+  it('can reveal the registration password', () => {
+    const fixture = TestBed.createComponent(RegisterPage);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const input = root.querySelector<HTMLInputElement>('#register-password');
+
+    root
+      .querySelector<HTMLButtonElement>('button[aria-controls="register-password"]')
+      ?.click();
+    fixture.detectChanges();
+
+    expect(input?.type).toBe('text');
+  });
 });
 
 function setInput(root: HTMLElement, selector: string, value: string): void {

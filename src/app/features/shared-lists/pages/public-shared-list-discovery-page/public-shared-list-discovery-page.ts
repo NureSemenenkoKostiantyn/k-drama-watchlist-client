@@ -11,12 +11,15 @@ import { RouterLink } from '@angular/router';
 
 import { OpenGraphMetadataService } from '../../../../core/open-graph-metadata.service';
 import { buildDiscoveryStructuredData } from '../../../../core/seo-structured-data';
+import { MediaPoster } from '../../../../shared/components/media-poster/media-poster';
+import { PageState } from '../../../../shared/components/page-state/page-state';
+import { Pagination } from '../../../../shared/components/pagination/pagination';
 import { PublicSharedListsService } from '../../data-access/public-shared-lists.service';
 import { PublicSharedListDiscovery } from '../../models/shared-list';
 
 @Component({
   selector: 'app-public-shared-list-discovery-page',
-  imports: [RouterLink],
+  imports: [RouterLink, MediaPoster, PageState, Pagination],
   templateUrl: './public-shared-list-discovery-page.html',
   styleUrl: './public-shared-list-discovery-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -82,9 +82,7 @@ describe('SuggestionsPage', () => {
     expect(root.textContent).toContain('Goblin is in your library.');
 
     const historyButton = Array.from(
-      root.querySelectorAll<HTMLButtonElement>(
-        '.tabs button',
-      ),
+      root.querySelectorAll<HTMLButtonElement>('app-segmented-control button'),
     ).find((button) => button.textContent?.includes('History'));
     historyButton?.click();
     fixture.detectChanges();

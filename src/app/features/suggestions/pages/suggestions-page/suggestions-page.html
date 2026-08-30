@@ -13,37 +13,14 @@
   }
 
   @if (isLoading()) {
-    <p class="suggestions__state" role="status">Loading suggestions...</p>
+    <app-page-state variant="loading" message="Loading suggestions…" />
   } @else {
-    <nav class="tabs" aria-label="Suggestion views">
-      <button
-        type="button"
-        [class.is-active]="activeView() === 'pending'"
-        [attr.aria-pressed]="activeView() === 'pending'"
-        (click)="setView('pending')"
-      >
-        Pending
-        <span>{{ pendingSuggestions().length }}</span>
-      </button>
-      <button
-        type="button"
-        [class.is-active]="activeView() === 'history'"
-        [attr.aria-pressed]="activeView() === 'history'"
-        (click)="setView('history')"
-      >
-        History
-        <span>{{ historySuggestions().length }}</span>
-      </button>
-      <button
-        type="button"
-        [class.is-active]="activeView() === 'sent'"
-        [attr.aria-pressed]="activeView() === 'sent'"
-        (click)="setView('sent')"
-      >
-        Sent
-        <span>{{ overview().sent.length }}</span>
-      </button>
-    </nav>
+    <app-segmented-control
+      label="Suggestion views"
+      [options]="viewOptions()"
+      [value]="activeView()"
+      (valueChange)="setView($event)"
+    />
 
     <section class="inbox" aria-label="Suggestions inbox">
       <div class="list" aria-label="Suggestion list">

@@ -12,8 +12,15 @@
     <p class="auth-card__lead">Use the email address connected to your account.</p>
 
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-      <div class="field">
-        <label for="login-email">Email</label>
+      <app-form-field
+        label="Email"
+        inputId="login-email"
+        [error]="
+          form.controls.email.invalid && form.controls.email.touched
+            ? 'Enter a valid email address.'
+            : undefined
+        "
+      >
         <input
           id="login-email"
           type="email"
@@ -21,27 +28,36 @@
           formControlName="email"
           [attr.aria-invalid]="form.controls.email.invalid && form.controls.email.touched"
         />
-        @if (form.controls.email.invalid && form.controls.email.touched) {
-          <p class="field__error">Enter a valid email address.</p>
-        }
-      </div>
+      </app-form-field>
 
-      <div class="field">
-        <div class="field__label-row">
-          <label for="login-password">Password</label>
-          <a routerLink="/forgot-password">Forgot password?</a>
+      <app-form-field
+        label="Password"
+        inputId="login-password"
+        [error]="
+          form.controls.password.invalid && form.controls.password.touched
+            ? 'Enter your password.'
+            : undefined
+        "
+      >
+        <a fieldAction routerLink="/forgot-password">Forgot password?</a>
+        <div class="password-input">
+          <input
+            id="login-password"
+            [type]="passwordVisible() ? 'text' : 'password'"
+            autocomplete="current-password"
+            formControlName="password"
+            [attr.aria-invalid]="form.controls.password.invalid && form.controls.password.touched"
+          />
+          <button
+            type="button"
+            aria-controls="login-password"
+            [attr.aria-pressed]="passwordVisible()"
+            (click)="togglePasswordVisibility()"
+          >
+            {{ passwordVisible() ? 'Hide' : 'Show' }}
+          </button>
         </div>
-        <input
-          id="login-password"
-          type="password"
-          autocomplete="current-password"
-          formControlName="password"
-          [attr.aria-invalid]="form.controls.password.invalid && form.controls.password.touched"
-        />
-        @if (form.controls.password.invalid && form.controls.password.touched) {
-          <p class="field__error">Enter your password.</p>
-        }
-      </div>
+      </app-form-field>
 
       @if (authentication.error(); as error) {
         <p class="auth-card__error" role="alert">{{ error }}</p>
@@ -53,9 +69,14 @@
         </a>
       }
 
-      <button type="submit" [disabled]="authentication.isPending()">
+      <app-button
+        type="submit"
+        [disabled]="authentication.isPending()"
+        [busy]="authentication.isPending()"
+        [fullWidth]="true"
+      >
         {{ authentication.isPending() ? 'Logging in…' : 'Log in' }}
-      </button>
+      </app-button>
     </form>
 
     <p class="auth-card__footer">

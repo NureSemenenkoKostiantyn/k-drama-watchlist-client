@@ -1,0 +1,11 @@
+<a [routerLink]="['/users', userId()]">
+  @if (showAvatar()) {
+    <app-user-avatar [name]="name()" [image]="image()" [size]="avatarSize()" />
+  }
+  <span>
+    @if (showName()) {
+      <strong>{{ name() }}</strong>
+    }
+    <span>&#64;{{ username() }}</span>
+  </span>
+</a>
