@@ -5,7 +5,9 @@
 .app-shell__primary-links > a,
 .app-shell__menu-trigger {
   position: relative;
+  display: inline-flex;
   min-height: 2.75rem;
+  align-items: center;
   padding: 0.5rem 0.125rem;
   border: 0;
   border-bottom: 0.125rem solid transparent;
@@ -37,8 +39,6 @@
 }
 
 .app-shell__menu-trigger {
-  display: inline-flex;
-  align-items: center;
   gap: 0.3rem;
   cursor: pointer;
 }
