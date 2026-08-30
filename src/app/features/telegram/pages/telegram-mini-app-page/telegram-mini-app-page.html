@@ -88,7 +88,7 @@
             <span>{{ toWatchEntries().length }}</span>
           </div>
           <div class="telegram-app__list">
-            @for (entry of toWatchEntries().slice(0, 8); track entry.id) {
+            @for (entry of toWatchEntries(); track entry.id) {
               <article class="telegram-media telegram-media--compact">
                 <app-media-poster [posterUrl]="entry.media.posterUrl ?? null" [title]="entry.media.title" />
                 <div>
