@@ -1,0 +1,19 @@
+<main class="telegram-app">
+  <div class="telegram-app__mark" aria-hidden="true">DW</div>
+  <p>Drama Watch for Telegram</p>
+  <h1>Your watchlist, closer to the conversation.</h1>
+
+  @if (isInsideTelegram()) {
+    <span>
+      The Mini App is connected to Telegram. Secure sign-in and quick library actions are coming
+      in the next integration slice.
+    </span>
+  } @else {
+    <span>
+      This page is designed to open inside the Drama Watch Telegram bot. Connect Telegram from
+      your account settings first.
+    </span>
+    <a routerLink="/settings">Open settings</a>
+  }
+</main>
+

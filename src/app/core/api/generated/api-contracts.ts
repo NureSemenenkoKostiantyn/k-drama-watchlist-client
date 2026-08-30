@@ -180,6 +180,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/telegram/connection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getTelegramConnection"];
+        put?: never;
+        post?: never;
+        delete: operations["disconnectTelegram"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/telegram/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["createTelegramLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/friends": {
         parameters: {
             query?: never;
@@ -694,6 +726,8 @@ export interface components {
             updateRatingRequest: components["schemas"]["UpdateRatingDto"];
             updatePlaybackPreferenceRequest: components["schemas"]["UpdatePlaybackPreferenceDto"];
             statisticsOverviewResponse: components["schemas"]["StatisticsOverviewResponse"];
+            telegramConnectionResponse: components["schemas"]["TelegramConnectionResponse"];
+            telegramLinkResponse: components["schemas"]["TelegramLinkResponse"];
             friendshipResponse: components["schemas"]["FriendshipResponse"];
             friendshipsResponse: components["schemas"]["FriendshipsResponse"];
             createFriendRequest: components["schemas"]["CreateFriendRequestDto"];
@@ -915,6 +949,19 @@ export interface components {
         StatisticsMonthBucket: {
             month: string;
             count: number;
+        };
+        TelegramConnectionResponse: {
+            enabled: boolean;
+            connected: boolean;
+            botUsername?: string;
+            miniAppUrl?: string;
+            telegramUsername?: string;
+            telegramDisplayName?: string;
+            connectedAt?: string;
+        };
+        TelegramLinkResponse: {
+            deepLink: string;
+            expiresAt: string;
         };
         FriendshipResponse: {
             id: string;
@@ -1610,6 +1657,64 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StatisticsOverviewResponse"];
+                };
+            };
+        };
+    };
+    getTelegramConnection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramConnectionResponse"];
+                };
+            };
+        };
+    };
+    disconnectTelegram: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    createTelegramLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramLinkResponse"];
                 };
             };
         };

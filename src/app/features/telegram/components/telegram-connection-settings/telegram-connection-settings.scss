@@ -1,0 +1,123 @@
+:host {
+  display: block;
+  width: min(100%, 42rem);
+}
+
+.telegram-settings {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1.25rem, 5vw, 2rem);
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 1.5rem;
+  background: var(--color-surface);
+}
+
+.telegram-settings :is(p, h2, span) {
+  margin: 0;
+}
+
+.telegram-settings__heading > p {
+  color: var(--color-accent-strong);
+  font-size: 0.6875rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.telegram-settings h2 {
+  margin-top: 0.35rem;
+  font-size: 1.75rem;
+  letter-spacing: -0.04em;
+}
+
+.telegram-settings__heading > span,
+.telegram-settings__explanation,
+.telegram-settings__status,
+.telegram-settings small {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.telegram-settings__heading > span {
+  display: block;
+  margin-top: 0.4rem;
+}
+
+.telegram-settings__connection {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.85rem;
+  border: 0.0625rem solid rgb(94 210 161 / 35%);
+  background: rgb(94 210 161 / 8%);
+}
+
+.telegram-settings__connection > span {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 50%;
+  color: #100d18;
+  background: #5ed2a1;
+  font-weight: 900;
+}
+
+.telegram-settings__connection div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.telegram-settings__connection p,
+.telegram-settings__connection p span {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.telegram-settings__connection p span {
+  margin-left: 0.4rem;
+}
+
+.telegram-settings__connect,
+.telegram-settings__mini-app {
+  width: fit-content;
+  min-height: 3rem;
+  padding-inline: 1rem;
+  display: inline-flex;
+  align-items: center;
+  border: 0.0625rem solid transparent;
+  text-decoration: none;
+  font-weight: 750;
+}
+
+.telegram-settings__connect {
+  color: #100d18;
+  background: var(--color-accent);
+}
+
+.telegram-settings__mini-app {
+  border-color: var(--color-border);
+}
+
+.telegram-settings__status--error {
+  color: #ffd1dd;
+}
+
+@media (max-width: 34rem) {
+  .telegram-settings {
+    padding: 1rem;
+  }
+
+  .telegram-settings__connect,
+  .telegram-settings__mini-app,
+  app-button {
+    width: 100%;
+  }
+
+  .telegram-settings__connect,
+  .telegram-settings__mini-app {
+    justify-content: center;
+  }
+}
+

@@ -1,0 +1,77 @@
+<section class="telegram-settings" aria-labelledby="telegram-settings-title">
+  <div class="telegram-settings__heading">
+    <p>Connected apps</p>
+    <h2 id="telegram-settings-title">Telegram</h2>
+    <span>Connect the Drama Watch bot to reach your library quickly from Telegram.</span>
+  </div>
+
+  @if (telegram.isLoading()) {
+    <p class="telegram-settings__status" role="status">Checking your connection&hellip;</p>
+  } @else if (telegram.connection(); as connection) {
+    @if (!connection.enabled) {
+      <p class="telegram-settings__status">
+        Telegram integration is not available in this environment yet.
+      </p>
+    } @else if (connection.connected) {
+      <div class="telegram-settings__connection">
+        <span aria-hidden="true">&#10003;</span>
+        <div>
+          <strong>Connected</strong>
+          <p>
+            @if (connection.telegramDisplayName) {
+              {{ connection.telegramDisplayName }}
+            }
+            @if (connection.telegramUsername) {
+              <span>&#64;{{ connection.telegramUsername }}</span>
+            }
+          </p>
+        </div>
+      </div>
+
+      @if (connection.miniAppUrl) {
+        <a class="telegram-settings__mini-app" [href]="connection.miniAppUrl" target="_blank" rel="noopener">
+          Open Telegram app
+        </a>
+      }
+
+      <app-button variant="danger" (click)="showDisconnectConfirmation.set(true)">
+        Disconnect Telegram
+      </app-button>
+    } @else {
+      <p class="telegram-settings__explanation">
+        Create a short-lived link, open it in Telegram, and press Start. The link works once and
+        expires after a few minutes.
+      </p>
+
+      @if (link(); as deepLink) {
+        <a class="telegram-settings__connect" [href]="deepLink" target="_blank" rel="noopener">
+          Continue in Telegram
+        </a>
+        @if (formattedExpiry(); as expiry) {
+          <small>For your security, this link expires at {{ expiry }}.</small>
+        }
+      } @else {
+        <app-button [busy]="isCreatingLink()" [disabled]="isCreatingLink()" (click)="createLink()">
+          {{ isCreatingLink() ? 'Creating link&hellip;' : 'Connect Telegram' }}
+        </app-button>
+      }
+    }
+  }
+
+  @if (telegram.error()) {
+    <p class="telegram-settings__status telegram-settings__status--error" role="alert">
+      {{ telegram.error() }}
+    </p>
+  }
+</section>
+
+<app-confirmation-dialog
+  [open]="showDisconnectConfirmation()"
+  title="Disconnect Telegram?"
+  message="The bot will no longer be able to access your Drama Watch account. You can reconnect it later."
+  confirmLabel="Disconnect"
+  [busy]="isDisconnecting()"
+  (confirmed)="disconnect()"
+  (cancelled)="showDisconnectConfirmation.set(false)"
+/>
+
