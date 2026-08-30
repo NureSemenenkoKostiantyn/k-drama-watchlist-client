@@ -7,13 +7,13 @@
 
 .app-shell__nav-search input {
   width: 100%;
-  min-height: 2.25rem;
-  padding: 0.5rem 2.25rem 0.5rem 0.75rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 2rem 0.5rem 0.125rem;
   border: 0;
-  border-radius: 999rem;
-  outline: 0.0625rem solid transparent;
+  border-bottom: 0.125rem solid var(--color-border);
+  border-radius: 0;
   color: var(--color-text);
-  background: var(--color-surface-raised);
+  background: transparent;
   font: inherit;
   font-size: 0.8125rem;
 }
@@ -23,18 +23,19 @@
 }
 
 .app-shell__nav-search input:focus-visible {
-  outline-color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+  outline: none;
 }
 
 .app-shell__nav-search button {
   position: absolute;
-  right: 0.2rem;
+  right: 0;
   display: grid;
   width: 1.85rem;
   height: 1.85rem;
   padding: 0;
   border: 0;
-  border-radius: 50%;
+  border-radius: 0;
   place-items: center;
   color: var(--color-text-muted);
   background: transparent;
@@ -42,8 +43,8 @@
 }
 
 .app-shell__nav-search button:hover {
-  color: #100d18;
-  background: var(--color-accent);
+  color: var(--color-accent-strong);
+  background: transparent;
 }
 
 .app-shell__nav-search svg {
