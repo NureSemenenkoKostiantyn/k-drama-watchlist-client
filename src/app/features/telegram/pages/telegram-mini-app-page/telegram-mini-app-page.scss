@@ -1,14 +1,12 @@
 :host {
-  display: grid;
   min-height: 100dvh;
-  padding: 1.25rem;
-  place-items: center;
+  padding: 1.25rem 1rem 3rem;
   background:
-    radial-gradient(circle at 20% 10%, rgb(255 113 154 / 28%), transparent 24rem),
-    #100d18;
+    radial-gradient(circle at 20% 10%, rgb(255 113 154 / 28%), transparent 24rem), #100d18;
 }
 
 .telegram-app {
+  margin-inline: auto;
   width: min(100%, 32rem);
 }
 
@@ -45,6 +43,190 @@
   line-height: 1.6;
 }
 
+.telegram-app__account {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.telegram-app__account span {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.telegram-app__account strong {
+  margin-top: 0.25rem;
+  font-size: 1.1rem;
+}
+
+.telegram-app__account small {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  align-self: center;
+  color: var(--color-accent-strong);
+}
+
+.telegram-app .telegram-app__error,
+.telegram-app .telegram-app__notice {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: var(--color-surface);
+}
+
+.telegram-app .telegram-app__error {
+  color: #ffb1c5;
+}
+
+.telegram-app .telegram-app__notice {
+  color: #b9f4d0;
+}
+
+.telegram-app__tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.telegram-app__tabs button,
+.telegram-app__section-heading button,
+.telegram-app__empty button {
+  min-height: 2.75rem;
+  padding: 0.5rem;
+  border: 0;
+  color: var(--color-text-muted);
+  background: transparent;
+  font-weight: 800;
+}
+
+.telegram-app__tabs button.is-active {
+  color: var(--color-accent-strong);
+  box-shadow: inset 0 -0.15rem var(--color-accent);
+}
+
+.telegram-app__workspace {
+  margin-top: 1.5rem;
+}
+
+.telegram-app__workspace > p,
+.telegram-app__section-heading p {
+  margin: 0;
+}
+
+.telegram-app__workspace h2,
+.telegram-app__section-heading h2 {
+  margin: 0.25rem 0 0;
+  font-size: 1.5rem;
+}
+
+.telegram-app__section-heading {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.telegram-app__section-heading--secondary {
+  margin-top: 2rem;
+}
+
+.telegram-app__section-heading > span {
+  margin: 0;
+}
+
+.telegram-app__list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.telegram-media {
+  display: grid;
+  grid-template-columns: 4.25rem minmax(0, 1fr);
+  gap: 0.875rem;
+  min-height: 6.25rem;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.telegram-media app-media-poster {
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  background: var(--color-surface-raised);
+}
+
+.telegram-media h3 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.telegram-media > div > span {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.telegram-media > div > strong {
+  display: block;
+  margin-top: 0.5rem;
+  color: var(--color-accent-strong);
+  font-size: 0.85rem;
+}
+
+.telegram-media__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.telegram-media--compact {
+  min-height: 5.25rem;
+}
+
+.telegram-media--compact app-button {
+  display: block;
+  margin-top: 0.65rem;
+}
+
+.telegram-app__empty {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  color: var(--color-text-muted);
+  border: 1px dashed var(--color-border);
+}
+
+.telegram-app__search {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.telegram-app__search :is(input, select) {
+  width: 100%;
+  min-height: 3rem;
+  padding-inline: 0.875rem;
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 0;
+  background: var(--color-surface);
+}
+
+.telegram-app__results {
+  padding-bottom: 1rem;
+}
+
 .telegram-app a {
   display: inline-flex;
   min-height: 3rem;
@@ -56,4 +238,3 @@
   text-decoration: none;
   font-weight: 800;
 }
-

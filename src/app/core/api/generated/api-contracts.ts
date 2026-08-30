@@ -212,6 +212,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/telegram/mini-app/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["authenticateTelegramMiniApp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/telegram/mini-app/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["searchFromTelegramMiniApp"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/telegram/mini-app/library": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listTelegramMiniAppLibrary"];
+        put?: never;
+        post: operations["addFromTelegramMiniApp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/telegram/mini-app/library/{entryId}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["updateTelegramMiniAppStatus"];
+        trace?: never;
+    };
+    "/telegram/mini-app/library/{entryId}/progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["updateTelegramMiniAppProgress"];
+        trace?: never;
+    };
     "/friends": {
         parameters: {
             query?: never;
@@ -728,6 +808,7 @@ export interface components {
             statisticsOverviewResponse: components["schemas"]["StatisticsOverviewResponse"];
             telegramConnectionResponse: components["schemas"]["TelegramConnectionResponse"];
             telegramLinkResponse: components["schemas"]["TelegramLinkResponse"];
+            telegramMiniAppSessionResponse: components["schemas"]["TelegramMiniAppSessionResponse"];
             friendshipResponse: components["schemas"]["FriendshipResponse"];
             friendshipsResponse: components["schemas"]["FriendshipsResponse"];
             createFriendRequest: components["schemas"]["CreateFriendRequestDto"];
@@ -962,6 +1043,11 @@ export interface components {
         TelegramLinkResponse: {
             deepLink: string;
             expiresAt: string;
+        };
+        TelegramMiniAppSessionResponse: {
+            account: components["schemas"]["PublicUserProfileResponse"];
+            telegramDisplayName: string;
+            telegramUsername?: string;
         };
         FriendshipResponse: {
             id: string;
@@ -1715,6 +1801,154 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TelegramLinkResponse"];
+                };
+            };
+        };
+    };
+    authenticateTelegramMiniApp: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Telegram-Init-Data": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramMiniAppSessionResponse"];
+                };
+            };
+        };
+    };
+    searchFromTelegramMiniApp: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Telegram-Init-Data": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MediaSearchResponse"];
+                };
+            };
+        };
+    };
+    listTelegramMiniAppLibrary: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Telegram-Init-Data": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LibraryEntryResponse"][];
+                };
+            };
+        };
+    };
+    addFromTelegramMiniApp: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Telegram-Init-Data": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddLibraryEntryDto"];
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LibraryEntryResponse"];
+                };
+            };
+        };
+    };
+    updateTelegramMiniAppStatus: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Telegram-Init-Data": string;
+            };
+            path: {
+                entryId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateLibraryStatusDto"];
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LibraryEntryResponse"];
+                };
+            };
+        };
+    };
+    updateTelegramMiniAppProgress: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Telegram-Init-Data": string;
+            };
+            path: {
+                entryId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProgressDto"];
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LibraryEntryResponse"];
                 };
             };
         };

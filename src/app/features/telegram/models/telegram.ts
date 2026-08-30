@@ -4,4 +4,5 @@ type ApiSchemas = components['schemas'];
 
 export type TelegramConnection = ApiSchemas['TelegramConnectionResponse'];
 export type TelegramLink = ApiSchemas['TelegramLinkResponse'];
+export type TelegramMiniAppSession = ApiSchemas['TelegramMiniAppSessionResponse'];
 
