@@ -1,0 +1,62 @@
+.app-shell__nav-search {
+  position: relative;
+  display: flex;
+  width: clamp(9rem, 16vw, 15rem);
+  align-items: center;
+}
+
+.app-shell__nav-search input {
+  width: 100%;
+  min-height: 2.25rem;
+  padding: 0.5rem 2.25rem 0.5rem 0.75rem;
+  border: 0;
+  border-radius: 999rem;
+  outline: 0.0625rem solid transparent;
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  font: inherit;
+  font-size: 0.8125rem;
+}
+
+.app-shell__nav-search input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.app-shell__nav-search input:focus-visible {
+  outline-color: var(--color-accent);
+}
+
+.app-shell__nav-search button {
+  position: absolute;
+  right: 0.2rem;
+  display: grid;
+  width: 1.85rem;
+  height: 1.85rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  place-items: center;
+  color: var(--color-text-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.app-shell__nav-search button:hover {
+  color: #100d18;
+  background: var(--color-accent);
+}
+
+.app-shell__nav-search svg {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-width: 1.8;
+}
+
+@media (max-width: 64rem) {
+  .app-shell__nav-search {
+    width: 9rem;
+  }
+}

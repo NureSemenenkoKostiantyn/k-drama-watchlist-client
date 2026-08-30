@@ -3,10 +3,12 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { AuthenticationService } from '../../../../core/auth/authentication.service';
+import { Button } from '../../../../shared/components/button/button';
+import { FormField } from '../../../../shared/components/form-field/form-field';
 
 @Component({
   selector: 'app-onboarding-page',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, Button, FormField],
   templateUrl: './onboarding-page.html',
   styleUrl: '../../auth-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,0 +1,36 @@
+:host {
+  display: inline-flex;
+}
+
+span {
+  display: inline-flex;
+  min-height: 1.625rem;
+  padding: 0.125rem 0.625rem;
+  align-items: center;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 999rem;
+  color: var(--color-text-muted);
+  background: rgb(255 255 255 / 4%);
+  font-size: 0.6875rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+:host(.ui-status-badge--accent) span {
+  border-color: rgb(255 113 154 / 35%);
+  color: var(--color-accent-strong);
+  background: rgb(255 113 154 / 9%);
+}
+
+:host(.ui-status-badge--success) span {
+  border-color: rgb(137 225 187 / 35%);
+  color: #b8f3d5;
+  background: rgb(137 225 187 / 9%);
+}
+
+:host(.ui-status-badge--warning) span {
+  border-color: rgb(255 205 113 / 35%);
+  color: #ffe0a3;
+  background: rgb(255 205 113 / 9%);
+}

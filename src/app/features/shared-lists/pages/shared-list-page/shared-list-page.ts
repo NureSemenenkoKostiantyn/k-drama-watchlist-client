@@ -22,6 +22,7 @@ import {
   KeyboardReorderAction,
   KeyboardReorderControls,
 } from '../../../../shared/components/keyboard-reorder-controls/keyboard-reorder-controls';
+import { ConfirmationDialog } from '../../../../shared/components/confirmation-dialog/confirmation-dialog';
 import { SharedListComments } from '../../components/shared-list-comments/shared-list-comments';
 import { SharedListsService } from '../../data-access/shared-lists.service';
 import {
@@ -40,6 +41,7 @@ const mobileSharedListBreakpoint = '(max-width: 48rem)';
     CdkDrag,
     CdkDropList,
     DatePipe,
+    ConfirmationDialog,
     KeyboardReorderControls,
     ReactiveFormsModule,
     RouterLink,
@@ -359,11 +361,13 @@ export class SharedListPage implements OnInit {
   }
 
   protected async deleteList(): Promise<void> {
-    if (!this.pendingDelete()) {
-      this.pendingDelete.set(true);
+    if (this.isSaving()) return;
+    this.isSaving.set(true);
+    if (await this.sharedLists.delete(this.listId)) {
+      await this.router.navigate(['/lists']);
       return;
     }
-    if (await this.sharedLists.delete(this.listId)) await this.router.navigate(['/lists']);
+    this.isSaving.set(false);
   }
 
   private async load(): Promise<void> {

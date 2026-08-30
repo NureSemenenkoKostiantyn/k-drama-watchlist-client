@@ -1,0 +1,17 @@
+<nav [attr.aria-label]="label()">
+  <button
+    type="button"
+    (click)="changeTo(page() - 1)"
+    [disabled]="disabled() || page() <= 1"
+  >
+    Previous
+  </button>
+  <span>Page {{ page() }} of {{ totalPages() }}</span>
+  <button
+    type="button"
+    (click)="changeTo(page() + 1)"
+    [disabled]="disabled() || page() >= totalPages()"
+  >
+    Next
+  </button>
+</nav>

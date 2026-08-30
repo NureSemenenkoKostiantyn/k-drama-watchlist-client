@@ -143,7 +143,7 @@ describe('LibraryPage', () => {
     fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
     const toggle = root.querySelector<HTMLButtonElement>(
-      '.library-tools__category-toggle',
+      '.library-tools__category-toggle button',
     );
     const manager = root.querySelector<HTMLElement>(
       '#library-category-manager',
@@ -230,7 +230,9 @@ describe('LibraryPage', () => {
     await fixture.whenStable();
     fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
-    const toggle = root.querySelector<HTMLButtonElement>('.library-filter-toggle');
+    const toggle = root.querySelector<HTMLButtonElement>(
+      'app-filter-panel button[aria-controls="library-filter-panel"]',
+    );
     const panel = root.querySelector<HTMLElement>('#library-filter-panel');
 
     expect(toggle?.getAttribute('aria-expanded')).toBe('false');

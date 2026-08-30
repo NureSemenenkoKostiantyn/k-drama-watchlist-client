@@ -3,10 +3,12 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { AuthenticationService } from '../../../../core/auth/authentication.service';
+import { Button } from '../../../../shared/components/button/button';
+import { FormField } from '../../../../shared/components/form-field/form-field';
 
 @Component({
   selector: 'app-verify-email-page',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, Button, FormField],
   templateUrl: './verify-email-page.html',
   styleUrl: '../../auth-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

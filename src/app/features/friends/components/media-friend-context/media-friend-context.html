@@ -14,37 +14,28 @@
   </div>
 
   @if (isLoading()) {
-    <p class="friend-context__state" role="status">Loading friend activity&hellip;</p>
+    <app-page-state [compact]="true" variant="loading" message="Loading friend activity…" />
   } @else if (error()) {
-    <p class="friend-context__state friend-context__state--error" role="status">
-      {{ error() }}
-    </p>
+    <app-page-state [compact]="true" variant="error" [message]="error() ?? undefined" />
   } @else if (activities().length === 0) {
-    <p class="friend-context__state">
-      None of your friends have this title in their library yet.
-    </p>
+    <app-page-state
+      [compact]="true"
+      variant="empty"
+      message="None of your friends have this title in their library yet."
+    />
   } @else {
     <div class="friend-context__grid">
       @for (activity of activities(); track activity.user.id) {
         <article class="friend-context__card">
-          <a
+          <app-public-user-link
             class="friend-context__profile"
-            [routerLink]="['/users', activity.user.id]"
-          >
-            @if (activity.user.image) {
-              <img
-                [src]="activity.user.image"
-                [alt]="activity.user.displayUsername + ' profile picture'"
-              />
-            } @else {
-              <span aria-hidden="true">{{ initials(activity) }}</span>
-            }
-
-            <span>
-              <strong>{{ activity.user.displayUsername }}</strong>
-              <small>{{ '@' + activity.user.username }}</small>
-            </span>
-          </a>
+            [userId]="activity.user.id"
+            [username]="activity.user.displayUsername"
+            [name]="activity.user.name"
+            [image]="activity.user.image"
+            [showAvatar]="true"
+            [showName]="true"
+          />
 
           <div class="friend-context__watch">
             <span>{{ statusLabel(activity.status) }}</span>

@@ -2,12 +2,17 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
+import { MediaPoster } from '../../../../shared/components/media-poster/media-poster';
+import { PageState } from '../../../../shared/components/page-state/page-state';
+import { Pagination } from '../../../../shared/components/pagination/pagination';
+import { PublicUserLink } from '../../../../shared/components/public-user-link/public-user-link';
+import { UserAvatar } from '../../../../shared/components/user-avatar/user-avatar';
 import { ActivityService } from '../../data-access/activity.service';
 import { ActivityFeed, ActivityFeedItem } from '../../models/activity';
 
 @Component({
   selector: 'app-activity-page',
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink, MediaPoster, PageState, Pagination, PublicUserLink, UserAvatar],
   templateUrl: './activity-page.html',
   styleUrl: './activity-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,18 +47,6 @@ export class ActivityPage implements OnInit {
     if (item.status === 'watching') return 'started watching';
     if (item.status === 'watched') return 'finished watching';
     return 'moved back to their watchlist';
-  }
-
-  protected initials(item: ActivityFeedItem): string {
-    return (
-      item.actor.name
-        .split(/\s+/)
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((part) => part[0])
-        .join('')
-        .toLocaleUpperCase() || '?'
-    );
   }
 
   private async loadPage(page: number): Promise<void> {

@@ -1,0 +1,59 @@
+dialog {
+  width: min(30rem, calc(100vw - 2rem));
+  padding: 0;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 1.25rem;
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  box-shadow: 0 2rem 6rem rgb(0 0 0 / 55%);
+}
+
+dialog::backdrop {
+  background: rgb(5 3 9 / 72%);
+  backdrop-filter: blur(0.25rem);
+}
+
+dialog > div {
+  padding: 1.5rem;
+}
+
+h2,
+p {
+  margin: 0;
+}
+
+p {
+  margin-top: 0.75rem;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.ui-confirmation-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+button {
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 999rem;
+  color: var(--color-text);
+  background: transparent;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+button.danger {
+  border-color: var(--color-accent);
+  color: #100d18;
+  background: var(--color-accent);
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}

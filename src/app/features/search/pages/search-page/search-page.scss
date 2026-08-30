@@ -46,6 +46,10 @@
   background: rgb(255 255 255 / 4%);
 }
 
+.search-form app-button {
+  --ui-button-padding-inline: 1.5rem;
+}
+
 .search-form label:not(.search-form__korean) {
   display: grid;
   gap: 0.5rem;

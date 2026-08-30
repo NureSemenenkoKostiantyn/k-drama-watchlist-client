@@ -110,7 +110,9 @@
 
 .app-shell__account button,
 .app-shell__auth-links a {
+  display: inline-flex;
   min-height: 2.75rem;
+  align-items: center;
   border: 0;
   color: var(--color-text);
   background: transparent;

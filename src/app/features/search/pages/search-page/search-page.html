@@ -6,8 +6,7 @@
   </header>
 
   <form class="search-form" [formGroup]="searchForm" (ngSubmit)="submitSearch()">
-    <label class="search-form__query" for="media-query">
-      <span>Title</span>
+    <app-form-field class="search-form__query" label="Title" inputId="media-query" [mutedLabel]="true">
       <input
         id="media-query"
         type="search"
@@ -16,25 +15,24 @@
         autocomplete="off"
         placeholder="Goblin, Parasite, Crash Landing on You..."
       />
-    </label>
+    </app-form-field>
 
-    <label for="media-type">
-      <span>Type</span>
+    <app-form-field label="Type" inputId="media-type" [mutedLabel]="true">
       <select id="media-type" formControlName="type">
         <option value="all">TV and movies</option>
         <option value="tv">TV series</option>
         <option value="movie">Movies</option>
       </select>
-    </label>
+    </app-form-field>
 
     <label class="search-form__korean">
       <input type="checkbox" formControlName="koreanOnly" />
       <span>Korean dramas only</span>
     </label>
 
-    <button type="submit" [disabled]="isLoading()">
+    <app-button type="submit" [disabled]="isLoading()" [busy]="isLoading()">
       {{ isLoading() ? 'Searching…' : 'Search' }}
-    </button>
+    </app-button>
 
     @if (searchForm.controls.query.touched && searchForm.controls.query.invalid) {
       <p class="search-form__error">Enter a title between 1 and 100 characters.</p>
@@ -42,9 +40,9 @@
   </form>
 
   @if (error()) {
-    <div class="search-state search-state--error" role="alert">{{ error() }}</div>
+    <app-page-state variant="error" [message]="error() ?? undefined" />
   } @else if (library.error()) {
-    <div class="search-state search-state--error" role="alert">{{ library.error() }}</div>
+    <app-page-state variant="error" [message]="library.error() ?? undefined" />
   } @else if (hasSearched() && !isLoading()) {
     <div class="search-results__summary" aria-live="polite">
       <p>
@@ -54,31 +52,21 @@
         }
       </p>
       @if (totalPages() > 1) {
-        <div class="pagination">
-          <button
-            type="button"
-            (click)="changePage(currentPage() - 1)"
-            [disabled]="currentPage() === 1"
-          >
-            Previous
-          </button>
-          <span>Page {{ currentPage() }} of {{ totalPages() }}</span>
-          <button
-            type="button"
-            (click)="changePage(currentPage() + 1)"
-            [disabled]="currentPage() === totalPages()"
-          >
-            Next
-          </button>
-        </div>
+        <app-pagination
+          label="Search result pages"
+          [page]="currentPage()"
+          [totalPages]="totalPages()"
+          (pageChange)="changePage($event)"
+        />
       }
     </div>
 
     @if (results().length === 0) {
-      <div class="search-state">
-        <h2>No matching titles</h2>
-        <p>Try another spelling or broaden the media type.</p>
-      </div>
+      <app-page-state
+        variant="empty"
+        heading="No matching titles"
+        message="Try another spelling or broaden the media type."
+      />
     } @else {
       <div class="search-results">
         @for (media of results(); track media.id) {
@@ -88,11 +76,7 @@
               [routerLink]="['/media', media.mediaType, media.tmdbId]"
               [attr.aria-label]="'View ' + media.title"
             >
-              @if (media.posterUrl) {
-                <img [src]="media.posterUrl" [alt]="media.title + ' poster'" />
-              } @else {
-                <span aria-hidden="true">No poster</span>
-              }
+              <app-media-poster [posterUrl]="media.posterUrl" [title]="media.title" />
             </a>
 
             <div class="media-card__body">
@@ -165,6 +149,6 @@
       </div>
     }
   } @else if (isLoading()) {
-    <div class="search-state" role="status">Searching TMDB…</div>
+    <app-page-state variant="loading" message="Searching TMDB…" />
   }
 </section>

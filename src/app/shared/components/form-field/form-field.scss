@@ -1,0 +1,99 @@
+app-form-field {
+  display: block;
+  min-width: 0;
+}
+
+.ui-form-field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.ui-form-field__label-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ui-form-field__label-row label {
+  color: var(--color-text);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.ui-form-field--muted-label .ui-form-field__label-row label {
+  color: var(--color-text-muted);
+}
+
+.ui-form-field__label-row [fieldAction] {
+  color: var(--color-accent-strong);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.ui-form-field input:not([type='checkbox'], [type='radio']),
+.ui-form-field select,
+.ui-form-field textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 3rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 0.75rem;
+  color: var(--color-text);
+  background: var(--ui-field-background, var(--color-surface));
+}
+
+.ui-form-field input:not([type='checkbox'], [type='radio']),
+.ui-form-field select {
+  padding: 0 0.875rem;
+}
+
+.ui-form-field select {
+  padding-right: 2.25rem;
+}
+
+.ui-form-field textarea {
+  padding: 0.75rem 0.875rem;
+  resize: vertical;
+}
+
+.ui-form-field input[aria-invalid='true'],
+.ui-form-field select[aria-invalid='true'],
+.ui-form-field textarea[aria-invalid='true'] {
+  border-color: var(--color-accent);
+}
+
+.ui-form-field--compact .ui-form-field input:not([type='checkbox'], [type='radio']),
+.ui-form-field--compact .ui-form-field select,
+.ui-form-field--compact .ui-form-field textarea {
+  min-height: 2.75rem;
+}
+
+.ui-form-field--compact .ui-form-field textarea {
+  padding-block: 0.65rem;
+}
+
+.ui-form-field__hint,
+.ui-form-field__error {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.ui-form-field__hint {
+  color: var(--color-text-muted);
+}
+
+.ui-form-field__error {
+  color: #ffb1c5;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 30rem) {
+  .ui-form-field__label-row:has([fieldAction]) {
+    align-items: start;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+}

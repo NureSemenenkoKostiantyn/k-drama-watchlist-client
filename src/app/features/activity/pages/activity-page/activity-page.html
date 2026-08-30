@@ -9,30 +9,26 @@
   </header>
 
   @if (error()) {
-    <div class="state state--error" role="alert">
-      <p>{{ error() }}</p>
-      <button type="button" (click)="load(requestedPage())">Try again</button>
-    </div>
+    <app-page-state variant="error" [message]="error() ?? undefined">
+      <button stateAction type="button" (click)="load(requestedPage())">Try again</button>
+    </app-page-state>
   } @else if (loading() && !feed()) {
-    <div class="state" role="status">Loading friend activity…</div>
+    <app-page-state variant="loading" message="Loading friend activity…" />
   } @else if (feed(); as currentFeed) {
     <div class="feed" [attr.aria-busy]="loading()">
       @for (item of currentFeed.items; track item.id) {
         <article>
           <a class="actor" [routerLink]="['/users', item.actor.id]">
-            @if (item.actor.image) {
-              <img
-                [src]="item.actor.image"
-                [alt]="item.actor.displayUsername + ' profile picture'"
-              />
-            } @else {
-              <span aria-hidden="true">{{ initials(item) }}</span>
-            }
+            <app-user-avatar [name]="item.actor.name" [image]="item.actor.image" />
           </a>
 
           <div class="activity-copy">
             <p>
-              <a [routerLink]="['/users', item.actor.id]">{{ item.actor.displayUsername }}</a>
+              <app-public-user-link
+                [userId]="item.actor.id"
+                [username]="item.actor.displayUsername"
+                [name]="item.actor.name"
+              />
               {{ message(item) }}
             </p>
             <a
@@ -49,39 +45,30 @@
             [routerLink]="['/media', item.media.mediaType, item.media.tmdbId]"
             [attr.aria-label]="'Open ' + item.media.title"
           >
-            @if (item.media.posterUrl) {
-              <img [src]="item.media.posterUrl" alt="" />
-            } @else {
-              <span aria-hidden="true">{{ item.media.title.slice(0, 1) }}</span>
-            }
+            <app-media-poster
+              [posterUrl]="item.media.posterUrl"
+              [title]="item.media.title"
+              [decorative]="true"
+              fallback="initial"
+            />
           </a>
         </article>
       } @empty {
-        <div class="state">
-          No visible friend activity yet. Friends can enable activity visibility from their profile
-          privacy settings.
-        </div>
+        <app-page-state
+          variant="empty"
+          message="No visible friend activity yet. Friends can enable activity visibility from their profile privacy settings."
+        />
       }
     </div>
 
     @if (currentFeed.totalPages > 1) {
-      <nav class="pagination" aria-label="Activity pages">
-        <button
-          type="button"
-          (click)="load(currentFeed.page - 1)"
-          [disabled]="loading() || currentFeed.page === 1"
-        >
-          Previous
-        </button>
-        <span>Page {{ currentFeed.page }} of {{ currentFeed.totalPages }}</span>
-        <button
-          type="button"
-          (click)="load(currentFeed.page + 1)"
-          [disabled]="loading() || currentFeed.page === currentFeed.totalPages"
-        >
-          Next
-        </button>
-      </nav>
+      <app-pagination
+        label="Activity pages"
+        [page]="currentFeed.page"
+        [totalPages]="currentFeed.totalPages"
+        [disabled]="loading()"
+        (pageChange)="load($event)"
+      />
     }
   }
 </section>

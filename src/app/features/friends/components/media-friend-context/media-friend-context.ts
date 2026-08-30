@@ -7,15 +7,16 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
 
 import { readApiErrorMessage } from '../../../../core/api/api-error';
+import { PageState } from '../../../../shared/components/page-state/page-state';
+import { PublicUserLink } from '../../../../shared/components/public-user-link/public-user-link';
 import { FriendsService } from '../../data-access/friends.service';
 import { MediaFriendActivity } from '../../models/friendship';
 
 @Component({
   selector: 'app-media-friend-context',
-  imports: [RouterLink],
+  imports: [PageState, PublicUserLink],
   templateUrl: './media-friend-context.html',
   styleUrl: './media-friend-context.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -53,18 +54,6 @@ export class MediaFriendContextComponent implements OnInit {
     }
 
     return status === 'watching' ? 'Watching' : 'Watched';
-  }
-
-  protected initials(activity: MediaFriendActivity): string {
-    return (
-      activity.user.name
-        .split(/\s+/)
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((part) => part[0])
-        .join('')
-        .toUpperCase() || '?'
-    );
   }
 
   private async load(): Promise<void> {

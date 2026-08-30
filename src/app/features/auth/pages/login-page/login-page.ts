@@ -1,14 +1,16 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { AuthenticationService } from '../../../../core/auth/authentication.service';
+import { Button } from '../../../../shared/components/button/button';
+import { FormField } from '../../../../shared/components/form-field/form-field';
 
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, Button, FormField],
   templateUrl: './login-page.html',
-  styleUrl: '../../auth-page.scss',
+  styleUrls: ['../../auth-page.scss', '../../auth-password.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginPage {
@@ -16,11 +18,16 @@ export class LoginPage {
   private readonly route = inject(ActivatedRoute);
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
+  protected readonly passwordVisible = signal(false);
 
   protected readonly form = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
   });
+
+  protected togglePasswordVisibility(): void {
+    this.passwordVisible.update((visible) => !visible);
+  }
 
   protected async submit(): Promise<void> {
     this.authentication.clearError();

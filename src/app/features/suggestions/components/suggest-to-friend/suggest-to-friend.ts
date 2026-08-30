@@ -10,6 +10,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { readApiErrorMessage } from '../../../../core/api/api-error';
+import { Button } from '../../../../shared/components/button/button';
+import { FormField } from '../../../../shared/components/form-field/form-field';
 import { FriendsService } from '../../../friends/data-access/friends.service';
 import { Friendship } from '../../../friends/models/friendship';
 import { MediaDetails } from '../../../search/models/media';
@@ -17,7 +19,7 @@ import { SuggestionsService } from '../../data-access/suggestions.service';
 
 @Component({
   selector: 'app-suggest-to-friend',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, Button, FormField],
   templateUrl: './suggest-to-friend.html',
   styleUrl: './suggest-to-friend.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

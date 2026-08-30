@@ -37,6 +37,10 @@
   margin-top: 1rem;
 }
 
+.suggest-friend app-form-field {
+  --ui-field-background: var(--color-surface-raised);
+}
+
 .suggest-friend label {
   display: grid;
   gap: 0.4rem;

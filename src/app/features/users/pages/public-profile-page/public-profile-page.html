@@ -1,25 +1,13 @@
 <section class="public-profile" aria-labelledby="profile-title">
   @if (isLoading()) {
-    <div class="public-profile__state" role="status">Loading profile…</div>
+    <app-page-state variant="loading" message="Loading profile…" />
   } @else if (error()) {
-    <div class="public-profile__state public-profile__state--error" role="alert">
-      <p>{{ error() }}</p>
-      <a routerLink="/friends">Find another profile</a>
-    </div>
+    <app-page-state variant="error" [message]="error() ?? undefined">
+      <a stateAction routerLink="/friends">Find another profile</a>
+    </app-page-state>
   } @else if (profile(); as currentProfile) {
     <article class="profile-card">
-      @if (currentProfile.image) {
-        <img
-          [src]="currentProfile.image"
-          alt=""
-          width="112"
-          height="112"
-        />
-      } @else {
-        <div class="profile-card__avatar" aria-hidden="true">
-          {{ initials(currentProfile) }}
-        </div>
-      }
+      <app-user-avatar [name]="currentProfile.name" [image]="currentProfile.image" size="7rem" />
 
       <div class="profile-card__identity">
         <p>{{ isOwnProfile(currentProfile) ? 'Your profile' : 'Drama Watch profile' }}</p>

@@ -12,12 +12,14 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { readApiErrorMessage } from '../../../../core/api/api-error';
 import { AuthenticationService } from '../../../../core/auth/authentication.service';
+import { PageState } from '../../../../shared/components/page-state/page-state';
+import { UserAvatar } from '../../../../shared/components/user-avatar/user-avatar';
 import { UsersService } from '../../data-access/users.service';
 import { PublicUserProfile } from '../../models/public-user-profile';
 
 @Component({
   selector: 'app-public-profile-page',
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink, PageState, UserAvatar],
   templateUrl: './public-profile-page.html',
   styleUrl: './public-profile-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,15 +49,6 @@ export class PublicProfilePage implements OnInit {
 
         void this.load(userId);
       });
-  }
-
-  protected initials(profile: PublicUserProfile): string {
-    return profile.name
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((part) => part[0]?.toLocaleUpperCase())
-      .join('');
   }
 
   protected isOwnProfile(profile: PublicUserProfile): boolean {

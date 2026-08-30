@@ -63,7 +63,27 @@ describe('LoginPage', () => {
     await fixture.whenStable();
 
     expect(signIn).not.toHaveBeenCalled();
-    expect(fixture.nativeElement.querySelectorAll('.field__error')).toHaveLength(2);
+    expect(fixture.nativeElement.querySelectorAll('.ui-form-field__error')).toHaveLength(2);
+  });
+
+  it('shows and hides the password without submitting the form', () => {
+    const fixture = TestBed.createComponent(LoginPage);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const input = root.querySelector<HTMLInputElement>('#login-password');
+    const toggle = root.querySelector<HTMLButtonElement>(
+      'button[aria-controls="login-password"]',
+    );
+
+    expect(input?.type).toBe('password');
+    expect(toggle?.getAttribute('aria-pressed')).toBe('false');
+
+    toggle?.click();
+    fixture.detectChanges();
+
+    expect(input?.type).toBe('text');
+    expect(toggle?.textContent).toContain('Hide');
+    expect(signIn).not.toHaveBeenCalled();
   });
 });
 

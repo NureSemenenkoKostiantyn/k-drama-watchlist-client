@@ -1,0 +1,16 @@
+<div class="ui-form-field">
+  <div class="ui-form-field__label-row">
+    <label [for]="inputId()">{{ label() }}</label>
+    <ng-content select="[fieldAction]" />
+  </div>
+
+  <ng-content />
+
+  @if (hint(); as hintText) {
+    <p class="ui-form-field__hint" [id]="hintId()">{{ hintText }}</p>
+  }
+
+  @if (error(); as errorText) {
+    <p class="ui-form-field__error" [id]="errorId()">{{ errorText }}</p>
+  }
+</div>

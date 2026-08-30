@@ -15,8 +15,17 @@
     </p>
 
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-      <div class="field">
-        <label for="onboarding-username">Username</label>
+      <app-form-field
+        label="Username"
+        inputId="onboarding-username"
+        hint="Use 3–30 letters, numbers, underscores, or periods."
+        hintId="username-hint"
+        [error]="
+          form.controls.username.invalid && form.controls.username.touched
+            ? 'Enter a valid username between 3 and 30 characters.'
+            : undefined
+        "
+      >
         <input
           id="onboarding-username"
           type="text"
@@ -25,21 +34,20 @@
           aria-describedby="username-hint"
           [attr.aria-invalid]="form.controls.username.invalid && form.controls.username.touched"
         />
-        <p id="username-hint" class="field__hint">
-          Use 3–30 letters, numbers, underscores, or periods.
-        </p>
-        @if (form.controls.username.invalid && form.controls.username.touched) {
-          <p class="field__error">Enter a valid username between 3 and 30 characters.</p>
-        }
-      </div>
+      </app-form-field>
 
       @if (authentication.error(); as error) {
         <p class="auth-card__error" role="alert">{{ error }}</p>
       }
 
-      <button type="submit" [disabled]="authentication.isPending()">
+      <app-button
+        type="submit"
+        [disabled]="authentication.isPending()"
+        [busy]="authentication.isPending()"
+        [fullWidth]="true"
+      >
         {{ authentication.isPending() ? 'Saving username…' : 'Finish setup' }}
-      </button>
+      </app-button>
     </form>
   </div>
 </section>

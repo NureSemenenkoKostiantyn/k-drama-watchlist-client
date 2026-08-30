@@ -56,8 +56,7 @@ h1 {
 }
 
 .auth-card__lead,
-.auth-card__footer,
-.field__hint {
+.auth-card__footer {
   color: var(--color-text-muted);
 }
 
@@ -71,44 +70,14 @@ form {
   gap: 1.125rem;
 }
 
-.field {
-  display: grid;
-  gap: 0.5rem;
+.auth-card app-form-field {
+  --ui-field-background: rgb(9 7 14 / 65%);
 }
 
-.field label {
-  font-size: 0.8125rem;
-  font-weight: 700;
+.auth-card app-button {
+  margin-top: 0.375rem;
 }
 
-.field__label-row {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.field__label-row a {
-  color: var(--color-accent-strong);
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.field input {
-  width: 100%;
-  min-height: 3rem;
-  padding: 0 0.875rem;
-  border: 0.0625rem solid var(--color-border);
-  border-radius: 0.75rem;
-  color: var(--color-text);
-  background: rgb(9 7 14 / 65%);
-}
-
-.field input[aria-invalid='true'] {
-  border-color: var(--color-accent);
-}
-
-.field__error,
 .auth-card__error,
 .auth-card__success {
   margin: 0;
@@ -125,33 +94,11 @@ form {
   background: rgb(137 225 187 / 9%);
 }
 
-.field__hint {
-  margin: 0;
-  font-size: 0.75rem;
-  line-height: 1.5;
-}
-
 .auth-card__error {
   padding: 0.75rem;
   border: 0.0625rem solid rgb(255 113 154 / 38%);
   border-radius: 0.75rem;
   background: rgb(255 113 154 / 9%);
-}
-
-.auth-card button {
-  min-height: 3rem;
-  margin-top: 0.375rem;
-  border: 0;
-  border-radius: 0.75rem;
-  color: #100d18;
-  background: var(--color-accent);
-  font-weight: 750;
-  cursor: pointer;
-}
-
-.auth-card button:disabled {
-  cursor: wait;
-  opacity: 0.58;
 }
 
 .auth-card__secondary-action {
@@ -213,11 +160,5 @@ form {
   .auth-card {
     padding: 1.25rem;
     border-radius: 1.125rem;
-  }
-
-  .field__label-row {
-    align-items: start;
-    flex-direction: column;
-    gap: 0.35rem;
   }
 }

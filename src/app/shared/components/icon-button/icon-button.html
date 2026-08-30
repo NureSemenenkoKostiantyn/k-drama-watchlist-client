@@ -1,0 +1,14 @@
+<button
+  [type]="type()"
+  [disabled]="disabled()"
+  [attr.aria-label]="label()"
+  [attr.title]="label()"
+  [attr.aria-pressed]="pressed()"
+  [attr.aria-controls]="controls()"
+  [attr.aria-expanded]="expanded()"
+  [class.ui-icon-button--accent]="tone() === 'accent'"
+  [class.ui-icon-button--danger]="tone() === 'danger'"
+  (click)="activated.emit()"
+>
+  <ng-content />
+</button>

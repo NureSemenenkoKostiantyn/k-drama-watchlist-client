@@ -1,0 +1,10 @@
+@if (image(); as imageUrl) {
+  <img
+    [src]="imageUrl"
+    [alt]="decorative() ? '' : name() + ' profile picture'"
+    loading="lazy"
+    decoding="async"
+  />
+} @else {
+  <span [attr.aria-hidden]="decorative() || null">{{ initials() }}</span>
+}

@@ -13,30 +13,45 @@
     </p>
   } @else {
     <form [formGroup]="form" (ngSubmit)="send()">
-      <label>
-        Friend
-        <select formControlName="username">
+      <app-form-field
+        label="Friend"
+        inputId="suggestion-friend"
+        density="compact"
+        [mutedLabel]="true"
+      >
+        <select id="suggestion-friend" formControlName="username">
           @for (friendship of friends(); track friendship.id) {
             <option [value]="friendship.user.username">
               {{ friendship.user.name }} (&#64;{{ friendship.user.displayUsername }})
             </option>
           }
         </select>
-      </label>
+      </app-form-field>
 
-      <label>
-        Message <span>Optional</span>
+      <app-form-field
+        label="Message"
+        inputId="suggestion-message"
+        density="compact"
+        [mutedLabel]="true"
+      >
+        <span fieldAction>Optional</span>
         <textarea
+          id="suggestion-message"
           formControlName="message"
           maxlength="500"
           rows="3"
           placeholder="Why should they watch it?"
         ></textarea>
-      </label>
+      </app-form-field>
 
-      <button type="submit" [disabled]="form.invalid || isSending()">
+      <app-button
+        type="submit"
+        density="compact"
+        [disabled]="form.invalid || isSending()"
+        [busy]="isSending()"
+      >
         {{ isSending() ? 'Sending...' : 'Send suggestion' }}
-      </button>
+      </app-button>
     </form>
   }
 
