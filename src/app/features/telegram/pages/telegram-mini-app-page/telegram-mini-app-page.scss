@@ -1,6 +1,16 @@
 :host {
+  display: block;
+  box-sizing: border-box;
   min-height: 100dvh;
-  padding: 1.25rem 1rem 3rem;
+  padding: calc(
+      1.25rem +
+        max(
+          env(safe-area-inset-top, 0px),
+          var(--tg-safe-area-inset-top, 0px),
+          var(--tg-content-safe-area-inset-top, 0px)
+        )
+    )
+    1rem 3rem;
   background:
     radial-gradient(circle at 20% 10%, rgb(255 113 154 / 28%), transparent 24rem), #100d18;
 }
