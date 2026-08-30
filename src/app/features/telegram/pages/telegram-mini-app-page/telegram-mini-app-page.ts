@@ -69,11 +69,18 @@ export class TelegramMiniAppPage implements OnInit {
 
   ngOnInit(): void {
     const telegram = (this.document.defaultView as TelegramWindow | null)?.Telegram?.WebApp;
-    if (!telegram?.initData) return;
+    if (!telegram) return;
 
     this.isInsideTelegram.set(true);
     telegram.ready();
     telegram.expand();
+
+    if (!telegram.initData) {
+      this.error.set(
+        'Telegram did not provide authentication data. Close and reopen the Mini App.',
+      );
+      return;
+    }
 
     void this.initialize(telegram.initData);
   }
@@ -127,7 +134,9 @@ export class TelegramMiniAppPage implements OnInit {
   protected async increment(entry: LibraryEntry): Promise<void> {
     const next = incrementEpisode(entry);
     if (!this.canIncrement(entry)) return;
-    await this.updateEntry(entry, () => this.telegramService.updateMiniAppProgress(entry.id, next));
+    await this.updateEntry(entry, () =>
+      this.telegramService.updateMiniAppProgress(entry.id, next),
+    );
   }
 
   protected canIncrement(entry: LibraryEntry): boolean {
@@ -143,7 +152,8 @@ export class TelegramMiniAppPage implements OnInit {
 
   protected isInLibrary(media: MediaSummary): boolean {
     return this.libraryEntries().some(
-      (entry) => entry.media.mediaType === media.mediaType && entry.media.tmdbId === media.tmdbId,
+      (entry) =>
+        entry.media.mediaType === media.mediaType && entry.media.tmdbId === media.tmdbId,
     );
   }
 
@@ -158,7 +168,9 @@ export class TelegramMiniAppPage implements OnInit {
       this.session.set(await this.telegramService.authenticateMiniApp(initData));
       await this.loadLibrary();
     } catch (error: unknown) {
-      this.error.set(readApiErrorMessage(error, 'Telegram authentication could not be completed.'));
+      this.error.set(
+        readApiErrorMessage(error, 'Telegram authentication could not be completed.'),
+      );
     } finally {
       this.isLoading.set(false);
     }
