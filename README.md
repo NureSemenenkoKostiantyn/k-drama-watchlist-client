@@ -103,9 +103,13 @@ returned to the browser.
 Profiles now link to `/users/:userId/library`. The shared-library page supports status, type,
 minimum-rating, named genre and country selectors, inclusive release-year ranges, server-backed
 sorting, poster-grid and compact-list views, and pagination. Owners choose Private, Friends, or
-Public library visibility from the reusable privacy settings panel on `/profile`; the browser
+Public library visibility from the reusable privacy settings panel on `/settings`; the browser
 receives only the server's public-safe library projection. The same panel independently controls
 private-by-default activity visibility.
+
+The Settings page also manages Telegram account linking. Once linked, a user can independently opt
+into friend-request messages from the bot; consent defaults to off and can be revoked without
+disconnecting the account.
 
 The owner's profile also provides a local JSON data export. The versioned archive includes the
 account profile, privacy settings, categories, priority lanes, and full personal library. Private

@@ -25,6 +25,9 @@ export class SettingsService {
   readonly activityVisibility = computed(
     () => this.settingsState()?.activityVisibility ?? 'private',
   );
+  readonly telegramFriendRequestNotifications = computed(
+    () => this.settingsState()?.telegramNotifications?.friendRequests ?? false,
+  );
   readonly isLoading = this.loadingState.asReadonly();
   readonly error = this.errorState.asReadonly();
 
@@ -80,6 +83,15 @@ export class SettingsService {
 
   async updatePrivacy(input: UpdateUserSettings): Promise<UserSettings | null> {
     return this.update(input, 'Your privacy settings could not be saved.');
+  }
+
+  async updateTelegramFriendRequestNotifications(
+    friendRequests: boolean,
+  ): Promise<UserSettings | null> {
+    return this.update(
+      { telegramNotifications: { friendRequests } },
+      'Your Telegram notification preference could not be saved.',
+    );
   }
 
   private async update(

@@ -806,6 +806,8 @@ export interface components {
             updateRatingRequest: components["schemas"]["UpdateRatingDto"];
             updatePlaybackPreferenceRequest: components["schemas"]["UpdatePlaybackPreferenceDto"];
             statisticsOverviewResponse: components["schemas"]["StatisticsOverviewResponse"];
+            userSettingsResponse: components["schemas"]["UserSettingsResponse"];
+            updateSettingsRequest: components["schemas"]["UpdateSettingsDto"];
             telegramConnectionResponse: components["schemas"]["TelegramConnectionResponse"];
             telegramLinkResponse: components["schemas"]["TelegramLinkResponse"];
             telegramMiniAppSessionResponse: components["schemas"]["TelegramMiniAppSessionResponse"];
@@ -1030,6 +1032,26 @@ export interface components {
         StatisticsMonthBucket: {
             month: string;
             count: number;
+        };
+        UserSettingsResponse: {
+            libraryVisibility: components["schemas"]["LibraryVisibility"];
+            activityVisibility: components["schemas"]["ActivityVisibility"];
+            telegramNotifications: components["schemas"]["TelegramNotificationSettings"];
+        };
+        /** @enum {string} */
+        LibraryVisibility: "friends" | "private" | "public";
+        /** @enum {string} */
+        ActivityVisibility: "friends" | "private" | "public";
+        TelegramNotificationSettings: {
+            friendRequests: boolean;
+        };
+        UpdateSettingsDto: {
+            libraryVisibility?: components["schemas"]["LibraryVisibility"];
+            activityVisibility?: components["schemas"]["ActivityVisibility"];
+            telegramNotifications?: components["schemas"]["UpdateTelegramNotificationsDto"];
+        };
+        UpdateTelegramNotificationsDto: {
+            friendRequests?: boolean;
         };
         TelegramConnectionResponse: {
             enabled: boolean;

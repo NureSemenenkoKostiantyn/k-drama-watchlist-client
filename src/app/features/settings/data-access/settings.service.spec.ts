@@ -25,10 +25,12 @@ describe('SettingsService', () => {
     http.expectOne('/api/settings').flush({
       libraryVisibility: 'private',
       activityVisibility: 'private',
+      telegramNotifications: { friendRequests: false },
     });
     await expect(loaded).resolves.toEqual({
       libraryVisibility: 'private',
       activityVisibility: 'private',
+      telegramNotifications: { friendRequests: false },
     });
     expect(service.libraryVisibility()).toBe('private');
     expect(service.activityVisibility()).toBe('private');
@@ -42,13 +44,31 @@ describe('SettingsService', () => {
     request.flush({
       libraryVisibility: 'friends',
       activityVisibility: 'private',
+      telegramNotifications: { friendRequests: false },
     });
 
     await expect(updated).resolves.toEqual({
       libraryVisibility: 'friends',
       activityVisibility: 'private',
+      telegramNotifications: { friendRequests: false },
     });
     expect(service.libraryVisibility()).toBe('friends');
+
+    const notificationsUpdated = service.updateTelegramFriendRequestNotifications(true);
+    const notificationRequest = http.expectOne('/api/settings');
+    expect(notificationRequest.request.method).toBe('PATCH');
+    expect(notificationRequest.request.body).toEqual({
+      telegramNotifications: { friendRequests: true },
+    });
+    notificationRequest.flush({
+      libraryVisibility: 'friends',
+      activityVisibility: 'private',
+      telegramNotifications: { friendRequests: true },
+    });
+    await expect(notificationsUpdated).resolves.toMatchObject({
+      telegramNotifications: { friendRequests: true },
+    });
+    expect(service.telegramFriendRequestNotifications()).toBe(true);
   });
 
   it('does not restore settings from a request started before session state was cleared', async () => {
@@ -59,11 +79,13 @@ describe('SettingsService', () => {
     request.flush({
       libraryVisibility: 'public',
       activityVisibility: 'friends',
+      telegramNotifications: { friendRequests: true },
     });
 
     await expect(loaded).resolves.toEqual({
       libraryVisibility: 'public',
       activityVisibility: 'friends',
+      telegramNotifications: { friendRequests: true },
     });
     expect(service.settings()).toBeNull();
     expect(service.libraryVisibility()).toBe('private');

@@ -75,6 +75,41 @@
   font-size: 0.8rem;
 }
 
+.telegram-settings__notifications {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  padding-block: 1rem;
+  border-block: 0.0625rem solid var(--color-border);
+}
+
+.telegram-settings__notifications > div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.telegram-settings__notifications p {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.telegram-settings__notifications label {
+  display: inline-flex;
+  gap: 0.55rem;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.telegram-settings__notifications input {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--color-accent);
+}
+
 .telegram-settings__connection p span {
   margin-left: 0.4rem;
 }
@@ -118,6 +153,10 @@
   .telegram-settings__connect,
   .telegram-settings__mini-app {
     justify-content: center;
+  }
+
+  .telegram-settings__notifications {
+    grid-template-columns: 1fr;
   }
 }
 

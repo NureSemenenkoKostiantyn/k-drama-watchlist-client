@@ -1,12 +1,8 @@
-export type LibraryVisibility = 'private' | 'friends' | 'public';
-export type ActivityVisibility = 'private' | 'friends' | 'public';
+import type { components } from '../../../core/api/generated/api-contracts';
 
-export interface UserSettings {
-  libraryVisibility: LibraryVisibility;
-  activityVisibility: ActivityVisibility;
-}
+type ApiSchemas = components['schemas'];
 
-export interface UpdateUserSettings {
-  libraryVisibility?: LibraryVisibility;
-  activityVisibility?: ActivityVisibility;
-}
+export type LibraryVisibility = ApiSchemas['LibraryVisibility'];
+export type ActivityVisibility = ApiSchemas['ActivityVisibility'];
+export type UserSettings = ApiSchemas['UserSettingsResponse'];
+export type UpdateUserSettings = ApiSchemas['UpdateSettingsDto'];
