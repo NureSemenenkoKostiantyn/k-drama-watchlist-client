@@ -22,10 +22,12 @@ describe('SettingsPage', () => {
             load: vi.fn().mockResolvedValue({
               libraryVisibility: 'private',
               activityVisibility: 'private',
-              telegramNotifications: { friendRequests: false },
+              telegramNotifications: { friendRequests: false, titleSuggestions: false },
             }),
             telegramFriendRequestNotifications: signal(false).asReadonly(),
+            telegramTitleSuggestionNotifications: signal(false).asReadonly(),
             updateTelegramFriendRequestNotifications: vi.fn(),
+            updateTelegramTitleSuggestionNotifications: vi.fn(),
             updatePrivacy: vi.fn(),
           },
         },

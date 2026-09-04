@@ -53,6 +53,25 @@
         </label>
       </div>
 
+      <div class="telegram-settings__notifications">
+        <div>
+          <strong>Title suggestion notifications</strong>
+          <p>
+            Allow Drama Watch to message you in Telegram when a friend suggests a title.
+          </p>
+        </div>
+        <label>
+          <input
+            #titleSuggestionNotifications
+            type="checkbox"
+            [checked]="settings.telegramTitleSuggestionNotifications()"
+            [disabled]="settings.isLoading() || isSavingNotifications()"
+            (change)="setTitleSuggestionNotifications(titleSuggestionNotifications.checked)"
+          />
+          <span>Send in Telegram</span>
+        </label>
+      </div>
+
       @if (notificationSavedMessage(); as message) {
         <p class="telegram-settings__status" role="status">{{ message }}</p>
       }

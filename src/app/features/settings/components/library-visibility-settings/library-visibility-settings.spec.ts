@@ -10,7 +10,7 @@ describe('LibraryVisibilitySettingsComponent', () => {
   const updatePrivacy = vi.fn().mockResolvedValue({
     libraryVisibility: 'public',
     activityVisibility: 'friends',
-    telegramNotifications: { friendRequests: false },
+    telegramNotifications: { friendRequests: false, titleSuggestions: false },
   });
 
   beforeEach(async () => {
@@ -26,7 +26,7 @@ describe('LibraryVisibilitySettingsComponent', () => {
             load: vi.fn().mockResolvedValue({
               libraryVisibility: 'friends',
               activityVisibility: 'private',
-              telegramNotifications: { friendRequests: false },
+              telegramNotifications: { friendRequests: false, titleSuggestions: false },
             }),
             updatePrivacy,
           },

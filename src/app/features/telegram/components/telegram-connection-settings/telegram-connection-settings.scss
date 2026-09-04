@@ -81,7 +81,11 @@
   gap: 1rem;
   align-items: center;
   padding-block: 1rem;
-  border-block: 0.0625rem solid var(--color-border);
+  border-top: 0.0625rem solid var(--color-border);
+}
+
+.telegram-settings__notifications:last-of-type {
+  border-bottom: 0.0625rem solid var(--color-border);
 }
 
 .telegram-settings__notifications > div {

@@ -28,6 +28,9 @@ export class SettingsService {
   readonly telegramFriendRequestNotifications = computed(
     () => this.settingsState()?.telegramNotifications?.friendRequests ?? false,
   );
+  readonly telegramTitleSuggestionNotifications = computed(
+    () => this.settingsState()?.telegramNotifications?.titleSuggestions ?? false,
+  );
   readonly isLoading = this.loadingState.asReadonly();
   readonly error = this.errorState.asReadonly();
 
@@ -90,6 +93,15 @@ export class SettingsService {
   ): Promise<UserSettings | null> {
     return this.update(
       { telegramNotifications: { friendRequests } },
+      'Your Telegram notification preference could not be saved.',
+    );
+  }
+
+  async updateTelegramTitleSuggestionNotifications(
+    titleSuggestions: boolean,
+  ): Promise<UserSettings | null> {
+    return this.update(
+      { telegramNotifications: { titleSuggestions } },
       'Your Telegram notification preference could not be saved.',
     );
   }

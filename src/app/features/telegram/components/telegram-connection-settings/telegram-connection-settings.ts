@@ -84,5 +84,23 @@ export class TelegramConnectionSettingsComponent implements OnInit {
       );
     }
   }
+
+  protected async setTitleSuggestionNotifications(enabled: boolean): Promise<void> {
+    if (this.isSavingNotifications()) return;
+
+    this.isSavingNotifications.set(true);
+    this.notificationSavedMessage.set(null);
+    this.notificationError.set(null);
+    const result = await this.settings.updateTelegramTitleSuggestionNotifications(enabled);
+    this.isSavingNotifications.set(false);
+
+    if (result) {
+      this.notificationSavedMessage.set('Telegram notification preference saved.');
+    } else {
+      this.notificationError.set(
+        this.settings.error() ?? 'Your Telegram notification preference could not be saved.',
+      );
+    }
+  }
 }
 

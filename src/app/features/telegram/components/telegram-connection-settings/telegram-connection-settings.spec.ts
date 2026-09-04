@@ -18,16 +18,24 @@ describe('TelegramConnectionSettingsComponent', () => {
     expiresAt: '2026-08-30T13:20:00.000Z',
   });
   const friendRequestNotifications = signal(false);
+  const titleSuggestionNotifications = signal(false);
   const updateTelegramFriendRequestNotifications = vi.fn().mockResolvedValue({
     libraryVisibility: 'private',
     activityVisibility: 'private',
-    telegramNotifications: { friendRequests: true },
+    telegramNotifications: { friendRequests: true, titleSuggestions: false },
+  });
+  const updateTelegramTitleSuggestionNotifications = vi.fn().mockResolvedValue({
+    libraryVisibility: 'private',
+    activityVisibility: 'private',
+    telegramNotifications: { friendRequests: false, titleSuggestions: true },
   });
 
   beforeEach(async () => {
     createLink.mockClear();
     updateTelegramFriendRequestNotifications.mockClear();
+    updateTelegramTitleSuggestionNotifications.mockClear();
     friendRequestNotifications.set(false);
+    titleSuggestionNotifications.set(false);
     connection.set({
       enabled: true,
       connected: false,
@@ -41,14 +49,16 @@ describe('TelegramConnectionSettingsComponent', () => {
           provide: SettingsService,
           useValue: {
             telegramFriendRequestNotifications: friendRequestNotifications.asReadonly(),
+            telegramTitleSuggestionNotifications: titleSuggestionNotifications.asReadonly(),
             isLoading: signal(false).asReadonly(),
             error: signal<string | null>(null).asReadonly(),
             load: vi.fn().mockResolvedValue({
               libraryVisibility: 'private',
               activityVisibility: 'private',
-              telegramNotifications: { friendRequests: false },
+              telegramNotifications: { friendRequests: false, titleSuggestions: false },
             }),
             updateTelegramFriendRequestNotifications,
+            updateTelegramTitleSuggestionNotifications,
           },
         },
         {
@@ -64,6 +74,29 @@ describe('TelegramConnectionSettingsComponent', () => {
         },
       ],
     }).compileComponents();
+  });
+
+  it('saves explicit title suggestion notification consent independently', async () => {
+    connection.set({
+      enabled: true,
+      connected: true,
+      botUsername: 'DramaWatchBot',
+    });
+    const fixture = TestBed.createComponent(TelegramConnectionSettingsComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const checkboxes = fixture.debugElement.queryAll(
+      By.css('.telegram-settings__notifications input'),
+    );
+    const checkbox = checkboxes[1].nativeElement as HTMLInputElement;
+    checkbox.checked = true;
+    checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+    await fixture.whenStable();
+
+    expect(updateTelegramTitleSuggestionNotifications).toHaveBeenCalledWith(true);
+    expect(updateTelegramFriendRequestNotifications).not.toHaveBeenCalled();
   });
 
   it('saves explicit friend request notification consent for a connected account', async () => {

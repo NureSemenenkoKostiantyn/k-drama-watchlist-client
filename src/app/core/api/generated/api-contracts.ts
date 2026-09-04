@@ -1044,6 +1044,7 @@ export interface components {
         ActivityVisibility: "friends" | "private" | "public";
         TelegramNotificationSettings: {
             friendRequests: boolean;
+            titleSuggestions: boolean;
         };
         UpdateSettingsDto: {
             libraryVisibility?: components["schemas"]["LibraryVisibility"];
@@ -1052,6 +1053,7 @@ export interface components {
         };
         UpdateTelegramNotificationsDto: {
             friendRequests?: boolean;
+            titleSuggestions?: boolean;
         };
         TelegramConnectionResponse: {
             enabled: boolean;

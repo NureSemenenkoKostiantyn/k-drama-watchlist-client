@@ -108,8 +108,8 @@ receives only the server's public-safe library projection. The same panel indepe
 private-by-default activity visibility.
 
 The Settings page also manages Telegram account linking. Once linked, a user can independently opt
-into friend-request messages from the bot; consent defaults to off and can be revoked without
-disconnecting the account.
+into friend-request and received-title-suggestion messages from the bot; both consent choices
+default to off and can be revoked without disconnecting the account.
 
 The owner's profile also provides a local JSON data export. The versioned archive includes the
 account profile, privacy settings, categories, priority lanes, and full personal library. Private
