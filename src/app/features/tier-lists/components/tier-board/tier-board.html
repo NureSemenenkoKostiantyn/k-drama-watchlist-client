@@ -55,13 +55,15 @@
             [value]="filter()"
             (input)="filter.set($any($event.target).value)"
           />
-          <app-button
-            density="compact"
-            variant="secondary"
-            [disabled]="busy()"
-            (click)="addRequested.emit()"
-            >+ Add titles</app-button
-          >
+          @if (allowAdd()) {
+            <app-button
+              density="compact"
+              variant="secondary"
+              [disabled]="busy()"
+              (click)="addRequested.emit()"
+              >+ Add titles</app-button
+            >
+          }
         </div>
       </header>
       <ng-container [ngTemplateOutlet]="items" [ngTemplateOutletContext]="{ $implicit: tray() }" />
@@ -98,7 +100,9 @@
             row.id === '__unranked'
               ? filter()
                 ? 'No matching titles'
-                : 'Add titles to start ranking'
+                : allowAdd()
+                  ? 'Add titles to start ranking'
+                  : 'Watched and watching titles appear here automatically'
               : '—'
           }}
         </p>
@@ -134,28 +138,30 @@
         }
       </div>
       <div class="move-actions">
-        <app-button
-          variant="secondary"
-          density="compact"
-          [disabled]="busy() || selected.index === 0"
-          (click)="move(selected.row.id, selected.index - 1)"
-          >Move earlier</app-button
-        >
-        <app-button
-          variant="secondary"
-          density="compact"
-          [disabled]="busy() || selected.index === selected.row.items.length - 1"
-          (click)="move(selected.row.id, selected.index + 1)"
-          >Move later</app-button
-        >
-        <a [routerLink]="['/media', selected.item.mediaType, selected.item.tmdbId]">Details</a>
-        <app-button
-          variant="danger"
-          density="compact"
-          [disabled]="busy()"
-          (click)="removed.emit(selected.item.id)"
-          >Remove title</app-button
-        >
+        @if (allowRemove()) {
+          <app-button
+            variant="secondary"
+            density="compact"
+            [disabled]="busy() || selected.index === 0"
+            (click)="move(selected.row.id, selected.index - 1)"
+            >Move earlier</app-button
+          >
+          <app-button
+            variant="secondary"
+            density="compact"
+            [disabled]="busy() || selected.index === selected.row.items.length - 1"
+            (click)="move(selected.row.id, selected.index + 1)"
+            >Move later</app-button
+          >
+          <a [routerLink]="['/media', selected.item.mediaType, selected.item.tmdbId]">Details</a>
+          <app-button
+            variant="danger"
+            density="compact"
+            [disabled]="busy()"
+            (click)="removed.emit(selected.item.id)"
+            >Remove title</app-button
+          >
+        }
         <app-button density="compact" [disabled]="busy()" (click)="selectedId.set(null)"
           >Done</app-button
         >

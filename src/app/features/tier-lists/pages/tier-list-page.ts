@@ -120,7 +120,7 @@ export class TierListPage {
   protected async saveSettings(): Promise<void> {
     const board = this.board();
     const value = this.form.getRawValue();
-    if (!board || this.form.invalid || !value.title.trim()) return;
+    if (!board || board.source !== 'manual' || this.form.invalid || !value.title.trim()) return;
     if (
       await this.mutate(() =>
         this.api.update(board.id, {
@@ -159,14 +159,14 @@ export class TierListPage {
   }
   protected async add(items: TierMedia[]): Promise<void> {
     let board = this.board();
-    if (!board || this.locked()) return;
+    if (!board || board.source !== 'manual' || this.locked()) return;
     const existing = new Set(this.existing());
     const additions = [
       ...new Map(items.map((item) => [`${item.mediaType}:${item.tmdbId}`, item])).values(),
     ].filter((item) => !existing.has(`${item.mediaType}:${item.tmdbId}`));
-    if (board.itemCount + additions.length > 300) {
+    if (board.itemCount + additions.length > board.capacity) {
       this.error.set(
-        'This selection exceeds the 300-title limit. Narrow the filters; nothing has been added.',
+        `This selection exceeds this board's ${board.capacity}-title limit. Narrow the filters; nothing has been added.`,
       );
       return;
     }
@@ -226,7 +226,7 @@ export class TierListPage {
   protected async confirmDelete(): Promise<void> {
     const board = this.board();
     const action = this.confirm();
-    if (!board || !action || this.locked()) return;
+    if (!board || board.source !== 'manual' || !action || this.locked()) return;
     if (action.type === 'item') {
       if (
         await this.mutate(() =>

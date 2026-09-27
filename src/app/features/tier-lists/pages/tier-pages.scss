@@ -51,6 +51,19 @@ header p {
 .list-card:hover {
   border-color: var(--color-accent);
 }
+.list-card:has(.auto-badge) {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
+}
+.auto-badge {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  color: var(--color-accent);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
 .list-card h2,
 .list-card p {
   overflow-wrap: anywhere;

@@ -11,6 +11,8 @@ describe('TierExportService', () => {
     description: '',
     revision: 0,
     visibility: 'private',
+    source: 'manual',
+    capacity: 300,
     itemCount: 2,
     createdAt: '',
     updatedAt: '',

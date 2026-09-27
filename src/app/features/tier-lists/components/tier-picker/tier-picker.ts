@@ -31,6 +31,7 @@ import { filterTierLibrary, TierLibraryFilters } from '../../utils/tier-library'
 })
 export class TierPicker implements OnInit {
   readonly existing = input.required<string[]>();
+  readonly capacity = input(300);
   readonly busy = input(false);
   readonly saveError = input('');
   readonly progress = input('');
@@ -75,7 +76,9 @@ export class TierPicker implements OnInit {
   protected readonly selection = computed(() =>
     this.selected().filter((item) => !this.existing().includes(item.id)),
   );
-  protected readonly maximum = computed(() => Math.max(0, 300 - this.existing().length));
+  protected readonly maximum = computed(() =>
+    Math.max(0, this.capacity() - this.existing().length),
+  );
   protected readonly overCapacity = computed(() => this.bulkItems().length > this.maximum());
 
   ngOnInit(): void {

@@ -26,6 +26,8 @@ describe('TierListPage', () => {
     title: 'Favourites',
     description: '',
     visibility: 'private',
+    source: 'manual',
+    capacity: 300,
     revision: 2,
     itemCount: 1,
     createdAt: '2026-09-01',
@@ -37,9 +39,9 @@ describe('TierListPage', () => {
     unranked: [],
   };
 
-  async function setup() {
+  async function setup(initial: TierList = original) {
     const api = {
-      get: vi.fn().mockResolvedValue(structuredClone(original)),
+      get: vi.fn().mockResolvedValue(structuredClone(initial)),
       layout: vi.fn(),
       delete: vi.fn(),
       update: vi.fn(),
@@ -249,5 +251,27 @@ describe('TierListPage', () => {
     click('+ Add titles');
     expect(root.querySelector('app-tier-picker')).not.toBeNull();
     expect(root.querySelector<HTMLDetailsElement>('details.quick-add')?.open).toBe(false);
+  });
+
+  it('keeps auto-board ranking editable while hiding manual membership and list settings', async () => {
+    const auto: TierList = {
+      ...original,
+      source: 'library_all',
+      capacity: 5000,
+      unranked: [{ ...media, id: 'tv:2', tmdbId: 2, title: 'New drama' }],
+      itemCount: 2,
+    };
+    const { api, root, fixture, click } = await setup(auto);
+    expect(root.textContent).toContain('Auto-synced with your watched and watching library');
+    expect(root.textContent).not.toContain('+ Add titles');
+    expect(root.textContent).not.toContain('Delete tier list');
+    expect(root.textContent).not.toContain('List settings');
+    root.querySelector<HTMLButtonElement>('button.poster')!.click();
+    fixture.detectChanges();
+    expect(root.querySelector<HTMLButtonElement>('button[aria-label="Move to A"]')).not.toBeNull();
+    expect(root.textContent).not.toContain('Remove title');
+    await fixture.componentInstance['add']([{ ...media, id: 'tv:3', tmdbId: 3 }]);
+    expect(api.add).not.toHaveBeenCalled();
+    click('Done');
   });
 });

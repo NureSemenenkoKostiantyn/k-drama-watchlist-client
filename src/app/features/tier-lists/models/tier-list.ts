@@ -8,6 +8,7 @@ export type TierRow = Schemas['TierRowResponse'];
 export type TierMedia = Schemas['TierListMedia'];
 export type TierColor = Schemas['TierColor'];
 export type TierVisibility = Schemas['TierListVisibility'];
+export type TierListSource = Schemas['TierListSource'];
 export type CreateTierList = Schemas['CreateTierListDto'];
 export type UpdateTierList = Schemas['UpdateTierListDto'];
 export type TierLayout = Schemas['UpdateTierLayoutDto'];

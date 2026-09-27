@@ -7,6 +7,7 @@ import { environment } from '../../../../environments/environment';
 import {
   ActivityVisibility,
   LibraryVisibility,
+  TierBoardMode,
   UpdateUserSettings,
   UserSettings,
 } from '../models/settings';
@@ -25,6 +26,7 @@ export class SettingsService {
   readonly activityVisibility = computed(
     () => this.settingsState()?.activityVisibility ?? 'private',
   );
+  readonly tierBoardMode = computed(() => this.settingsState()?.tierBoardMode ?? 'all');
   readonly telegramFriendRequestNotifications = computed(
     () => this.settingsState()?.telegramNotifications?.friendRequests ?? false,
   );
@@ -86,6 +88,10 @@ export class SettingsService {
 
   async updatePrivacy(input: UpdateUserSettings): Promise<UserSettings | null> {
     return this.update(input, 'Your privacy settings could not be saved.');
+  }
+
+  async updateTierBoardMode(tierBoardMode: TierBoardMode): Promise<UserSettings | null> {
+    return this.update({ tierBoardMode }, 'Your tier-list preference could not be saved.');
   }
 
   async updateTelegramFriendRequestNotifications(

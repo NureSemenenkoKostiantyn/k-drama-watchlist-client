@@ -15,11 +15,19 @@
       <div class="heading">
         <h1>{{ current.title }}</h1>
         <span class="metadata">{{ current.visibility }} · {{ current.itemCount }} titles</span>
+        @if (current.source !== 'manual') {
+          <p class="status">
+            Auto-synced with your watched and watching library. Rank titles here; duplicate for an
+            editable snapshot.
+          </p>
+        }
       </div>
       <div class="toolbar">
-        <app-button density="compact" [disabled]="locked()" (click)="panel.set('add')"
-          >+ Add titles</app-button
-        >
+        @if (current.source === 'manual') {
+          <app-button density="compact" [disabled]="locked()" (click)="panel.set('add')"
+            >+ Add titles</app-button
+          >
+        }
         <app-button
           density="compact"
           variant="secondary"
@@ -42,27 +50,31 @@
         <details #more class="more" tabindex="-1" (keydown.escape)="more.open = false">
           <summary aria-label="More tier-list options">⋯</summary>
           <div class="more-menu">
-            <button
-              type="button"
-              [disabled]="locked()"
-              (click)="panel.set('settings'); more.open = false"
-            >
-              List settings
-            </button>
+            @if (current.source === 'manual') {
+              <button
+                type="button"
+                [disabled]="locked()"
+                (click)="panel.set('settings'); more.open = false"
+              >
+                List settings
+              </button>
+            }
             <button type="button" (click)="focusMode.toggle(); more.open = false">
               {{ focusMode.active() ? 'Exit focus mode' : 'Focus mode' }}
             </button>
             <button type="button" [disabled]="locked()" (click)="duplicate(); more.open = false">
               Duplicate
             </button>
-            <button
-              class="danger"
-              type="button"
-              [disabled]="locked()"
-              (click)="confirm.set({ type: 'board', id: current.id }); more.open = false"
-            >
-              Delete tier list
-            </button>
+            @if (current.source === 'manual') {
+              <button
+                class="danger"
+                type="button"
+                [disabled]="locked()"
+                (click)="confirm.set({ type: 'board', id: current.id }); more.open = false"
+              >
+                Delete tier list
+              </button>
+            }
           </div>
         </details>
       </div>
@@ -72,13 +84,15 @@
       [tiers]="current.tiers"
       [unranked]="current.unranked"
       [editable]="true"
+      [allowAdd]="current.source === 'manual'"
+      [allowRemove]="current.source === 'manual'"
       [busy]="locked()"
       [saving]="busy()"
       [error]="error()"
       (moved)="move($event)"
-      (removed)="confirm.set({ type: 'item', id: $event })"
+      (removed)="current.source === 'manual' && confirm.set({ type: 'item', id: $event })"
       (editTier)="editingTier.set($event)"
-      (addRequested)="panel.set('add')"
+      (addRequested)="current.source === 'manual' && panel.set('add')"
     />
     <app-tier-rows-editor
       [board]="current"
@@ -90,28 +104,31 @@
       (dismissed)="editingTier.set(null)"
     />
 
-    <app-dialog-panel
-      [open]="panel() === 'add'"
-      title="Add titles"
-      [drawer]="true"
-      [busy]="busy()"
-      (dismissed)="panel.set(null)"
-    >
-      @if (panel() === 'add') {
-        <app-tier-picker
-          [existing]="existing()"
-          [busy]="locked()"
-          [progress]="notice()"
-          [saveError]="error()"
-          (added)="add($event)"
-        />
-        @if (conflict()) {
-          <app-button density="compact" [disabled]="busy()" (click)="load()"
-            >Reload saved board</app-button
-          >
+    @if (current.source === 'manual') {
+      <app-dialog-panel
+        [open]="panel() === 'add'"
+        title="Add titles"
+        [drawer]="true"
+        [busy]="busy()"
+        (dismissed)="panel.set(null)"
+      >
+        @if (panel() === 'add') {
+          <app-tier-picker
+            [existing]="existing()"
+            [capacity]="current.capacity"
+            [busy]="locked()"
+            [progress]="notice()"
+            [saveError]="error()"
+            (added)="add($event)"
+          />
+          @if (conflict()) {
+            <app-button density="compact" [disabled]="busy()" (click)="load()"
+              >Reload saved board</app-button
+            >
+          }
         }
-      }
-    </app-dialog-panel>
+      </app-dialog-panel>
+    }
     <app-dialog-panel
       [open]="panel() === 'share'"
       title="Share tier list"
@@ -125,11 +142,13 @@
             >Copy share link</app-button
           >
           <a [routerLink]="['/tier-lists/public', current.publicSlug]">Public preview</a>
-        } @else {
+        } @else if (current.source === 'manual') {
           <p>This list is private. Change its visibility to share a link.</p>
           <app-button density="compact" variant="secondary" (click)="panel.set('settings')"
             >Change visibility</app-button
           >
+        } @else {
+          <p>The live board stays private. Duplicate it to share a snapshot.</p>
         }
         <app-button
           density="compact"
@@ -153,44 +172,46 @@
       }
       <p class="status">Downloaded images cannot be revoked by changing visibility.</p>
     </app-dialog-panel>
-    <app-dialog-panel
-      [open]="panel() === 'settings'"
-      title="List settings"
-      [busy]="busy()"
-      (dismissed)="panel.set(null)"
-    >
-      <form class="settings" [formGroup]="form" (ngSubmit)="saveSettings()">
-        <app-form-field label="Title" inputId="edit-tier-title"
-          ><input id="edit-tier-title" formControlName="title" maxlength="100" required
-        /></app-form-field>
-        <app-form-field label="Visibility" inputId="tier-visibility"
-          ><select id="tier-visibility" formControlName="visibility">
-            <option value="private">Private — only you</option>
-            <option value="unlisted">Unlisted — anyone with the link</option>
-            <option value="public">Public — link and search engines</option>
-          </select></app-form-field
-        >
-        <app-form-field label="Description" inputId="tier-description">
-          <textarea
-            id="tier-description"
-            formControlName="description"
-            maxlength="1000"
-            rows="3"
-          ></textarea>
-        </app-form-field>
-        <p class="status">Making a list private immediately revokes its old share link.</p>
-        @if (error()) {
-          <p role="alert">{{ error() }}</p>
-        }
-        <app-button
-          type="submit"
-          density="compact"
-          [disabled]="locked() || form.invalid"
-          [busy]="busy()"
-          >Save settings</app-button
-        >
-      </form>
-    </app-dialog-panel>
+    @if (current.source === 'manual') {
+      <app-dialog-panel
+        [open]="panel() === 'settings'"
+        title="List settings"
+        [busy]="busy()"
+        (dismissed)="panel.set(null)"
+      >
+        <form class="settings" [formGroup]="form" (ngSubmit)="saveSettings()">
+          <app-form-field label="Title" inputId="edit-tier-title"
+            ><input id="edit-tier-title" formControlName="title" maxlength="100" required
+          /></app-form-field>
+          <app-form-field label="Visibility" inputId="tier-visibility"
+            ><select id="tier-visibility" formControlName="visibility">
+              <option value="private">Private — only you</option>
+              <option value="unlisted">Unlisted — anyone with the link</option>
+              <option value="public">Public — link and search engines</option>
+            </select></app-form-field
+          >
+          <app-form-field label="Description" inputId="tier-description">
+            <textarea
+              id="tier-description"
+              formControlName="description"
+              maxlength="1000"
+              rows="3"
+            ></textarea>
+          </app-form-field>
+          <p class="status">Making a list private immediately revokes its old share link.</p>
+          @if (error()) {
+            <p role="alert">{{ error() }}</p>
+          }
+          <app-button
+            type="submit"
+            density="compact"
+            [disabled]="locked() || form.invalid"
+            [busy]="busy()"
+            >Save settings</app-button
+          >
+        </form>
+      </app-dialog-panel>
+    }
   }
 </main>
 <app-confirmation-dialog

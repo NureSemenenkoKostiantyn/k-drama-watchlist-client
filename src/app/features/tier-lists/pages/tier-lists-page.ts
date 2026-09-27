@@ -17,9 +17,10 @@ import { TierListSummary } from '../models/tier-list';
         <p class="eyebrow">Your taste, ranked</p>
         <h1>Tier lists</h1>
         <p>
-          Give your favourite dramas and films a place. Rankings are separate from your library and
-          ratings.
+          Your auto-synced ranking follows watched and watching titles. Create other boards for
+          independent rankings and shareable snapshots.
         </p>
+        <a routerLink="/settings">Choose which auto-synced boards appear in Settings</a>
       </header>
       <form class="panel create" [formGroup]="form" (ngSubmit)="create()">
         <app-form-field label="New tier list" inputId="tier-title"
@@ -48,6 +49,9 @@ import { TierListSummary } from '../models/tier-list';
       <div class="list-grid">
         @for (list of lists(); track list.id) {
           <a class="panel list-card" [routerLink]="['/tier-lists', list.id]">
+            @if (list.source !== 'manual') {
+              <span class="auto-badge">Featured · Auto-synced</span>
+            }
             <div class="mini-tiers" aria-hidden="true">
               <span>S</span><span>A</span><span>B</span>
             </div>

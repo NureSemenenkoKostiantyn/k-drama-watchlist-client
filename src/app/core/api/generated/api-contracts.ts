@@ -1173,17 +1173,21 @@ export interface components {
         UserSettingsResponse: {
             libraryVisibility: components["schemas"]["LibraryVisibility"];
             activityVisibility: components["schemas"]["ActivityVisibility"];
+            tierBoardMode: components["schemas"]["TierBoardMode"];
             telegramNotifications: components["schemas"]["TelegramNotificationSettings"];
         };
         /** @enum {string} */
         LibraryVisibility: "friends" | "private" | "public";
         /** @enum {string} */
         ActivityVisibility: "friends" | "private" | "public";
+        /** @enum {string} */
+        TierBoardMode: "all" | "kdrama" | "both";
         TelegramNotificationSettings: {
             friendRequests: boolean;
             titleSuggestions: boolean;
         };
         UpdateSettingsDto: {
+            tierBoardMode?: components["schemas"]["TierBoardMode"];
             libraryVisibility?: components["schemas"]["LibraryVisibility"];
             activityVisibility?: components["schemas"]["ActivityVisibility"];
             telegramNotifications?: components["schemas"]["UpdateTelegramNotificationsDto"];
@@ -1579,6 +1583,8 @@ export interface components {
             title: string;
             description: string;
             visibility: components["schemas"]["TierListVisibility"];
+            source: components["schemas"]["TierListSource"];
+            capacity: number;
             publicSlug?: string;
             revision: number;
             itemCount: number;
@@ -1589,6 +1595,8 @@ export interface components {
         };
         /** @enum {string} */
         TierListVisibility: "private" | "unlisted" | "public";
+        /** @enum {string} */
+        TierListSource: "manual" | "library_all" | "library_kdrama";
         TierRowResponse: {
             id: string;
             label: string;
@@ -1610,6 +1618,8 @@ export interface components {
             title: string;
             description: string;
             visibility: components["schemas"]["TierListVisibility"];
+            source: components["schemas"]["TierListSource"];
+            capacity: number;
             publicSlug?: string;
             revision: number;
             itemCount: number;

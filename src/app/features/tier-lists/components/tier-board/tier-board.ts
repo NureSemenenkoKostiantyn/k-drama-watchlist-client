@@ -41,6 +41,8 @@ export class TierBoard {
   readonly tiers = input.required<TierRow[]>();
   readonly unranked = input<TierMedia[] | null>(null);
   readonly editable = input(false);
+  readonly allowAdd = input(true);
+  readonly allowRemove = input(true);
   readonly busy = input(false);
   readonly saving = input(false);
   readonly error = input('');

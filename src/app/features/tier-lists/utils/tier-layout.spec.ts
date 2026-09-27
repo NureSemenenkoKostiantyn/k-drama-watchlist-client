@@ -14,6 +14,8 @@ export function exampleTierList(): TierList {
     title: 'My dramas',
     description: '',
     visibility: 'private',
+    source: 'manual',
+    capacity: 300,
     revision: 4,
     itemCount: 3,
     createdAt: '2026-09-01',
