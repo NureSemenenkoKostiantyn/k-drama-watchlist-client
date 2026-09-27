@@ -1,0 +1,126 @@
+<details>
+  <summary>Add titles <span>From your library or TMDB</span></summary>
+  <div class="picker">
+    <div class="actions">
+      <app-button
+        [variant]="source() === 'library' ? 'primary' : 'secondary'"
+        (click)="source.set('library')"
+        >My library</app-button
+      >
+      <app-button
+        [variant]="source() === 'search' ? 'primary' : 'secondary'"
+        (click)="source.set('search')"
+        >Search TMDB</app-button
+      >
+    </div>
+    @if (source() === 'library') {
+      <label class="check"
+        ><input
+          type="checkbox"
+          [checked]="watchedOnly()"
+          (change)="watchedOnly.set(!watchedOnly())"
+        />
+        Watched titles only</label
+      >
+      @if (library.isLoading()) {
+        <p role="status">Loading library…</p>
+      }
+      @if (library.error(); as message) {
+        <p role="alert">{{ message }}</p>
+        <app-button (click)="library.load()">Retry library</app-button>
+      }
+    } @else {
+      <form (submit)="$event.preventDefault(); search()">
+        <app-form-field label="Search titles" inputId="tier-search"
+          ><input
+            id="tier-search"
+            [formControl]="query"
+            maxlength="200"
+            placeholder="Try a drama or film"
+        /></app-form-field>
+        <app-button
+          type="submit"
+          [busy]="searching()"
+          [disabled]="searching() || !query.value.trim()"
+          >Search</app-button
+        >
+      </form>
+      @if (error()) {
+        <p role="alert">{{ error() }}</p>
+      }
+    }
+    <div class="candidates">
+      @for (item of candidates(); track item.id) {
+        <button
+          type="button"
+          class="candidate"
+          [class.selected]="isSelected(item.id)"
+          [attr.aria-pressed]="isSelected(item.id)"
+          [disabled]="
+            busy() ||
+            existing().includes(item.id) ||
+            (!isSelected(item.id) && selection().length >= maximum())
+          "
+          (click)="toggle(item)"
+        >
+          <span class="poster"
+            ><app-media-poster
+              [posterUrl]="item.posterUrl"
+              [title]="item.title"
+              [decorative]="true"
+          /></span>
+          <strong>{{ item.title }}</strong
+          ><small>{{
+            existing().includes(item.id)
+              ? 'Already added'
+              : item.mediaType === 'tv'
+                ? 'TV'
+                : 'Movie'
+          }}</small>
+        </button>
+      } @empty {
+        @if (!searching() && !library.isLoading()) {
+          <p>No titles to show. Try another search or library filter.</p>
+        }
+      }
+    </div>
+    @if (source() === 'search' && results().length) {
+      <div class="actions">
+        <app-button
+          variant="secondary"
+          [disabled]="searching() || page() <= 1"
+          (click)="search(page() - 1)"
+          >Previous</app-button
+        >
+        <span>Page {{ page() }}</span>
+        <app-button
+          variant="secondary"
+          [disabled]="searching() || !hasNext()"
+          (click)="search(page() + 1)"
+          >Next</app-button
+        >
+      </div>
+    }
+    <div class="actions">
+      <app-button
+        variant="secondary"
+        [disabled]="busy() || maximum() === 0"
+        (click)="selectVisible()"
+        >Select visible (up to {{ maximum() }})</app-button
+      >
+      <app-button
+        [busy]="busy()"
+        [disabled]="busy() || !selection().length"
+        (click)="added.emit(selection())"
+        >Add {{ selection().length }} to Unranked</app-button
+      >
+      <app-button
+        variant="secondary"
+        [disabled]="busy() || !selection().length"
+        (click)="selected.set([])"
+        >Clear selection</app-button
+      >
+    </div>
+    <p>Up to 300 titles per board. Adding here does not change your personal library.</p>
+  </div>
+</details>

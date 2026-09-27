@@ -3,6 +3,26 @@
 The Angular frontend for Drama Watch, a personal and social watchlist for Korean dramas, films,
 and other TV series.
 
+## Tier lists
+
+Open **More → Tier lists** to create a private ranking. Add watched library titles (or all library
+statuses) and TMDB search results, then arrange them in S–F tiers or customize labels, colors, and
+tier order. Desktop supports whole-poster dragging; mobile disables drag/drop and uses tap-to-select
+tier/earlier/later controls. Keyboard controls remain available on desktop.
+
+Each arrangement saves one complete board with revision conflict protection. Undo restores the last
+arrangement; stale edits require reloading. Boards support duplication and confirmed tier/title/board
+deletion without changing the personal library. Up to 300 titles and 20 tiers are supported, with
+50-title batch additions.
+
+List settings allow private, unlisted, and public visibility. Read-only share links, canonical
+metadata, and PNG exports contain ranked titles only; Unranked stays private. Public boards can be
+indexed, unlisted boards cannot, and returning to private revokes the link. PNG export runs entirely
+in the browser with bounded image loading and placeholders for unavailable posters; downloaded
+images cannot be revoked. No Firebase or Cloud Run configuration changes are needed.
+
+## Application architecture
+
 The client is a strict, standalone Angular application. It uses Angular Router with lazy feature
 routes, Angular `HttpClient` for API access, RxJS for asynchronous streams, and Angular Signals for
 local UI state as features are introduced. Remote data is owned by feature services rather than a

@@ -1,0 +1,108 @@
+@if (editable()) {
+  <p class="hint">
+    {{
+      mobile()
+        ? 'Tap a title, then choose a tier or position.'
+        : 'Drag a poster to rank it, or select it to use the move controls.'
+    }}
+  </p>
+}
+<div class="board" cdkDropListGroup>
+  @for (row of rows(); track row.id) {
+    <section class="tier" [attr.aria-label]="row.label + ' tier'">
+      <h2 [style.background]="colors[row.color]">
+        {{ row.label }} <small>{{ row.items.length }}</small>
+      </h2>
+      <div
+        class="items"
+        cdkDropList
+        cdkDropListOrientation="mixed"
+        [cdkDropListData]="row"
+        [cdkDropListDisabled]="!editable() || busy() || mobile()"
+        (cdkDropListDropped)="drop($event)"
+      >
+        @for (item of row.items; track item.id) {
+          <div
+            class="item"
+            cdkDrag
+            [cdkDragData]="item"
+            [cdkDragDisabled]="!editable() || busy() || mobile()"
+          >
+            @if (editable()) {
+              <button
+                type="button"
+                class="poster"
+                [class.selected]="selectedId() === item.id"
+                [attr.aria-pressed]="selectedId() === item.id"
+                [attr.aria-label]="'Arrange ' + item.title"
+                [disabled]="busy()"
+                (click)="selectedId.set(item.id)"
+              >
+                <app-media-poster
+                  [posterUrl]="item.posterUrl"
+                  [title]="item.title"
+                  [decorative]="true"
+                />
+              </button>
+            } @else {
+              <a
+                class="poster"
+                [routerLink]="['/media', item.mediaType, item.tmdbId]"
+                [attr.aria-label]="item.title"
+              >
+                <app-media-poster
+                  [posterUrl]="item.posterUrl"
+                  [title]="item.title"
+                  [decorative]="true"
+                />
+              </a>
+            }
+            <span class="title" [title]="item.title">{{ item.title }}</span>
+          </div>
+        } @empty {
+          <p class="empty">{{ editable() ? 'Place titles here' : 'No titles' }}</p>
+        }
+      </div>
+    </section>
+  }
+</div>
+@if (editable()) {
+  @if (selection(); as selected) {
+    <section class="move-panel" aria-label="Move selected title">
+      <strong>{{ selected.item.title }}</strong>
+      <app-form-field label="Tier" inputId="move-tier">
+        <select
+          id="move-tier"
+          [value]="selected.row.id"
+          [disabled]="busy()"
+          (change)="changeTier($event)"
+        >
+          @for (row of rows(); track row.id) {
+            <option [value]="row.id">{{ row.label }}</option>
+          }
+        </select>
+      </app-form-field>
+      <div class="actions">
+        <app-button
+          variant="secondary"
+          [disabled]="busy() || selected.index === 0"
+          (click)="move(selected.row.id, selected.index - 1)"
+          >Move earlier</app-button
+        >
+        <app-button
+          variant="secondary"
+          [disabled]="busy() || selected.index === selected.row.items.length - 1"
+          (click)="move(selected.row.id, selected.index + 1)"
+          >Move later</app-button
+        >
+        <a [routerLink]="['/media', selected.item.mediaType, selected.item.tmdbId]">Details</a>
+        <app-button variant="danger" [disabled]="busy()" (click)="removed.emit(selected.item.id)"
+          >Remove title</app-button
+        >
+        <app-button variant="secondary" [disabled]="busy()" (click)="selectedId.set(null)"
+          >Done</app-button
+        >
+      </div>
+    </section>
+  }
+}

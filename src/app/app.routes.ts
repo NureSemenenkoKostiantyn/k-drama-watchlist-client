@@ -4,6 +4,23 @@ import { anonymousOnlyGuard, onboardingGuard, profileCompleteGuard } from './cor
 
 export const routes: Routes = [
   {
+    path: 'tier-lists/public/:publicSlug',
+    title: 'Tier list · Drama Watch',
+    loadComponent: () => import('./features/tier-lists/pages/public-tier-list-page').then(({ PublicTierListPage }) => PublicTierListPage),
+  },
+  {
+    path: 'tier-lists',
+    title: 'Tier lists · Drama Watch',
+    canActivate: [profileCompleteGuard],
+    loadComponent: () => import('./features/tier-lists/pages/tier-lists-page').then(({ TierListsPage }) => TierListsPage),
+  },
+  {
+    path: 'tier-lists/:tierListId',
+    title: 'Edit tier list · Drama Watch',
+    canActivate: [profileCompleteGuard],
+    loadComponent: () => import('./features/tier-lists/pages/tier-list-page').then(({ TierListPage }) => TierListPage),
+  },
+  {
     path: 'activity',
     title: 'Friends activity · Drama Watch',
     canActivate: [profileCompleteGuard],

@@ -772,6 +772,134 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/tier-lists": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listTierLists"];
+        put?: never;
+        post: operations["createTierList"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tier-lists/{tierListId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getTierList"];
+        put?: never;
+        post?: never;
+        delete: operations["deleteTierList"];
+        options?: never;
+        head?: never;
+        patch: operations["updateTierList"];
+        trace?: never;
+    };
+    "/tier-lists/{tierListId}/layout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["updateTierLayout"];
+        trace?: never;
+    };
+    "/tier-lists/{tierListId}/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["addTierItems"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tier-lists/{tierListId}/remove-item": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["removeTierItem"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/tier-lists/{tierListId}/duplicate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["duplicateTierList"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/tier-lists/{publicSlug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getPublicTierList"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/tier-lists/share/{publicSlug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["shareTierList"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/openapi.json": {
         parameters: {
             query?: never;
@@ -846,6 +974,15 @@ export interface components {
             addWheelItemRequest: components["schemas"]["AddWheelItemDto"];
             updateWheelItemRequest: components["schemas"]["UpdateWheelItemDto"];
             reorderWheelItemsRequest: components["schemas"]["ReorderWheelItemsDto"];
+            tierList: components["schemas"]["TierListResponse"];
+            tierListSummary: components["schemas"]["TierListSummaryResponse"];
+            publicTierList: components["schemas"]["PublicTierListResponse"];
+            createTierList: components["schemas"]["CreateTierListDto"];
+            updateTierList: components["schemas"]["UpdateTierListDto"];
+            updateTierLayout: components["schemas"]["UpdateTierLayoutDto"];
+            addTierItems: components["schemas"]["AddTierItemsDto"];
+            removeTierItem: components["schemas"]["RemoveTierItemDto"];
+            revision: components["schemas"]["RevisionDto"];
         };
         MediaSummary: {
             backdropPath?: string;
@@ -1436,6 +1573,99 @@ export interface components {
         };
         ReorderWheelItemsDto: {
             itemIds: string[];
+        };
+        TierListResponse: {
+            id: string;
+            title: string;
+            description: string;
+            visibility: components["schemas"]["TierListVisibility"];
+            publicSlug?: string;
+            revision: number;
+            itemCount: number;
+            createdAt: string;
+            updatedAt: string;
+            tiers: components["schemas"]["TierRowResponse"][];
+            unranked: components["schemas"]["TierListMedia"][];
+        };
+        /** @enum {string} */
+        TierListVisibility: "private" | "unlisted" | "public";
+        TierRowResponse: {
+            id: string;
+            label: string;
+            color: components["schemas"]["TierColor"];
+            items: components["schemas"]["TierListMedia"][];
+        };
+        /** @enum {string} */
+        TierColor: "red" | "orange" | "yellow" | "green" | "blue" | "purple" | "pink" | "gray";
+        TierListMedia: {
+            id: string;
+            mediaType: components["schemas"]["MediaType"];
+            tmdbId: number;
+            title: string;
+            originalTitle: string;
+            posterUrl?: string;
+        };
+        TierListSummaryResponse: {
+            id: string;
+            title: string;
+            description: string;
+            visibility: components["schemas"]["TierListVisibility"];
+            publicSlug?: string;
+            revision: number;
+            itemCount: number;
+            createdAt: string;
+            updatedAt: string;
+        };
+        PublicTierListResponse: {
+            title: string;
+            description: string;
+            /** @enum {string} */
+            visibility: "public" | "unlisted";
+            publicSlug: string;
+            owner?: components["schemas"]["PublicUserProfileResponse"];
+            tiers: {
+                label: string;
+                color: components["schemas"]["TierColor"];
+                items: components["schemas"]["TierListMedia"][];
+            }[];
+            itemCount: number;
+            updatedAt: string;
+        };
+        CreateTierListDto: {
+            title: string;
+            description?: string;
+        };
+        UpdateTierListDto: {
+            revision: number;
+            title: string;
+            description: string;
+            visibility: components["schemas"]["TierListVisibility"];
+        };
+        UpdateTierLayoutDto: {
+            revision: number;
+            tiers: components["schemas"]["TierPlacementDto"][];
+            unrankedMediaIds: string[];
+        };
+        TierPlacementDto: {
+            id: string;
+            label: string;
+            color: components["schemas"]["TierColor"];
+            mediaIds: string[];
+        };
+        AddTierItemsDto: {
+            revision: number;
+            items: components["schemas"]["TierMediaIdentityDto"][];
+        };
+        TierMediaIdentityDto: {
+            mediaType: components["schemas"]["MediaType"];
+            tmdbId: number;
+        };
+        RemoveTierItemDto: {
+            revision: number;
+            mediaId: string;
+        };
+        RevisionDto: {
+            revision: number;
         };
     };
     responses: never;
@@ -2932,6 +3162,268 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PublicWheelDetailsResponse"];
+                };
+            };
+        };
+    };
+    listTierLists: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TierListSummaryResponse"][];
+                };
+            };
+        };
+    };
+    createTierList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTierListDto"];
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TierListResponse"];
+                };
+            };
+        };
+    };
+    getTierList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tierListId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TierListResponse"];
+                };
+            };
+        };
+    };
+    deleteTierList: {
+        parameters: {
+            query: {
+                revision: number;
+            };
+            header?: never;
+            path: {
+                tierListId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    updateTierList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tierListId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTierListDto"];
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TierListResponse"];
+                };
+            };
+        };
+    };
+    updateTierLayout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tierListId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTierLayoutDto"];
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TierListResponse"];
+                };
+            };
+        };
+    };
+    addTierItems: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tierListId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddTierItemsDto"];
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TierListResponse"];
+                };
+            };
+        };
+    };
+    removeTierItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tierListId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RemoveTierItemDto"];
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TierListResponse"];
+                };
+            };
+        };
+    };
+    duplicateTierList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tierListId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RevisionDto"];
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TierListResponse"];
+                };
+            };
+        };
+    };
+    getPublicTierList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                publicSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicTierListResponse"];
+                };
+            };
+        };
+    };
+    shareTierList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                publicSlug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Open Graph share document */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/html": string;
                 };
             };
         };
