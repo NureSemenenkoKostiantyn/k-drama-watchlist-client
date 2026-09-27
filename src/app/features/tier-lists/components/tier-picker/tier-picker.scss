@@ -1,0 +1,82 @@
+details {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+summary {
+  padding: 1rem;
+  cursor: pointer;
+  font-weight: 700;
+}
+summary span {
+  display: inline-block;
+  margin-left: 0.5rem;
+  color: var(--color-text-muted);
+  font-weight: 400;
+  font-size: 0.85rem;
+}
+.picker {
+  display: grid;
+  gap: 1rem;
+  padding: 0 1rem 1rem;
+}
+.actions,
+form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.7rem;
+}
+form app-form-field {
+  flex: 1;
+  min-width: 10rem;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+}
+.check input {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+.candidates {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 0.65rem;
+  max-height: 26rem;
+  overflow: auto;
+  padding: 0.3rem;
+}
+.candidate {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.5rem;
+  color: inherit;
+  background: var(--color-surface-raised);
+  border: 2px solid transparent;
+  text-align: left;
+  cursor: pointer;
+  min-width: 0;
+}
+.candidate.selected {
+  border-color: var(--color-accent);
+}
+.candidate:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.poster {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+}
+strong {
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+p,
+small {
+  color: var(--color-text-muted);
+}

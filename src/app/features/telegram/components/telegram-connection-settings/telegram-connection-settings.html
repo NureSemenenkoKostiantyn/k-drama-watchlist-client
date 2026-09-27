@@ -34,6 +34,48 @@
         </a>
       }
 
+      <div class="telegram-settings__notifications">
+        <div>
+          <strong>Friend request notifications</strong>
+          <p>
+            Allow Drama Watch to message you in Telegram when someone sends you a friend request.
+          </p>
+        </div>
+        <label>
+          <input
+            #friendRequestNotifications
+            type="checkbox"
+            [checked]="settings.telegramFriendRequestNotifications()"
+            [disabled]="settings.isLoading() || isSavingNotifications()"
+            (change)="setFriendRequestNotifications(friendRequestNotifications.checked)"
+          />
+          <span>Send in Telegram</span>
+        </label>
+      </div>
+
+      <div class="telegram-settings__notifications">
+        <div>
+          <strong>Title suggestion notifications</strong>
+          <p>
+            Allow Drama Watch to message you in Telegram when a friend suggests a title.
+          </p>
+        </div>
+        <label>
+          <input
+            #titleSuggestionNotifications
+            type="checkbox"
+            [checked]="settings.telegramTitleSuggestionNotifications()"
+            [disabled]="settings.isLoading() || isSavingNotifications()"
+            (change)="setTitleSuggestionNotifications(titleSuggestionNotifications.checked)"
+          />
+          <span>Send in Telegram</span>
+        </label>
+      </div>
+
+      @if (notificationSavedMessage(); as message) {
+        <p class="telegram-settings__status" role="status">{{ message }}</p>
+      }
+
       <app-button variant="danger" (click)="showDisconnectConfirmation.set(true)">
         Disconnect Telegram
       </app-button>
@@ -61,6 +103,12 @@
   @if (telegram.error()) {
     <p class="telegram-settings__status telegram-settings__status--error" role="alert">
       {{ telegram.error() }}
+    </p>
+  }
+
+  @if (notificationError(); as error) {
+    <p class="telegram-settings__status telegram-settings__status--error" role="alert">
+      {{ error }}
     </p>
   }
 </section>

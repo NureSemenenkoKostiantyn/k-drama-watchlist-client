@@ -4,6 +4,7 @@ Allow: /api/public/seo/sitemap.xml
 Allow: /lists/discover
 Allow: /lists/public/
 Allow: /wheels/public/
+Allow: /tier-lists/public/
 Disallow: /api/
 Disallow: /activity
 Disallow: /forgot-password
@@ -26,5 +27,6 @@ Disallow: /suggestions
 Disallow: /users/
 Disallow: /verify-email
 Disallow: /wheels
+Disallow: /tier-lists
 
 Sitemap: https://dahyun.best/api/public/seo/sitemap.xml

@@ -1,0 +1,108 @@
+<main class="page">
+  <a routerLink="/tier-lists">← All tier lists</a>
+  @if (loading()) {
+    <app-page-state variant="loading" message="Loading tier list…" />
+  }
+  @if (error()) {
+    <app-page-state variant="error" [message]="error()"
+      ><app-button variant="secondary" [disabled]="busy()" (click)="load()"
+        >Reload saved board</app-button
+      ></app-page-state
+    >
+  }
+  @if (board(); as current) {
+    <header>
+      <p class="eyebrow">{{ current.visibility }} tier list</p>
+      <h1>{{ current.title }}</h1>
+      <p>{{ current.description }}</p>
+    </header>
+    <div class="actions">
+      <span class="status" role="status">{{ notice() }}</span>
+      <app-button variant="secondary" [disabled]="locked() || !undoLayout()" (click)="undo()"
+        >Undo last arrangement</app-button
+      >
+      <app-button
+        variant="secondary"
+        [disabled]="exporting() || busy()"
+        [busy]="exporting()"
+        (click)="export()"
+        >Download PNG</app-button
+      >
+      <app-button variant="secondary" [disabled]="exporting() || busy()" (click)="export(true)"
+        >Share PNG</app-button
+      >
+      <app-button variant="secondary" [disabled]="locked()" (click)="duplicate()"
+        >Duplicate</app-button
+      >
+    </div>
+    <app-tier-board
+      [tiers]="current.tiers"
+      [unranked]="current.unranked"
+      [editable]="true"
+      [busy]="locked()"
+      (moved)="move($event)"
+      (removed)="confirm.set({ type: 'item', id: $event })"
+    />
+    <app-tier-picker [existing]="existing()" [busy]="locked()" (added)="add($event)" />
+    <app-tier-rows-editor [board]="current" [busy]="locked()" (saved)="saveLayout($event)" />
+    <details class="panel">
+      <summary>List settings & sharing</summary>
+      <form class="settings" [formGroup]="form" (ngSubmit)="saveSettings()">
+        <div class="settings-grid">
+          <app-form-field label="Title" inputId="edit-tier-title"
+            ><input id="edit-tier-title" formControlName="title" maxlength="100" required
+          /></app-form-field>
+          <app-form-field label="Visibility" inputId="tier-visibility"
+            ><select id="tier-visibility" formControlName="visibility">
+              <option value="private">Private — only you</option>
+              <option value="unlisted">Unlisted — anyone with the link</option>
+              <option value="public">Public — link and search engines</option>
+            </select></app-form-field
+          >
+        </div>
+        <app-form-field label="Description" inputId="tier-description">
+          <textarea
+            id="tier-description"
+            formControlName="description"
+            maxlength="1000"
+            rows="3"
+          ></textarea>
+        </app-form-field>
+        <p class="status">
+          Only ranked titles are shared or exported. Unranked titles stay private. Making the list
+          private revokes its old link. A downloaded image cannot be revoked.
+        </p>
+        <div class="actions">
+          <app-button type="submit" [disabled]="locked() || form.invalid" [busy]="busy()"
+            >Save settings</app-button
+          >
+          @if (current.publicSlug) {
+            <a [routerLink]="['/tier-lists/public', current.publicSlug]">Public preview</a>
+            <app-button variant="secondary" [disabled]="locked()" (click)="copyLink()"
+              >Copy share link</app-button
+            >
+          }
+          <app-button
+            variant="danger"
+            [disabled]="locked()"
+            (click)="confirm.set({ type: 'board', id: current.id })"
+            >Delete tier list</app-button
+          >
+        </div>
+      </form>
+    </details>
+  }
+</main>
+<app-confirmation-dialog
+  [open]="confirm() !== null"
+  [title]="confirm()?.type === 'board' ? 'Delete this tier list?' : 'Remove this title?'"
+  [message]="
+    confirm()?.type === 'board'
+      ? 'The ranking and its shared link will be permanently deleted. Your library is not affected.'
+      : 'This removes the title only from this tier list. Your library is not affected.'
+  "
+  confirmLabel="Delete"
+  [busy]="busy()"
+  (confirmed)="confirmDelete()"
+  (cancelled)="confirm.set(null)"
+/>
