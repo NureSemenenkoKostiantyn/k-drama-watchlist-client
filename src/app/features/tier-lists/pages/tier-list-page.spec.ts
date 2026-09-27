@@ -253,7 +253,7 @@ describe('TierListPage', () => {
     expect(root.querySelector<HTMLDetailsElement>('details.quick-add')?.open).toBe(false);
   });
 
-  it('keeps auto-board ranking editable while hiding manual membership and list settings', async () => {
+  it('keeps auto-board ranking library-managed while allowing its visibility to be changed', async () => {
     const auto: TierList = {
       ...original,
       source: 'library_all',
@@ -265,7 +265,7 @@ describe('TierListPage', () => {
     expect(root.textContent).toContain('Auto-synced with your watched and watching library');
     expect(root.textContent).not.toContain('+ Add titles');
     expect(root.textContent).not.toContain('Delete tier list');
-    expect(root.textContent).not.toContain('List settings');
+    expect(root.textContent).toContain('List settings');
     root.querySelector<HTMLButtonElement>('button.poster')!.click();
     fixture.detectChanges();
     expect(root.querySelector<HTMLButtonElement>('button[aria-label="Move to A"]')).not.toBeNull();
@@ -273,5 +273,20 @@ describe('TierListPage', () => {
     await fixture.componentInstance['add']([{ ...media, id: 'tv:3', tmdbId: 3 }]);
     expect(api.add).not.toHaveBeenCalled();
     click('Done');
+
+    click('List settings');
+    expect(root.querySelector('select#tier-visibility')).not.toBeNull();
+    api.update.mockResolvedValue({ ...auto, visibility: 'public', publicSlug: 'a'.repeat(16) });
+    const select = root.querySelector<HTMLSelectElement>('select#tier-visibility')!;
+    select.value = 'public';
+    select.dispatchEvent(new Event('change'));
+    click('Save settings');
+    await fixture.whenStable();
+    expect(api.update).toHaveBeenCalledWith('board', {
+      title: auto.title,
+      description: auto.description,
+      visibility: 'public',
+      revision: auto.revision,
+    });
   });
 });

@@ -50,15 +50,13 @@
         <details #more class="more" tabindex="-1" (keydown.escape)="more.open = false">
           <summary aria-label="More tier-list options">⋯</summary>
           <div class="more-menu">
-            @if (current.source === 'manual') {
-              <button
-                type="button"
-                [disabled]="locked()"
-                (click)="panel.set('settings'); more.open = false"
-              >
-                List settings
-              </button>
-            }
+            <button
+              type="button"
+              [disabled]="locked()"
+              (click)="panel.set('settings'); more.open = false"
+            >
+              List settings
+            </button>
             <button type="button" (click)="focusMode.toggle(); more.open = false">
               {{ focusMode.active() ? 'Exit focus mode' : 'Focus mode' }}
             </button>
@@ -142,13 +140,11 @@
             >Copy share link</app-button
           >
           <a [routerLink]="['/tier-lists/public', current.publicSlug]">Public preview</a>
-        } @else if (current.source === 'manual') {
+        } @else {
           <p>This list is private. Change its visibility to share a link.</p>
           <app-button density="compact" variant="secondary" (click)="panel.set('settings')"
             >Change visibility</app-button
           >
-        } @else {
-          <p>The live board stays private. Duplicate it to share a snapshot.</p>
         }
         <app-button
           density="compact"
@@ -172,46 +168,47 @@
       }
       <p class="status">Downloaded images cannot be revoked by changing visibility.</p>
     </app-dialog-panel>
-    @if (current.source === 'manual') {
-      <app-dialog-panel
-        [open]="panel() === 'settings'"
-        title="List settings"
-        [busy]="busy()"
-        (dismissed)="panel.set(null)"
-      >
-        <form class="settings" [formGroup]="form" (ngSubmit)="saveSettings()">
-          <app-form-field label="Title" inputId="edit-tier-title"
-            ><input id="edit-tier-title" formControlName="title" maxlength="100" required
-          /></app-form-field>
-          <app-form-field label="Visibility" inputId="tier-visibility"
-            ><select id="tier-visibility" formControlName="visibility">
-              <option value="private">Private — only you</option>
-              <option value="unlisted">Unlisted — anyone with the link</option>
-              <option value="public">Public — link and search engines</option>
-            </select></app-form-field
-          >
-          <app-form-field label="Description" inputId="tier-description">
-            <textarea
-              id="tier-description"
-              formControlName="description"
-              maxlength="1000"
-              rows="3"
-            ></textarea>
-          </app-form-field>
-          <p class="status">Making a list private immediately revokes its old share link.</p>
-          @if (error()) {
-            <p role="alert">{{ error() }}</p>
-          }
-          <app-button
-            type="submit"
-            density="compact"
-            [disabled]="locked() || form.invalid"
-            [busy]="busy()"
-            >Save settings</app-button
-          >
-        </form>
-      </app-dialog-panel>
-    }
+    <app-dialog-panel
+      [open]="panel() === 'settings'"
+      title="List settings"
+      [busy]="busy()"
+      (dismissed)="panel.set(null)"
+    >
+      <form class="settings" [formGroup]="form" (ngSubmit)="saveSettings()">
+        <app-form-field label="Title" inputId="edit-tier-title"
+          ><input id="edit-tier-title" formControlName="title" maxlength="100" required
+        /></app-form-field>
+        <app-form-field label="Visibility" inputId="tier-visibility"
+          ><select id="tier-visibility" formControlName="visibility">
+            <option value="private">Private — only you</option>
+            <option value="unlisted">Unlisted — anyone with the link</option>
+            <option value="public">Public — link and search engines</option>
+          </select></app-form-field
+        >
+        <app-form-field label="Description" inputId="tier-description">
+          <textarea
+            id="tier-description"
+            formControlName="description"
+            maxlength="1000"
+            rows="3"
+          ></textarea>
+        </app-form-field>
+        <p class="status">Making a list private immediately revokes its old share link.</p>
+        @if (current.source !== 'manual') {
+          <p class="status">Titles still follow your library. Duplicate this board to rank an independent snapshot.</p>
+        }
+        @if (error()) {
+          <p role="alert">{{ error() }}</p>
+        }
+        <app-button
+          type="submit"
+          density="compact"
+          [disabled]="locked() || form.invalid"
+          [busy]="busy()"
+          >Save settings</app-button
+        >
+      </form>
+    </app-dialog-panel>
   }
 </main>
 <app-confirmation-dialog

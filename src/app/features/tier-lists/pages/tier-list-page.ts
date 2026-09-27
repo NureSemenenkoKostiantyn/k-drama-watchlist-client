@@ -120,7 +120,7 @@ export class TierListPage {
   protected async saveSettings(): Promise<void> {
     const board = this.board();
     const value = this.form.getRawValue();
-    if (!board || board.source !== 'manual' || this.form.invalid || !value.title.trim()) return;
+    if (!board || this.form.invalid || !value.title.trim()) return;
     if (
       await this.mutate(() =>
         this.api.update(board.id, {
