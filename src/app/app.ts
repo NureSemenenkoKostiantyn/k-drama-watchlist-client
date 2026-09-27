@@ -17,6 +17,7 @@ import { fromEvent, merge } from 'rxjs';
 
 import { environment } from '../environments/environment';
 import { AuthenticationService } from './core/auth/authentication.service';
+import { FocusModeService } from './core/layout/focus-mode.service';
 import { NotificationsService } from './features/notifications/data-access/notifications.service';
 import { SettingsService } from './features/settings/data-access/settings.service';
 
@@ -33,6 +34,7 @@ import { SettingsService } from './features/settings/data-access/settings.servic
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
+  protected readonly focusMode = inject(FocusModeService);
   protected readonly appName = environment.appName;
   protected readonly authentication = inject(AuthenticationService);
   protected readonly notifications = inject(NotificationsService);

@@ -2,107 +2,164 @@
   <p class="hint">
     {{
       mobile()
-        ? 'Tap a title, then choose a tier or position.'
-        : 'Drag a poster to rank it, or select it to use the move controls.'
+        ? 'Tap a poster to choose its tier.'
+        : 'Drag posters to rank. Select a poster for more controls.'
     }}
   </p>
 }
-<div class="board" cdkDropListGroup>
-  @for (row of rows(); track row.id) {
-    <section class="tier" [attr.aria-label]="row.label + ' tier'">
-      <h2 [style.background]="colors[row.color]">
-        {{ row.label }} <small>{{ row.items.length }}</small>
-      </h2>
-      <div
-        class="items"
-        cdkDropList
-        cdkDropListOrientation="mixed"
-        [cdkDropListData]="row"
-        [cdkDropListDisabled]="!editable() || busy() || mobile()"
-        (cdkDropListDropped)="drop($event)"
-      >
-        @for (item of row.items; track item.id) {
-          <div
-            class="item"
-            cdkDrag
-            [cdkDragData]="item"
-            [cdkDragDisabled]="!editable() || busy() || mobile()"
-          >
-            @if (editable()) {
-              <button
-                type="button"
-                class="poster"
-                [class.selected]="selectedId() === item.id"
-                [attr.aria-pressed]="selectedId() === item.id"
-                [attr.aria-label]="'Arrange ' + item.title"
-                [disabled]="busy()"
-                (click)="selectedId.set(item.id)"
-              >
-                <app-media-poster
-                  [posterUrl]="item.posterUrl"
-                  [title]="item.title"
-                  [decorative]="true"
-                />
-              </button>
-            } @else {
-              <a
-                class="poster"
-                [routerLink]="['/media', item.mediaType, item.tmdbId]"
-                [attr.aria-label]="item.title"
-              >
-                <app-media-poster
-                  [posterUrl]="item.posterUrl"
-                  [title]="item.title"
-                  [decorative]="true"
-                />
-              </a>
-            }
-            <span class="title" [title]="item.title">{{ item.title }}</span>
+<div cdkDropListGroup>
+  <div class="board">
+    @for (row of tiers(); track row.id) {
+      <section class="tier" [class.editable]="editable()" [attr.aria-label]="row.label + ' tier'">
+        <h2 [style.background]="colors[row.color]">
+          @if (editable()) {
+            <button
+              class="label"
+              type="button"
+              [disabled]="busy()"
+              [attr.aria-label]="'Edit tier ' + row.label"
+              (click)="editTier.emit(row.id)"
+            >
+              {{ row.label }}
+            </button>
+          } @else {
+            <span>{{ row.label }}</span>
+          }
+          <small>{{ row.items.length }}</small>
+        </h2>
+        <ng-container [ngTemplateOutlet]="items" [ngTemplateOutletContext]="{ $implicit: row }" />
+        @if (editable()) {
+          <div class="row-tools">
+            <app-icon-button
+              [label]="'Settings for tier ' + row.label"
+              [disabled]="busy()"
+              (activated)="editTier.emit(row.id)"
+              >⚙</app-icon-button
+            >
           </div>
-        } @empty {
-          <p class="empty">{{ editable() ? 'Place titles here' : 'No titles' }}</p>
         }
-      </div>
+      </section>
+    }
+  </div>
+  @if (unranked() !== null && editable()) {
+    <section class="tray" aria-label="Unranked titles">
+      <header>
+        <h2>
+          Unranked <small>{{ unranked()!.length }}</small>
+        </h2>
+        <div class="tray-tools">
+          <input
+            type="search"
+            aria-label="Filter unranked titles"
+            placeholder="Find a title…"
+            [value]="filter()"
+            (input)="filter.set($any($event.target).value)"
+          />
+          <app-button
+            density="compact"
+            variant="secondary"
+            [disabled]="busy()"
+            (click)="addRequested.emit()"
+            >+ Add titles</app-button
+          >
+        </div>
+      </header>
+      <ng-container [ngTemplateOutlet]="items" [ngTemplateOutletContext]="{ $implicit: tray() }" />
+      <p class="hint">Private staging area · only ranked titles are shared or exported.</p>
     </section>
   }
-</div>
-@if (editable()) {
-  @if (selection(); as selected) {
-    <section class="move-panel" aria-label="Move selected title">
-      <strong>{{ selected.item.title }}</strong>
-      <app-form-field label="Tier" inputId="move-tier">
-        <select
-          id="move-tier"
-          [value]="selected.row.id"
-          [disabled]="busy()"
-          (change)="changeTier($event)"
+  <ng-template #items let-row>
+    <div
+      class="items"
+      cdkDropList
+      cdkDropListOrientation="mixed"
+      [cdkDropListData]="row"
+      [cdkDropListDisabled]="!editable() || busy() || mobile()"
+      (cdkDropListDropped)="drop($event)"
+    >
+      @for (item of row.items; track item.id) {
+        <div
+          class="item"
+          cdkDrag
+          [cdkDragData]="item"
+          [cdkDragDisabled]="!editable() || busy() || mobile()"
         >
-          @for (row of rows(); track row.id) {
-            <option [value]="row.id">{{ row.label }}</option>
-          }
-        </select>
-      </app-form-field>
-      <div class="actions">
+          <app-tier-poster
+            [item]="item"
+            [editable]="editable()"
+            [busy]="busy()"
+            [selected]="selectedId() === item.id"
+            (chosen)="selectedId.set($event)"
+          />
+        </div>
+      } @empty {
+        <p class="empty">
+          {{
+            row.id === '__unranked'
+              ? filter()
+                ? 'No matching titles'
+                : 'Add titles to start ranking'
+              : '—'
+          }}
+        </p>
+      }
+    </div>
+  </ng-template>
+</div>
+
+@if (editable()) {
+  <app-dialog-panel
+    [open]="selection() !== null"
+    [title]="selection()?.item?.title ?? 'Arrange title'"
+    [busy]="saving()"
+    (dismissed)="selectedId.set(null)"
+  >
+    @if (selection(); as selected) {
+      @if (error()) {
+        <p role="alert">{{ error() }} Close this panel to reload the saved board.</p>
+      }
+      <p class="hint">Choose a tier</p>
+      <div class="tier-choices">
+        @for (row of rows(); track row.id) {
+          <button
+            type="button"
+            [style.background]="colors[row.color]"
+            [attr.aria-label]="'Move to ' + row.label"
+            [attr.aria-pressed]="row.id === selected.row.id"
+            [disabled]="busy()"
+            (click)="changeTier(row.id)"
+          >
+            {{ row.label }}
+          </button>
+        }
+      </div>
+      <div class="move-actions">
         <app-button
           variant="secondary"
+          density="compact"
           [disabled]="busy() || selected.index === 0"
           (click)="move(selected.row.id, selected.index - 1)"
           >Move earlier</app-button
         >
         <app-button
           variant="secondary"
+          density="compact"
           [disabled]="busy() || selected.index === selected.row.items.length - 1"
           (click)="move(selected.row.id, selected.index + 1)"
           >Move later</app-button
         >
         <a [routerLink]="['/media', selected.item.mediaType, selected.item.tmdbId]">Details</a>
-        <app-button variant="danger" [disabled]="busy()" (click)="removed.emit(selected.item.id)"
+        <app-button
+          variant="danger"
+          density="compact"
+          [disabled]="busy()"
+          (click)="removed.emit(selected.item.id)"
           >Remove title</app-button
         >
-        <app-button variant="secondary" [disabled]="busy()" (click)="selectedId.set(null)"
+        <app-button density="compact" [disabled]="busy()" (click)="selectedId.set(null)"
           >Done</app-button
         >
       </div>
-    </section>
-  }
+    }
+  </app-dialog-panel>
 }

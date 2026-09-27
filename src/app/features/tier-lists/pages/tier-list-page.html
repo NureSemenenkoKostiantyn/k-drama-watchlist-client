@@ -1,65 +1,175 @@
-<main class="page">
-  <a routerLink="/tier-lists">← All tier lists</a>
+<main class="page workspace" [class.focus-mode]="focusMode.active()">
+  <a class="back" routerLink="/tier-lists">← All tier lists</a>
   @if (loading()) {
     <app-page-state variant="loading" message="Loading tier list…" />
   }
   @if (error()) {
-    <app-page-state variant="error" [message]="error()"
-      ><app-button variant="secondary" [disabled]="busy()" (click)="load()"
+    <app-page-state variant="error" [message]="error()">
+      <app-button density="compact" variant="secondary" [disabled]="busy()" (click)="load()"
         >Reload saved board</app-button
-      ></app-page-state
-    >
+      >
+    </app-page-state>
   }
   @if (board(); as current) {
-    <header>
-      <p class="eyebrow">{{ current.visibility }} tier list</p>
-      <h1>{{ current.title }}</h1>
-      <p>{{ current.description }}</p>
+    <header class="workspace-header">
+      <div class="heading">
+        <h1>{{ current.title }}</h1>
+        <span class="metadata">{{ current.visibility }} · {{ current.itemCount }} titles</span>
+      </div>
+      <div class="toolbar">
+        <app-button density="compact" [disabled]="locked()" (click)="panel.set('add')"
+          >+ Add titles</app-button
+        >
+        <app-button
+          density="compact"
+          variant="secondary"
+          [disabled]="locked() || !undoLayout()"
+          (click)="undo()"
+          >Undo</app-button
+        >
+        <app-button
+          density="compact"
+          variant="secondary"
+          [disabled]="busy()"
+          (click)="panel.set('share')"
+          >Share</app-button
+        >
+        @if (focusMode.active()) {
+          <app-button density="compact" variant="secondary" (click)="focusMode.reset()"
+            >Exit focus</app-button
+          >
+        }
+        <details #more class="more" tabindex="-1" (keydown.escape)="more.open = false">
+          <summary aria-label="More tier-list options">⋯</summary>
+          <div class="more-menu">
+            <button
+              type="button"
+              [disabled]="locked()"
+              (click)="panel.set('settings'); more.open = false"
+            >
+              List settings
+            </button>
+            <button type="button" (click)="focusMode.toggle(); more.open = false">
+              {{ focusMode.active() ? 'Exit focus mode' : 'Focus mode' }}
+            </button>
+            <button type="button" [disabled]="locked()" (click)="duplicate(); more.open = false">
+              Duplicate
+            </button>
+            <button
+              class="danger"
+              type="button"
+              [disabled]="locked()"
+              (click)="confirm.set({ type: 'board', id: current.id }); more.open = false"
+            >
+              Delete tier list
+            </button>
+          </div>
+        </details>
+      </div>
     </header>
-    <div class="actions">
-      <span class="status" role="status">{{ notice() }}</span>
-      <app-button variant="secondary" [disabled]="locked() || !undoLayout()" (click)="undo()"
-        >Undo last arrangement</app-button
-      >
-      <app-button
-        variant="secondary"
-        [disabled]="exporting() || busy()"
-        [busy]="exporting()"
-        (click)="export()"
-        >Download PNG</app-button
-      >
-      <app-button variant="secondary" [disabled]="exporting() || busy()" (click)="export(true)"
-        >Share PNG</app-button
-      >
-      <app-button variant="secondary" [disabled]="locked()" (click)="duplicate()"
-        >Duplicate</app-button
-      >
-    </div>
+    <p class="save-status" role="status" aria-live="polite">{{ notice() }}</p>
     <app-tier-board
       [tiers]="current.tiers"
       [unranked]="current.unranked"
       [editable]="true"
       [busy]="locked()"
+      [saving]="busy()"
+      [error]="error()"
       (moved)="move($event)"
       (removed)="confirm.set({ type: 'item', id: $event })"
+      (editTier)="editingTier.set($event)"
+      (addRequested)="panel.set('add')"
     />
-    <app-tier-picker [existing]="existing()" [busy]="locked()" (added)="add($event)" />
-    <app-tier-rows-editor [board]="current" [busy]="locked()" (saved)="saveLayout($event)" />
-    <details class="panel">
-      <summary>List settings & sharing</summary>
-      <form class="settings" [formGroup]="form" (ngSubmit)="saveSettings()">
-        <div class="settings-grid">
-          <app-form-field label="Title" inputId="edit-tier-title"
-            ><input id="edit-tier-title" formControlName="title" maxlength="100" required
-          /></app-form-field>
-          <app-form-field label="Visibility" inputId="tier-visibility"
-            ><select id="tier-visibility" formControlName="visibility">
-              <option value="private">Private — only you</option>
-              <option value="unlisted">Unlisted — anyone with the link</option>
-              <option value="public">Public — link and search engines</option>
-            </select></app-form-field
+    <app-tier-rows-editor
+      [board]="current"
+      [tierId]="editingTier()"
+      [busy]="locked()"
+      [saving]="busy()"
+      [error]="error()"
+      (saved)="saveLayout($event)"
+      (dismissed)="editingTier.set(null)"
+    />
+
+    <app-dialog-panel
+      [open]="panel() === 'add'"
+      title="Add titles"
+      [drawer]="true"
+      [busy]="busy()"
+      (dismissed)="panel.set(null)"
+    >
+      @if (panel() === 'add') {
+        <app-tier-picker
+          [existing]="existing()"
+          [busy]="locked()"
+          [progress]="notice()"
+          [saveError]="error()"
+          (added)="add($event)"
+        />
+        @if (conflict()) {
+          <app-button density="compact" [disabled]="busy()" (click)="load()"
+            >Reload saved board</app-button
           >
-        </div>
+        }
+      }
+    </app-dialog-panel>
+    <app-dialog-panel
+      [open]="panel() === 'share'"
+      title="Share tier list"
+      [busy]="exporting()"
+      (dismissed)="panel.set(null)"
+    >
+      <p>Only ranked titles are shared. Unranked titles stay private.</p>
+      <div class="share-actions">
+        @if (current.publicSlug) {
+          <app-button density="compact" [disabled]="busy()" (click)="copyLink()"
+            >Copy share link</app-button
+          >
+          <a [routerLink]="['/tier-lists/public', current.publicSlug]">Public preview</a>
+        } @else {
+          <p>This list is private. Change its visibility to share a link.</p>
+          <app-button density="compact" variant="secondary" (click)="panel.set('settings')"
+            >Change visibility</app-button
+          >
+        }
+        <app-button
+          density="compact"
+          variant="secondary"
+          [disabled]="exporting() || busy()"
+          [busy]="exporting()"
+          (click)="export()"
+          >Download PNG</app-button
+        >
+        <app-button
+          density="compact"
+          variant="secondary"
+          [disabled]="exporting() || busy()"
+          (click)="export(true)"
+          >Share PNG</app-button
+        >
+      </div>
+      <p class="status" role="status">{{ notice() }}</p>
+      @if (error()) {
+        <p role="alert">{{ error() }}</p>
+      }
+      <p class="status">Downloaded images cannot be revoked by changing visibility.</p>
+    </app-dialog-panel>
+    <app-dialog-panel
+      [open]="panel() === 'settings'"
+      title="List settings"
+      [busy]="busy()"
+      (dismissed)="panel.set(null)"
+    >
+      <form class="settings" [formGroup]="form" (ngSubmit)="saveSettings()">
+        <app-form-field label="Title" inputId="edit-tier-title"
+          ><input id="edit-tier-title" formControlName="title" maxlength="100" required
+        /></app-form-field>
+        <app-form-field label="Visibility" inputId="tier-visibility"
+          ><select id="tier-visibility" formControlName="visibility">
+            <option value="private">Private — only you</option>
+            <option value="unlisted">Unlisted — anyone with the link</option>
+            <option value="public">Public — link and search engines</option>
+          </select></app-form-field
+        >
         <app-form-field label="Description" inputId="tier-description">
           <textarea
             id="tier-description"
@@ -68,29 +178,19 @@
             rows="3"
           ></textarea>
         </app-form-field>
-        <p class="status">
-          Only ranked titles are shared or exported. Unranked titles stay private. Making the list
-          private revokes its old link. A downloaded image cannot be revoked.
-        </p>
-        <div class="actions">
-          <app-button type="submit" [disabled]="locked() || form.invalid" [busy]="busy()"
-            >Save settings</app-button
-          >
-          @if (current.publicSlug) {
-            <a [routerLink]="['/tier-lists/public', current.publicSlug]">Public preview</a>
-            <app-button variant="secondary" [disabled]="locked()" (click)="copyLink()"
-              >Copy share link</app-button
-            >
-          }
-          <app-button
-            variant="danger"
-            [disabled]="locked()"
-            (click)="confirm.set({ type: 'board', id: current.id })"
-            >Delete tier list</app-button
-          >
-        </div>
+        <p class="status">Making a list private immediately revokes its old share link.</p>
+        @if (error()) {
+          <p role="alert">{{ error() }}</p>
+        }
+        <app-button
+          type="submit"
+          density="compact"
+          [disabled]="locked() || form.invalid"
+          [busy]="busy()"
+          >Save settings</app-button
+        >
       </form>
-    </details>
+    </app-dialog-panel>
   }
 </main>
 <app-confirmation-dialog
