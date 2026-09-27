@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   inject,
   input,
@@ -8,205 +9,261 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Button } from '../../../../shared/components/button/button';
 import { ConfirmationDialog } from '../../../../shared/components/confirmation-dialog/confirmation-dialog';
+import { DialogPanel } from '../../../../shared/components/dialog-panel/dialog-panel';
 import { FormField } from '../../../../shared/components/form-field/form-field';
-import { KeyboardReorderControls } from '../../../../shared/components/keyboard-reorder-controls/keyboard-reorder-controls';
 import { TierColor, TierLayout, TierList, TIER_COLORS } from '../../models/tier-list';
 import { layoutOf } from '../../utils/tier-layout';
 
 @Component({
   selector: 'app-tier-rows-editor',
-  imports: [ReactiveFormsModule, Button, ConfirmationDialog, FormField, KeyboardReorderControls],
+  imports: [ReactiveFormsModule, Button, ConfirmationDialog, DialogPanel, FormField],
   template: `
-    <details>
-      <summary>Customize tiers</summary>
-      <p>
-        Rename, recolor, and reorder tiers. Removing a tier moves its titles to Unranked when you
-        save.
-      </p>
-      <form [formGroup]="form" (ngSubmit)="save()">
-        <div formArrayName="rows">
-          @for (row of form.controls.rows.controls; track row.controls.id.value; let i = $index) {
-            <div class="row" [formGroupName]="i">
-              <app-form-field label="Label" [inputId]="'tier-label-' + i"
-                ><input [id]="'tier-label-' + i" formControlName="label" maxlength="40" required
-              /></app-form-field>
-              <app-form-field label="Color" [inputId]="'tier-color-' + i"
-                ><select [id]="'tier-color-' + i" formControlName="color">
-                  @for (color of colors; track color) {
-                    <option [value]="color">{{ color }}</option>
-                  }
-                </select></app-form-field
-              >
-              <div class="actions">
-                <app-keyboard-reorder-controls
-                  [itemLabel]="'tier ' + row.controls.label.value"
-                  [disabled]="busy()"
-                  [touchFriendly]="true"
-                  [canMoveBefore]="i > 0"
-                  [canMoveAfter]="i < form.controls.rows.length - 1"
-                  orientation="vertical"
-                  (moveRequested)="reorder(i, $event === 'before' ? -1 : 1)"
-                />
-                <app-button
-                  variant="danger"
-                  [disabled]="busy() || form.controls.rows.length <= 1"
-                  (click)="pendingRemoval.set(i)"
-                  >Remove tier</app-button
+    <app-dialog-panel
+      [open]="row() !== null"
+      title="Edit tier"
+      [busy]="saving()"
+      (dismissed)="dismissed.emit()"
+    >
+      @if (row(); as current) {
+        <form [formGroup]="form" (ngSubmit)="save()">
+          <app-form-field label="Tier label" inputId="tier-label">
+            <input id="tier-label" formControlName="label" maxlength="40" required />
+          </app-form-field>
+          <fieldset [disabled]="busy()">
+            <legend>Label color</legend>
+            <div class="swatches">
+              @for (color of colors; track color) {
+                <button
+                  type="button"
+                  [style.background]="palette[color]"
+                  [attr.aria-label]="color"
+                  [attr.aria-pressed]="form.controls.color.value === color"
+                  (click)="form.controls.color.setValue(color)"
                 >
-              </div>
+                  @if (form.controls.color.value === color) {
+                    ✓
+                  }
+                </button>
+              }
             </div>
+          </fieldset>
+          @if (error()) {
+            <p role="alert">{{ error() }}</p>
           }
-        </div>
-        <div class="actions">
-          <app-button
-            variant="secondary"
-            [disabled]="busy() || form.controls.rows.length >= 20"
-            (click)="add()"
-            >Add tier</app-button
-          >
-          <app-button type="submit" [disabled]="busy() || form.invalid" [busy]="busy()"
-            >Save tiers</app-button
-          >
-          <app-button variant="secondary" [disabled]="busy()" (click)="reset()"
-            >Discard changes</app-button
-          >
-        </div>
-      </form>
-    </details>
+          <div class="actions">
+            <app-button
+              type="submit"
+              density="compact"
+              [disabled]="busy() || form.invalid"
+              [busy]="busy()"
+              >Save tier</app-button
+            >
+            <app-button
+              variant="secondary"
+              density="compact"
+              [disabled]="busy()"
+              (click)="dismissed.emit()"
+              >Cancel</app-button
+            >
+          </div>
+          <div class="row-actions">
+            <app-button
+              variant="secondary"
+              density="compact"
+              [disabled]="busy() || form.invalid || index() === 0"
+              (click)="reorder(-1)"
+              >Move up</app-button
+            >
+            <app-button
+              variant="secondary"
+              density="compact"
+              [disabled]="busy() || form.invalid || index() === board().tiers.length - 1"
+              (click)="reorder(1)"
+              >Move down</app-button
+            >
+            <app-button
+              variant="secondary"
+              density="compact"
+              [disabled]="busy() || form.invalid || board().tiers.length >= 20"
+              (click)="add(false)"
+              >Add tier above</app-button
+            >
+            <app-button
+              variant="secondary"
+              density="compact"
+              [disabled]="busy() || form.invalid || board().tiers.length >= 20"
+              (click)="add(true)"
+              >Add tier below</app-button
+            >
+            <app-button
+              variant="secondary"
+              density="compact"
+              [disabled]="busy() || !current.items.length"
+              (click)="pending.set('clear')"
+              >Clear tier</app-button
+            >
+            <app-button
+              variant="danger"
+              density="compact"
+              [disabled]="busy() || board().tiers.length <= 1"
+              (click)="pending.set('delete')"
+              >Delete tier</app-button
+            >
+          </div>
+          <p class="hint">
+            Clearing or deleting moves titles to Unranked. Your library is never changed.
+          </p>
+        </form>
+      }
+    </app-dialog-panel>
     <app-confirmation-dialog
-      [open]="pendingRemoval() !== null"
-      title="Remove this tier?"
-      message="Its titles will move to Unranked when you save the tiers. No title is removed from your library."
-      confirmLabel="Remove tier"
+      [open]="pending() !== null"
+      [title]="pending() === 'delete' ? 'Delete this tier?' : 'Clear this tier?'"
+      message="Its titles will move to Unranked. No titles are removed from your library."
+      [confirmLabel]="pending() === 'delete' ? 'Delete tier' : 'Clear tier'"
       [busy]="busy()"
-      (confirmed)="remove()"
-      (cancelled)="pendingRemoval.set(null)"
+      (confirmed)="confirm()"
+      (cancelled)="pending.set(null)"
     />
   `,
   styles: `
-    details {
-      border: 1px solid var(--color-border);
-      padding: 1rem;
-      background: var(--color-surface);
-    }
-    summary {
-      cursor: pointer;
-      font-weight: 700;
-    }
-    p {
-      color: var(--color-text-muted);
-      line-height: 1.5;
-    }
-    .row {
+    form {
       display: grid;
-      grid-template-columns: minmax(6rem, 1fr) minmax(6rem, 1fr) auto;
-      align-items: end;
-      gap: 0.7rem;
-      margin: 0.8rem 0;
+      gap: 1.1rem;
     }
+    fieldset {
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+    legend {
+      margin-bottom: 0.6rem;
+      font-size: 0.85rem;
+    }
+    .swatches,
     .actions {
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
     }
-    @media (max-width: 48rem) {
-      .row {
-        grid-template-columns: 1fr 1fr;
-      }
-      .row .actions {
-        grid-column: 1 / -1;
-      }
+    .swatches button {
+      width: 2.75rem;
+      height: 2.75rem;
+      padding: 0;
+      border: 2px solid transparent;
+      color: #17101d;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    .swatches button[aria-pressed='true'] {
+      border-color: #17101d;
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+    }
+    .row-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.65rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--color-border);
+    }
+    .row-actions app-button { width: 100%; }
+    .hint {
+      margin: 0;
+      font-size: 0.8rem;
+      color: var(--color-text-muted);
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TierRowsEditor {
   readonly board = input.required<TierList>();
+  readonly tierId = input<string | null>(null);
   readonly busy = input(false);
+  readonly saving = input(false);
+  readonly error = input('');
   readonly saved = output<TierLayout>();
-  private readonly fb = inject(FormBuilder).nonNullable;
+  readonly dismissed = output<void>();
+  protected readonly palette = TIER_COLORS;
   protected readonly colors = Object.keys(TIER_COLORS) as TierColor[];
-  protected readonly pendingRemoval = signal<number | null>(null);
+  protected readonly pending = signal<'delete' | 'clear' | null>(null);
+  protected readonly row = computed(
+    () => this.board().tiers.find((row) => row.id === this.tierId()) ?? null,
+  );
+  protected readonly index = computed(() =>
+    this.board().tiers.findIndex((row) => row.id === this.tierId()),
+  );
+  private readonly fb = inject(FormBuilder).nonNullable;
   protected readonly form = this.fb.group({
-    rows: new FormArray<ReturnType<TierRowsEditor['makeRow']>>([]),
+    label: ['', [Validators.required, Validators.maxLength(40), Validators.pattern(/\S/)]],
+    color: this.fb.control<TierColor>('gray'),
   });
-  private synchronizedTiers = '';
+  private synchronizedRow = '';
 
   constructor() {
     effect(() => {
-      const board = this.board();
-      const signature = JSON.stringify([
-        board.id,
-        board.tiers.map(({ id, label, color }) => ({ id, label, color })),
-      ]);
-      // A poster move or a settings save must not discard an unfinished tier-label edit.
-      if (signature !== this.synchronizedTiers) {
-        this.synchronizedTiers = signature;
-        untracked(() => this.reset());
+      const row = this.row();
+      const signature = JSON.stringify([this.board().id, row?.id, row?.label, row?.color]);
+      // Revision changes from poster movement must not erase an unfinished label edit.
+      if (signature !== this.synchronizedRow) {
+        this.synchronizedRow = signature;
+        untracked(() => {
+          this.form.reset({ label: row?.label ?? '', color: row?.color ?? 'gray' });
+          this.pending.set(null);
+        });
       }
     });
     effect(() => {
       const busy = this.busy();
-      untracked(() => {
-        if (busy) this.form.disable();
-        else this.form.enable();
-      });
+      untracked(() => (busy ? this.form.disable() : this.form.enable()));
     });
   }
 
-  protected reset(): void {
-    this.form.controls.rows.clear();
-    for (const row of this.board().tiers)
-      this.form.controls.rows.push(this.makeRow(row.id, row.label, row.color));
-    this.pendingRemoval.set(null);
+  private draft(): TierLayout | null {
+    if (this.busy() || this.form.invalid || !this.row()) return null;
+    const layout = layoutOf(this.board());
+    const row = layout.tiers[this.index()];
+    row.label = this.form.controls.label.value.trim();
+    row.color = this.form.controls.color.value;
+    return layout;
   }
 
-  private makeRow(id: string, label: string, color: TierColor) {
-    return this.fb.group({
-      id,
-      label: [label, [Validators.required, Validators.maxLength(40)]],
-      color: this.fb.control<TierColor>(color),
-    });
-  }
-
-  protected add(): void {
-    if (!this.busy() && this.form.controls.rows.length < 20)
-      this.form.controls.rows.push(this.makeRow(crypto.randomUUID(), 'New tier', 'gray'));
-  }
-  protected reorder(index: number, offset: number): void {
-    const rows = this.form.controls.rows;
-    const next = index + offset;
-    if (this.busy() || next < 0 || next >= rows.length) return;
-    const row = rows.at(index);
-    rows.removeAt(index);
-    rows.insert(next, row);
-  }
-  protected remove(): void {
-    const index = this.pendingRemoval();
-    if (index !== null && !this.busy() && this.form.controls.rows.length > 1)
-      this.form.controls.rows.removeAt(index);
-    this.pendingRemoval.set(null);
-  }
   protected save(): void {
-    if (this.busy() || this.form.invalid) return;
-    const value = this.form.getRawValue().rows;
-    if (value.some((row) => !row.label.trim())) return;
-    const previous = layoutOf(this.board());
-    const retained = new Set(value.map((row) => row.id));
-    this.saved.emit({
-      revision: previous.revision,
-      tiers: value.map((row) => ({
-        ...row,
-        label: row.label.trim(),
-        mediaIds: previous.tiers.find((tier) => tier.id === row.id)?.mediaIds ?? [],
-      })),
-      unrankedMediaIds: [
-        ...previous.unrankedMediaIds,
-        ...previous.tiers.filter((row) => !retained.has(row.id)).flatMap((row) => row.mediaIds),
-      ],
+    const layout = this.draft();
+    if (layout) this.saved.emit(layout);
+  }
+  protected reorder(offset: number): void {
+    const layout = this.draft();
+    const index = this.index();
+    const next = index + offset;
+    if (!layout || next < 0 || next >= layout.tiers.length) return;
+    const [row] = layout.tiers.splice(index, 1);
+    layout.tiers.splice(next, 0, row);
+    this.saved.emit(layout);
+  }
+  protected add(below: boolean): void {
+    const layout = this.draft();
+    if (!layout || layout.tiers.length >= 20) return;
+    layout.tiers.splice(this.index() + Number(below), 0, {
+      id: crypto.randomUUID(),
+      label: 'New tier',
+      color: 'gray',
+      mediaIds: [],
     });
+    this.saved.emit(layout);
+  }
+  protected confirm(): void {
+    if (this.busy() || !this.row() || !this.pending()) return;
+    const layout = layoutOf(this.board());
+    const index = this.index();
+    if (this.pending() === 'delete' && layout.tiers.length <= 1) return;
+    layout.unrankedMediaIds.push(...layout.tiers[index].mediaIds);
+    if (this.pending() === 'delete') layout.tiers.splice(index, 1);
+    else layout.tiers[index].mediaIds = [];
+    this.pending.set(null);
+    this.saved.emit(layout);
   }
 }

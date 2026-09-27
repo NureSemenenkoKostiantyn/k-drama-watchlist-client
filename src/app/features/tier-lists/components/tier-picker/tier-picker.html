@@ -1,126 +1,234 @@
-<details>
-  <summary>Add titles <span>From your library or TMDB</span></summary>
-  <div class="picker">
-    <div class="actions">
-      <app-button
-        [variant]="source() === 'library' ? 'primary' : 'secondary'"
-        (click)="source.set('library')"
-        >My library</app-button
-      >
-      <app-button
-        [variant]="source() === 'search' ? 'primary' : 'secondary'"
-        (click)="source.set('search')"
-        >Search TMDB</app-button
-      >
-    </div>
-    @if (source() === 'library') {
-      <label class="check"
-        ><input
-          type="checkbox"
-          [checked]="watchedOnly()"
-          (change)="watchedOnly.set(!watchedOnly())"
-        />
-        Watched titles only</label
-      >
-      @if (library.isLoading()) {
-        <p role="status">Loading library…</p>
-      }
-      @if (library.error(); as message) {
-        <p role="alert">{{ message }}</p>
-        <app-button (click)="library.load()">Retry library</app-button>
-      }
-    } @else {
-      <form (submit)="$event.preventDefault(); search()">
-        <app-form-field label="Search titles" inputId="tier-search"
+<div class="picker">
+  <div class="tabs" aria-label="Title source">
+    <button
+      type="button"
+      [attr.aria-pressed]="source() === 'library'"
+      [disabled]="busy()"
+      (click)="setSource('library')"
+    >
+      My library
+    </button>
+    <button
+      type="button"
+      [attr.aria-pressed]="source() === 'search'"
+      [disabled]="busy()"
+      (click)="setSource('search')"
+    >
+      Search TMDB
+    </button>
+  </div>
+  @if (source() === 'library') {
+    <fieldset [disabled]="busy()" [formGroup]="filters">
+      <div class="library-search">
+        <app-form-field label="Find in library" inputId="tier-library-query"
           ><input
-            id="tier-search"
-            [formControl]="query"
-            maxlength="200"
-            placeholder="Try a drama or film"
+            id="tier-library-query"
+            type="search"
+            placeholder="Title or original title"
+            formControlName="query"
+            (input)="libraryPage.set(1)"
         /></app-form-field>
-        <app-button
-          type="submit"
-          [busy]="searching()"
-          [disabled]="searching() || !query.value.trim()"
-          >Search</app-button
+        <app-form-field label="Status" inputId="tier-library-status"
+          ><select id="tier-library-status" formControlName="status" (change)="libraryPage.set(1)">
+            <option value="all">All statuses</option>
+            <option value="watched">Watched</option>
+            <option value="watching">Watching</option>
+            <option value="to_watch">To watch</option>
+          </select></app-form-field
         >
-      </form>
-      @if (error()) {
-        <p role="alert">{{ error() }}</p>
-      }
-    }
-    <div class="candidates">
-      @for (item of candidates(); track item.id) {
-        <button
-          type="button"
-          class="candidate"
-          [class.selected]="isSelected(item.id)"
-          [attr.aria-pressed]="isSelected(item.id)"
+      </div>
+      <details class="quick-add">
+        <summary>Quick add from library</summary>
+        <p>Add a whole selection at once. Existing board titles are skipped.</p>
+        <div class="actions">
+          <app-button
+            variant="secondary"
+            density="compact"
+            [disabled]="busy()"
+            (click)="preset('all')"
+            >All library titles</app-button
+          >
+          <app-button
+            variant="secondary"
+            density="compact"
+            [disabled]="busy()"
+            (click)="preset('watched')"
+            >All watched titles</app-button
+          >
+        </div>
+        <div class="library-search">
+          <app-form-field label="Genre" inputId="tier-library-genre"
+            ><select id="tier-library-genre" formControlName="genre" (change)="libraryPage.set(1)">
+              <option [ngValue]="null">All genres</option>
+              @for (genre of genres; track genre.value) {
+                <option [ngValue]="genre.value">{{ genre.label }}</option>
+              }
+            </select></app-form-field
+          >
+          <app-form-field label="Type" inputId="tier-library-type"
+            ><select id="tier-library-type" formControlName="type" (change)="libraryPage.set(1)">
+              <option value="all">Movies and TV</option>
+              <option value="movie">Movies</option>
+              <option value="tv">TV series</option>
+            </select></app-form-field
+          >
+        </div>
+        <p role="status">
+          {{ bulkItems().length }} new titles match ·
+          {{ libraryMatches().length - bulkItems().length }} already on board.
+        </p>
+        @if (overCapacity()) {
+          <p role="alert">
+            Only {{ maximum() }} spaces remain. Narrow the filters or select titles individually;
+            nothing will be added partially.
+          </p>
+        }
+        <app-button
+          density="compact"
           [disabled]="
             busy() ||
-            existing().includes(item.id) ||
-            (!isSelected(item.id) && selection().length >= maximum())
+            library.isLoading() ||
+            !!library.error() ||
+            overCapacity() ||
+            !bulkItems().length
           "
-          (click)="toggle(item)"
+          (click)="addMatching()"
+          >Add {{ bulkItems().length }} matching titles</app-button
         >
-          <span class="poster"
-            ><app-media-poster
-              [posterUrl]="item.posterUrl"
-              [title]="item.title"
-              [decorative]="true"
-          /></span>
-          <strong>{{ item.title }}</strong
-          ><small>{{
-            existing().includes(item.id)
-              ? 'Already added'
+      </details>
+    </fieldset>
+    @if (library.isLoading()) {
+      <p role="status">Loading your full library…</p>
+    }
+    @if (library.error(); as message) {
+      <p role="alert">{{ message }}</p>
+      <app-button [disabled]="busy()" (click)="library.load()">Retry library</app-button>
+    }
+  } @else {
+    <form class="search" (submit)="$event.preventDefault(); search()">
+      <app-form-field label="Search titles" inputId="tier-search"
+        ><input
+          id="tier-search"
+          [formControl]="query"
+          maxlength="200"
+          placeholder="Try a drama or film"
+      /></app-form-field>
+      <app-button
+        type="submit"
+        density="compact"
+        [busy]="searching()"
+        [disabled]="busy() || searching() || !query.value.trim()"
+        >Search</app-button
+      >
+    </form>
+    @if (error()) {
+      <p role="alert">{{ error() }}</p>
+    }
+  }
+  <div class="candidates">
+    @for (item of candidates(); track item.id) {
+      <button
+        type="button"
+        class="candidate"
+        [class.selected]="isSelected(item.id)"
+        [attr.aria-pressed]="isSelected(item.id)"
+        [disabled]="
+          busy() ||
+          existing().includes(item.id) ||
+          (!isSelected(item.id) && selection().length >= maximum())
+        "
+        (click)="toggle(item)"
+      >
+        <span class="poster"
+          ><app-media-poster [posterUrl]="item.posterUrl" [title]="item.title" [decorative]="true"
+        /></span>
+        <strong>{{ item.title }}</strong
+        ><small>{{
+          existing().includes(item.id)
+            ? 'On board'
+            : isSelected(item.id)
+              ? 'Selected'
               : item.mediaType === 'tv'
                 ? 'TV'
                 : 'Movie'
-          }}</small>
-        </button>
-      } @empty {
-        @if (!searching() && !library.isLoading()) {
-          <p>No titles to show. Try another search or library filter.</p>
-        }
+        }}</small>
+      </button>
+    } @empty {
+      @if (!searching() && !library.isLoading()) {
+        <p>No matching titles. Try different filters.</p>
       }
-    </div>
-    @if (source() === 'search' && results().length) {
-      <div class="actions">
-        <app-button
-          variant="secondary"
-          [disabled]="searching() || page() <= 1"
-          (click)="search(page() - 1)"
-          >Previous</app-button
-        >
-        <span>Page {{ page() }}</span>
-        <app-button
-          variant="secondary"
-          [disabled]="searching() || !hasNext()"
-          (click)="search(page() + 1)"
-          >Next</app-button
-        >
-      </div>
     }
+  </div>
+  @if (source() === 'library' && libraryPages() > 1) {
     <div class="actions">
       <app-button
         variant="secondary"
-        [disabled]="busy() || maximum() === 0"
-        (click)="selectVisible()"
-        >Select visible (up to {{ maximum() }})</app-button
+        density="compact"
+        [disabled]="busy() || libraryPage() <= 1"
+        (click)="libraryPage.set(libraryPage() - 1)"
+        >Previous</app-button
       >
+      <span>Page {{ libraryPage() }} of {{ libraryPages() }}</span>
       <app-button
+        variant="secondary"
+        density="compact"
+        [disabled]="busy() || libraryPage() >= libraryPages()"
+        (click)="libraryPage.set(libraryPage() + 1)"
+        >Next</app-button
+      >
+    </div>
+  }
+  @if (source() === 'search' && results().length) {
+    <div class="actions">
+      <app-button
+        variant="secondary"
+        density="compact"
+        [disabled]="busy() || searching() || page() <= 1"
+        (click)="search(page() - 1)"
+        >Previous</app-button
+      >
+      <span>Page {{ page() }}</span>
+      <app-button
+        variant="secondary"
+        density="compact"
+        [disabled]="busy() || searching() || !hasNext()"
+        (click)="search(page() + 1)"
+        >Next</app-button
+      >
+    </div>
+  }
+  <footer>
+    @if (saveError()) {
+      <p role="alert">{{ saveError() }}</p>
+    }
+    @if (busy()) {
+      <p role="status">{{ progress() }}</p>
+    }
+    <div class="actions">
+      <app-button
+        density="compact"
         [busy]="busy()"
-        [disabled]="busy() || !selection().length"
-        (click)="added.emit(selection())"
-        >Add {{ selection().length }} to Unranked</app-button
+        [disabled]="busy() || !selection().length || selection().length > maximum()"
+        (click)="addSelected()"
+        >Add {{ selection().length }} selected</app-button
       >
       <app-button
         variant="secondary"
+        density="compact"
+        [disabled]="busy() || maximum() === 0"
+        (click)="selectVisible()"
+        >Select page</app-button
+      >
+      <app-button
+        variant="secondary"
+        density="compact"
         [disabled]="busy() || !selection().length"
         (click)="selected.set([])"
-        >Clear selection</app-button
+        >Clear</app-button
       >
     </div>
-    <p>Up to 300 titles per board. Adding here does not change your personal library.</p>
-  </div>
-</details>
+    <p>
+      {{ maximum() }} of 300 spaces remaining. Titles enter Unranked; your library stays unchanged.
+    </p>
+  </footer>
+</div>

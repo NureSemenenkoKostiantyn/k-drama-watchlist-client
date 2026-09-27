@@ -11,6 +11,7 @@ import { TierPicker } from '../components/tier-picker/tier-picker';
 import { TierListsService } from '../data-access/tier-lists.service';
 import { TierList } from '../models/tier-list';
 import { TierListPage } from './tier-list-page';
+import { FocusModeService } from '../../../core/layout/focus-mode.service';
 
 describe('TierListPage', () => {
   const media = {
@@ -42,6 +43,7 @@ describe('TierListPage', () => {
       layout: vi.fn(),
       delete: vi.fn(),
       update: vi.fn(),
+      add: vi.fn(),
     };
     const params = convertToParamMap({ tierListId: 'board' });
     await TestBed.configureTestingModule({
@@ -90,9 +92,7 @@ describe('TierListPage', () => {
     const move = () => {
       root.querySelector<HTMLButtonElement>('button.poster')!.click();
       fixture.detectChanges();
-      const select = root.querySelector<HTMLSelectElement>('#move-tier')!;
-      select.value = 'a';
-      select.dispatchEvent(new Event('change'));
+      root.querySelector<HTMLButtonElement>('button[aria-label="Move to A"]')!.click();
       fixture.detectChanges();
     };
     return { api, fixture, root, click, move };
@@ -124,12 +124,13 @@ describe('TierListPage', () => {
       fixture.detectChanges();
       expect(
         [...root.querySelectorAll<HTMLButtonElement>('button')].find(
-          (button) => button.textContent?.trim() === 'Undo last arrangement',
+          (button) => button.textContent?.trim() === 'Undo',
         )?.disabled,
       ).toBe(false);
     });
     api.layout.mockResolvedValueOnce({ ...original, revision: 4 });
-    click('Undo last arrangement');
+    click('Done');
+    click('Undo');
     await fixture.whenStable();
     fixture.detectChanges();
     expect(api.layout.mock.lastCall?.[1]).toMatchObject({
@@ -170,5 +171,83 @@ describe('TierListPage', () => {
     expect(root.querySelector('dialog[open]')?.textContent).toContain('Delete this tier list?');
     click('Cancel');
     expect(api.delete).not.toHaveBeenCalled();
+  });
+
+  it('adds the complete selection in sequential batches with fresh revisions and no duplicates', async () => {
+    const { api, fixture } = await setup();
+    const additions = Array.from({ length: 121 }, (_, i) => ({
+      ...media,
+      id: `tv:${i + 1}`,
+      tmdbId: i + 1,
+    }));
+    let saved = structuredClone(original);
+    api.add.mockImplementation(async (_id, input) => {
+      expect(input.revision).toBe(saved.revision);
+      saved = {
+        ...saved,
+        revision: saved.revision + 1,
+        itemCount: saved.itemCount + input.items.length,
+      };
+      return saved;
+    });
+    await fixture.componentInstance['add']([...additions, additions[1]]);
+    expect(api.add.mock.calls.map((call) => call[1].items.length)).toEqual([50, 50, 20]);
+    expect(api.add.mock.calls.map((call) => call[1].revision)).toEqual([2, 3, 4]);
+    expect(
+      api.add.mock.calls.flatMap((call) => call[1].items).some((item) => item.tmdbId === 1),
+    ).toBe(false);
+    expect(fixture.componentInstance['notice']()).toBe('Added 120 titles to Unranked');
+    expect(fixture.componentInstance['busy']()).toBe(false);
+  });
+
+  it('blocks overlapping writes and stops after a partial failure until reload', async () => {
+    const { api, fixture } = await setup();
+    const additions = Array.from({ length: 110 }, (_, i) => ({
+      ...media,
+      id: `tv:${i + 2}`,
+      tmdbId: i + 2,
+    }));
+    let resolve!: (board: TierList) => void;
+    api.add
+      .mockImplementationOnce(
+        () =>
+          new Promise<TierList>((done) => {
+            resolve = done;
+          }),
+      )
+      .mockRejectedValueOnce(new HttpErrorResponse({ status: 409 }));
+    const operation = fixture.componentInstance['add'](additions);
+    await fixture.componentInstance['add'](additions);
+    expect(api.add).toHaveBeenCalledTimes(1);
+    resolve({ ...original, revision: 3, itemCount: 51 });
+    await operation;
+    expect(api.add).toHaveBeenCalledTimes(2);
+    expect(fixture.componentInstance['board']()?.revision).toBe(3);
+    expect(fixture.componentInstance['error']()).toContain('50 additions confirmed');
+    expect(fixture.componentInstance['conflict']()).toBe(true);
+    await fixture.componentInstance['add'](additions);
+    expect(api.add).toHaveBeenCalledTimes(2);
+  });
+
+  it('rejects oversized selections without writing and restores navigation after focus mode', async () => {
+    const { api, fixture, click } = await setup();
+    await fixture.componentInstance['add'](
+      Array.from({ length: 300 }, (_, i) => ({ ...media, id: `tv:${i + 2}`, tmdbId: i + 2 })),
+    );
+    expect(api.add).not.toHaveBeenCalled();
+    expect(fixture.componentInstance['error']()).toContain('300-title limit');
+    const focus = TestBed.inject(FocusModeService);
+    click('Focus mode');
+    expect(focus.active()).toBe(true);
+    fixture.destroy();
+    expect(focus.active()).toBe(false);
+  });
+
+  it('opens library tools only on demand', async () => {
+    const { root, click } = await setup();
+    expect(root.querySelector('app-tier-picker')).toBeNull();
+    click('+ Add titles');
+    expect(root.querySelector('app-tier-picker')).not.toBeNull();
+    expect(root.querySelector<HTMLDetailsElement>('details.quick-add')?.open).toBe(false);
   });
 });

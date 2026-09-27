@@ -7,6 +7,7 @@ import { AuthenticationService } from './core/auth/authentication.service';
 import { NotificationsService } from './features/notifications/data-access/notifications.service';
 import { SettingsService } from './features/settings/data-access/settings.service';
 import { App } from './app';
+import { FocusModeService } from './core/layout/focus-mode.service';
 
 describe('App', () => {
   const authenticated = signal(false);
@@ -72,6 +73,23 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
+  });
+
+  it('hides both navigation surfaces in focus mode and restores them on exit', () => {
+    authenticated.set(true);
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('.app-shell__header')).not.toBeNull();
+    expect(root.querySelector('.app-shell__mobile-nav')).not.toBeNull();
+    const focus = TestBed.inject(FocusModeService);
+    focus.toggle(); fixture.detectChanges();
+    expect(root.querySelector('.app-shell__header')).toBeNull();
+    expect(root.querySelector('.app-shell__mobile-nav')).toBeNull();
+    expect(root.querySelector('router-outlet')).not.toBeNull();
+    focus.reset(); fixture.detectChanges();
+    expect(root.querySelector('.app-shell__header')).not.toBeNull();
+    expect(root.querySelector('.app-shell__mobile-nav')).not.toBeNull();
   });
 
   it('should render the application name', async () => {

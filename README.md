@@ -5,15 +5,29 @@ and other TV series.
 
 ## Tier lists
 
-Open **More → Tier lists** to create a private ranking. Add watched library titles (or all library
-statuses) and TMDB search results, then arrange them in S–F tiers or customize labels, colors, and
-tier order. Desktop supports whole-poster dragging; mobile disables drag/drop and uses tap-to-select
-tier/earlier/later controls. Keyboard controls remain available on desktop.
+Open **More → Tier lists** to create a private ranking. The compact editor uses a continuous board,
+equal-size portrait posters, and a separate searchable Unranked tray. Select a tier label or its
+settings icon to rename/recolor it, change row order, insert a tier, or clear/delete a row. Desktop
+supports whole-poster dragging; mobile uses a tap-to-rank bottom sheet with colored tier choices
+and earlier/later controls. Keyboard controls remain available on desktop.
+
+**Add titles → My library → Quick add from library** contains the collapsed bulk-add tools:
+all library titles, all watched titles, or matching lifecycle status, named genre, movie/TV type,
+and title/original-title search. Matching counts cover the entire library, not just the visible
+page, and already-added titles are skipped. Select titles individually or use paginated TMDB
+search instead. Additions enter Unranked and never change the personal library.
 
 Each arrangement saves one complete board with revision conflict protection. Undo restores the last
 arrangement; stale edits require reloading. Boards support duplication and confirmed tier/title/board
 deletion without changing the personal library. Up to 300 titles and 20 tiers are supported, with
-50-title batch additions.
+50-title API batches. Larger bulk selections run sequentially using each returned revision, with
+overlapping writes blocked. Over-capacity selections are rejected without silent truncation. If
+a batch fails, earlier confirmed batches remain saved; the drawer reports progress and requires
+reload before retrying. It closes after all batches succeed.
+
+The toolbar keeps Add titles, Undo, and Share visible. The overflow menu holds list settings,
+duplicate/delete, and Focus mode, which temporarily hides navigation and widens the workspace.
+Native modal panels support Escape and restore focus; Focus mode ends when leaving the editor.
 
 List settings allow private, unlisted, and public visibility. Read-only share links, canonical
 metadata, and PNG exports contain ranked titles only; Unranked stays private. Public boards can be

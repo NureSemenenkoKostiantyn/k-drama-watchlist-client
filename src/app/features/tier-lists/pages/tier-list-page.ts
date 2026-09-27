@@ -11,6 +11,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { readApiErrorMessage } from '../../../core/api/api-error';
+import { FocusModeService } from '../../../core/layout/focus-mode.service';
+import { DialogPanel } from '../../../shared/components/dialog-panel/dialog-panel';
 import { Button } from '../../../shared/components/button/button';
 import { ConfirmationDialog } from '../../../shared/components/confirmation-dialog/confirmation-dialog';
 import { FormField } from '../../../shared/components/form-field/form-field';
@@ -35,12 +37,16 @@ import { layoutOf, moveTitle, TierMove } from '../utils/tier-layout';
     TierBoard,
     TierPicker,
     TierRowsEditor,
+    DialogPanel,
   ],
   templateUrl: './tier-list-page.html',
-  styleUrl: './tier-pages.scss',
+  styleUrls: ['./tier-pages.scss', './tier-workspace.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TierListPage {
+  protected readonly focusMode = inject(FocusModeService);
+  protected readonly panel = signal<'add' | 'share' | 'settings' | null>(null);
+  protected readonly editingTier = signal<string | null>(null);
   private readonly api = inject(TierListsService);
   private readonly exporter = inject(TierExportService);
   private readonly route = inject(ActivatedRoute);
@@ -71,7 +77,10 @@ export class TierListPage {
   private generation = 0;
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => this.generation++);
+    inject(DestroyRef).onDestroy(() => {
+      this.generation++;
+      this.focusMode.reset();
+    });
     this.route.paramMap.pipe(takeUntilDestroyed()).subscribe(() => {
       void this.load();
     });
@@ -85,6 +94,8 @@ export class TierListPage {
     this.board.set(null);
     this.undoLayout.set(null);
     this.confirm.set(null);
+    this.panel.set(null);
+    this.editingTier.set(null);
     try {
       const board = await this.api.get(this.route.snapshot.paramMap.get('tierListId') ?? '');
       if (generation !== this.generation) return;
@@ -110,9 +121,16 @@ export class TierListPage {
     const board = this.board();
     const value = this.form.getRawValue();
     if (!board || this.form.invalid || !value.title.trim()) return;
-    await this.mutate(() =>
-      this.api.update(board.id, { ...value, title: value.title.trim(), revision: board.revision }),
-    );
+    if (
+      await this.mutate(() =>
+        this.api.update(board.id, {
+          ...value,
+          title: value.title.trim(),
+          revision: board.revision,
+        }),
+      )
+    )
+      this.panel.set(null);
   }
 
   protected move(move: TierMove): void {
@@ -123,8 +141,12 @@ export class TierListPage {
     const board = this.board();
     if (!board) return;
     const previous = layoutOf(board);
-    if (await this.mutate(() => this.api.layout(board.id, { ...layout, revision: board.revision })))
+    if (
+      await this.mutate(() => this.api.layout(board.id, { ...layout, revision: board.revision }))
+    ) {
       this.undoLayout.set(previous);
+      this.editingTier.set(null);
+    }
   }
   protected async undo(): Promise<void> {
     const board = this.board();
@@ -136,17 +158,52 @@ export class TierListPage {
       this.undoLayout.set(null);
   }
   protected async add(items: TierMedia[]): Promise<void> {
-    const board = this.board();
-    if (!board) return;
-    if (
-      await this.mutate(() =>
-        this.api.add(board.id, {
+    let board = this.board();
+    if (!board || this.locked()) return;
+    const existing = new Set(this.existing());
+    const additions = [
+      ...new Map(items.map((item) => [`${item.mediaType}:${item.tmdbId}`, item])).values(),
+    ].filter((item) => !existing.has(`${item.mediaType}:${item.tmdbId}`));
+    if (board.itemCount + additions.length > 300) {
+      this.error.set(
+        'This selection exceeds the 300-title limit. Narrow the filters; nothing has been added.',
+      );
+      return;
+    }
+    if (!additions.length) {
+      this.notice.set('These titles are already on the board.');
+      return;
+    }
+    const generation = this.generation;
+    let confirmed = 0;
+    this.busy.set(true);
+    this.error.set('');
+    try {
+      for (let offset = 0; offset < additions.length; offset += 50) {
+        const batch = additions.slice(offset, offset + 50);
+        this.notice.set(`Adding titles… ${confirmed} of ${additions.length} saved`);
+        board = await this.api.add(board.id, {
           revision: board.revision,
-          items: items.map(({ mediaType, tmdbId }) => ({ mediaType, tmdbId })),
-        }),
-      )
-    )
-      this.undoLayout.set(null);
+          items: batch.map(({ mediaType, tmdbId }) => ({ mediaType, tmdbId })),
+        });
+        if (generation !== this.generation) return;
+        confirmed += batch.length;
+        this.board.set(board);
+        this.undoLayout.set(null);
+      }
+      this.notice.set(`Added ${confirmed} titles to Unranked`);
+      this.panel.set(null);
+    } catch (error) {
+      if (generation !== this.generation) return;
+      // A failed response may hide a successful write. Reload before any retry.
+      this.conflict.set(true);
+      this.notice.set(`${confirmed} additions confirmed; reload required`);
+      this.error.set(
+        `${confirmed} additions confirmed before the request failed. ${readApiErrorMessage(error, 'The remaining additions could not be confirmed.')} Reload the saved board before retrying.`,
+      );
+    } finally {
+      if (generation === this.generation) this.busy.set(false);
+    }
   }
 
   protected async duplicate(): Promise<void> {

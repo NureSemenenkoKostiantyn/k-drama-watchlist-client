@@ -1,61 +1,76 @@
-details {
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-}
-summary {
-  padding: 1rem;
-  cursor: pointer;
-  font-weight: 700;
-}
-summary span {
-  display: inline-block;
-  margin-left: 0.5rem;
-  color: var(--color-text-muted);
-  font-weight: 400;
-  font-size: 0.85rem;
-}
 .picker {
   display: grid;
   gap: 1rem;
-  padding: 0 1rem 1rem;
+}
+.tabs {
+  display: flex;
+  gap: 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.tabs button {
+  padding: 0.6rem 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: none;
+  color: var(--color-text-muted);
+  font: inherit;
+  cursor: pointer;
+}
+.tabs button[aria-pressed='true'] {
+  color: var(--color-text);
+  border-color: var(--color-accent);
+}
+fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.library-search {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 0.65rem 0;
+}
+.quick-add {
+  margin-top: 0.75rem;
+  border-block: 1px solid var(--color-border);
+  padding: 0.7rem 0;
+}
+summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 .actions,
-form {
+.search {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.7rem;
+  gap: 0.5rem;
 }
-form app-form-field {
+.search {
+  align-items: end;
+}
+.search app-form-field {
   flex: 1;
   min-width: 10rem;
 }
-.check {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  min-height: 2.75rem;
-}
-.check input {
-  width: 1.2rem;
-  height: 1.2rem;
-}
 .candidates {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
-  gap: 0.65rem;
-  max-height: 26rem;
-  overflow: auto;
-  padding: 0.3rem;
+  grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+  gap: 0.55rem;
 }
 .candidate {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
-  padding: 0.5rem;
-  color: inherit;
-  background: var(--color-surface-raised);
+  padding: 0.25rem;
   border: 2px solid transparent;
+  border-radius: 0;
+  color: inherit;
+  background: none;
   text-align: left;
   cursor: pointer;
   min-width: 0;
@@ -73,10 +88,24 @@ form app-form-field {
   aspect-ratio: 2 / 3;
 }
 strong {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   overflow-wrap: anywhere;
 }
 p,
 small {
   color: var(--color-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+footer {
+  position: sticky;
+  bottom: -1.25rem;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  padding: 0.9rem 0 0;
+}
+@media (max-width: 24rem) {
+  .library-search {
+    grid-template-columns: 1fr;
+  }
 }
